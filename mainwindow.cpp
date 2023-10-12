@@ -22,9 +22,9 @@ MainWindow::MainWindow()
     state = VIDEO_STATE;
 
     createUI();
-    setupActions();
     createLayout();
     initializePlayer();
+    setupActions();
     setupToolBar();
 
     update_buttons(player->playbackState());
@@ -45,7 +45,7 @@ void MainWindow::createUI()
 
 void MainWindow::setupActions()
 {
-    QAction *openAction = new QAction("Open...", this);
+    openAction = new QAction("Open...", this);
     openAction->setShortcut(QKeySequence::Open);
     connect(openAction, &QAction::triggered, this, &MainWindow::open);
 
@@ -53,8 +53,10 @@ void MainWindow::setupActions()
     //exitAction->setShortcut("Ctrl+Q");
     connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
 
-    menuBar()->addMenu("&File")->addAction(openAction);
-    menuBar()->addMenu("&File")->addAction(exitAction);
+    // Добавьте элементы меню "File" только к главному меню
+    QMenu *file_menu = menuBar()->addMenu("&File");
+    file_menu->addAction(openAction);
+    file_menu->addAction(exitAction);
 }
 
 void MainWindow::createLayout()
@@ -101,16 +103,7 @@ void MainWindow::setupToolBar()
     toolBar = new QToolBar();
     addToolBar(toolBar);
 
-    QMenu *file_menu = menuBar()->addMenu("&File");
-    QAction *openAction = new QAction("Open...", this);
-    openAction->setShortcut(QKeySequence::Open);
-    connect(openAction, &QAction::triggered, this, &MainWindow::open);
-    file_menu->addAction(openAction);
     toolBar->addAction(openAction);
-    QAction *exit_action = new QAction("Exit", this);
-    //exit_action->setShortcut("Ctrl+Q");
-    connect(exit_action, &QAction::triggered, this, &QMainWindow::close);
-    file_menu->addAction(exit_action);
 
     // Создание меню "Play"
     QMenu* playMenu = menuBar()->addMenu("&Play");
@@ -123,6 +116,12 @@ void MainWindow::setupToolBar()
     connect(playAction, &QAction::triggered, player, &QMediaPlayer::play);
     toolBar->addAction(playAction);
     playMenu->addAction(playAction);
+
+    // About
+    QMenu* about_menu = menuBar()->addMenu("&About");
+    about_qt_action = new QAction("About &Qt", this);
+    connect(about_qt_action, &QAction::triggered, qApp, &QApplication::aboutQt);
+    about_menu->addAction(about_qt_action);
 
     // Создание действия "Pause"
     pauseAction = new QAction("Pause", this);

@@ -64,9 +64,11 @@ private:
     QPushButton *ripButton;
     QVideoWidget *videoWidget;
 
+    QAction *openAction;
     QAction *playAction;
     QAction *pauseAction;
     QAction *stopAction;
+    QAction *about_qt_action;
 
     QString videoPath;
     QString ffmpegPath;
