@@ -23,6 +23,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    constants.h \
     mainwindow.h
 
 #FORMS += \

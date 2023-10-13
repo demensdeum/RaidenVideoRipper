@@ -14,6 +14,7 @@
 #include <QStyle>
 #include <QStatusBar>
 #include <QScreen>
+#include "constants.h"
 
 MainWindow::MainWindow()
 {
@@ -139,7 +140,8 @@ void MainWindow::setupToolBar()
     volumeSlider->setTickInterval(10);
     volumeSlider->setTickPosition(QSlider::TicksBelow);
     volumeSlider->setToolTip("Volume");
-    volumeSlider->setValue(volumeSlider->maximum());
+    auto savedVolume = settings.value(volumeSettingsKey, volumeSlider->maximum()).value<qint64>();
+    volumeSlider->setValue(savedVolume);
     connect(volumeSlider, &QSlider::valueChanged, this, &MainWindow::volumeSliderMoved);
     toolBar->addWidget(volumeSlider);
 
@@ -200,11 +202,8 @@ void MainWindow::open()
 {
     QFileDialog fileDialog(this);
 
-    QString lastWorkingPathKey = "lastWorkingPath";
-    auto lastWorkingPath = settings.value(lastWorkingPathKey).value<QString>();
     QString moviesLocation = QStandardPaths::writableLocation(QStandardPaths::MoviesLocation);
-
-    auto path = lastWorkingPath.isEmpty() ? moviesLocation : lastWorkingPath;
+    auto path = settings.value(lastWorkingPathKey, moviesLocation).value<QString>();
 
     fileDialog.setDirectory(path);
 
@@ -254,6 +253,7 @@ void MainWindow::volumeSliderMoved(qint64 position)
     qDebug() << position;
     qDebug() << volume;
     audioOutput->setVolume(volume);
+    settings.setValue(volumeSettingsKey, position);
 }
 
 void MainWindow::rip()
