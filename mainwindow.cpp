@@ -122,12 +122,14 @@ void MainWindow::setupToolBar()
     pauseAction = new QAction("Pause", this);
     QIcon pauseIcon = QIcon::fromTheme("media-playback-pause.png", style->standardIcon(QStyle::SP_MediaPause));
     pauseAction->setIcon(pauseIcon);
+    connect(pauseAction, &QAction::triggered, player, &QMediaPlayer::pause);
     toolBar->addAction(pauseAction);
     playMenu->addAction(pauseAction);
 
     stopAction = new QAction("Stop", this);
     QIcon stopIcon = QIcon::fromTheme("media-playback-stop.png", style->standardIcon(QStyle::SP_MediaStop));
     stopAction->setIcon(stopIcon);
+    connect(stopAction, &QAction::triggered, player, &QMediaPlayer::stop);
     toolBar->addAction(stopAction);
     playMenu->addAction(stopAction);
 
@@ -160,7 +162,8 @@ void MainWindow::setupToolBar()
 void MainWindow::showAboutApplication()
 {
     const auto copyright =
-        QStringLiteral("Copyright &copy; 2023 <a href=\"https://www.demensdeum.com/\">Ilia Prokhorov (DemensDeum)</a>");
+        tr("Copyright &copy; 2023 <a href=\"https://www.demensdeum.com/\">Ilia Prokhorov (%1)</a>")
+                               .arg(RAIDEN_VIDEO_RIPPER_COMPANY_NAME);
     const auto license =
         QStringLiteral("<a href=\"https://opensource.org/license/mit/\">MIT License</a>");
     const auto sourceCode =
@@ -171,7 +174,7 @@ void MainWindow::showAboutApplication()
         tr("About %1").arg(qApp->applicationName()),
         tr(
             "<h1>Version %1 %2</h1>"
-            "<p><a href=\"%3\">%1</a> is a free, open source, cross platform video editor.</p>"
+            "<p><a href=\"%3\">%1</a> is an open-source project designed for video editing and format conversion. It's built using Qt 6 (Qt Creator) and allows you to trim and convert videos to MP4 or GIF formats.</p>"
             "<small><p>%4</p>"
             "<p>Licensed under the %5</p>"
             "<p>This program proudly uses the following projects:<ul>"
@@ -190,22 +193,30 @@ void MainWindow::showAboutApplication()
             .arg(copyright)
             .arg(license)
             .arg(sourceCode)
-//        "Raiden Video Ripper is an open-source project designed for video editing and format conversion. It's built using Qt 6 (Qt Creator) and allows you to trim and convert videos to MP4 or GIF formats.\n<a href=\"https://google.com\">Website: https://github.com/demensdeum/RaidenVideoRipper/tree/main</a>\nEmail: demensdeum@gmail.com"
     );
 }
 
 void MainWindow::open()
 {
     QFileDialog fileDialog(this);
+
+    QString lastWorkingPathKey = "lastWorkingPath";
+    auto lastWorkingPath = settings.value(lastWorkingPathKey).value<QString>();
     QString moviesLocation = QStandardPaths::writableLocation(QStandardPaths::MoviesLocation);
 
-    fileDialog.setDirectory(moviesLocation);
+    auto path = lastWorkingPath.isEmpty() ? moviesLocation : lastWorkingPath;
+
+    fileDialog.setDirectory(path);
+
     if (fileDialog.exec() == QDialog::Accepted)
     {
         state = VIDEO_STATE;
 
         QUrl url = fileDialog.selectedUrls().at(0);
         videoPath = QDir::toNativeSeparators(url.toLocalFile());
+        auto videoPathDirectory = QFileInfo(videoPath).absolutePath();
+
+        settings.setValue(lastWorkingPathKey, videoPathDirectory);
 
         player->setSource(url);
         player->play();

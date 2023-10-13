@@ -12,6 +12,7 @@
 #include <QProcess>
 #include <QString>
 #include <QVBoxLayout>
+#include <QSettings>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -51,6 +52,8 @@ private:
     void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
 
     static void showAlert(const QString &title, const QString &message);
+
+    QSettings settings;
 
     QMediaPlayer *player;
     QAudioOutput *audioOutput;
