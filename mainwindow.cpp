@@ -66,8 +66,10 @@ void MainWindow::createLayout()
     playbackSlider = new QSlider(Qt::Horizontal);
     layout->addWidget(playbackSlider);
     startPositionSlider = new QSlider(Qt::Horizontal);
+    connect(startPositionSlider,&QSlider::sliderMoved, this, &MainWindow::startPositionSliderMoved);
     layout->addWidget(startPositionSlider);
     endPositionSlider = new QSlider(Qt::Horizontal);
+    connect(endPositionSlider,&QSlider::sliderMoved, this, &MainWindow::endPositionSliderMoved);
     layout->addWidget(endPositionSlider);
 
     ripButton = new QPushButton("RIP EM!");
@@ -79,6 +81,14 @@ void MainWindow::createLayout()
     setCentralWidget(widget);
 
     resize(800, 600);
+}
+
+void MainWindow::startPositionSliderMoved(qint64 position) {
+    player->setPosition(position);
+}
+
+void MainWindow::endPositionSliderMoved(qint64 position) {
+    player->setPosition(position);
 }
 
 void MainWindow::initializePlayer()

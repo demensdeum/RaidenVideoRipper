@@ -39,6 +39,8 @@ private slots:
     void ensureStopped();
     void updateButtons(QMediaPlayer::PlaybackState state);
     void togglePlayback();
+    void startPositionSliderMoved(qint64 position);
+    void endPositionSliderMoved(qint64 position);
 
     void showAboutApplication();
 
