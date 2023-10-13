@@ -17,6 +17,7 @@
 
 MainWindow::MainWindow()
 {
+    qApp->setApplicationVersion(RAIDEN_VIDEO_RIPPER_APPLICATION_VERSION);
     state = VIDEO_STATE;
     createUI();
     createLayout();
@@ -35,7 +36,7 @@ MainWindow::MainWindow()
 
 void MainWindow::createUI()
 {
-    setWindowTitle("Raiden Video Ripper");
+    setWindowTitle("Raiden Video Ripper " + QString(RAIDEN_VIDEO_RIPPER_APPLICATION_VERSION));
 }
 
 void MainWindow::setupActions()
@@ -44,10 +45,10 @@ void MainWindow::setupActions()
     openAction->setShortcut(QKeySequence::Open);
     connect(openAction, &QAction::triggered, this, &MainWindow::open);
 
-    QAction *exitAction = new QAction("Exit", this);
+    auto exitAction = new QAction("Exit", this);
     connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
 
-    QMenu *fileMenu = menuBar()->addMenu("&File");
+    auto fileMenu = menuBar()->addMenu("&File");
     fileMenu->addAction(openAction);
     fileMenu->addAction(exitAction);
 }
@@ -58,7 +59,7 @@ void MainWindow::createLayout()
     videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
     videoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
-    QVBoxLayout *layout = new QVBoxLayout();
+    auto layout = new QVBoxLayout();
     layout->addWidget(videoWidget);
 
     playbackSlider = new QSlider(Qt::Horizontal);
@@ -72,7 +73,7 @@ void MainWindow::createLayout()
     connect(ripButton, &QPushButton::clicked, this, &MainWindow::ripButtonClicked);
     layout->addWidget(ripButton);
 
-    QWidget *widget = new QWidget();
+    auto widget = new QWidget();
     widget->setLayout(layout);
     setCentralWidget(widget);
 
@@ -98,8 +99,8 @@ void MainWindow::setupToolBar()
 
     toolBar->addAction(openAction);
 
-    QMenu *playMenu = menuBar()->addMenu("&Play");
-    QStyle *style = this->style();
+    auto playMenu = menuBar()->addMenu("&Play");
+    auto style = this->style();
 
     playAction = new QAction("Play", this);
     QIcon playIcon = QIcon::fromTheme("media-playback-start.png", style->standardIcon(QStyle::SP_MediaPlay));
@@ -108,8 +109,13 @@ void MainWindow::setupToolBar()
     toolBar->addAction(playAction);
     playMenu->addAction(playAction);
 
-    QMenu *aboutMenu = menuBar()->addMenu("&About");
-    aboutQtAction = new QAction("About &Qt", this);
+    auto aboutMenu = menuBar()->addMenu("&About");
+
+    auto aboutApplicationAction = new QAction("About Raiden Video Ripper", this);
+    connect(aboutApplicationAction, &QAction::triggered, qApp, [this] { showAboutApplication(); });
+    aboutMenu->addAction(aboutApplicationAction);
+
+    auto aboutQtAction = new QAction("About &Qt", this);
     connect(aboutQtAction, &QAction::triggered, qApp, &QApplication::aboutQt);
     aboutMenu->addAction(aboutQtAction);
 
@@ -118,14 +124,12 @@ void MainWindow::setupToolBar()
     pauseAction->setIcon(pauseIcon);
     toolBar->addAction(pauseAction);
     playMenu->addAction(pauseAction);
-    connect(pauseAction, &QAction::triggered, player, &QMediaPlayer::pause);
 
     stopAction = new QAction("Stop", this);
     QIcon stopIcon = QIcon::fromTheme("media-playback-stop.png", style->standardIcon(QStyle::SP_MediaStop));
     stopAction->setIcon(stopIcon);
     toolBar->addAction(stopAction);
     playMenu->addAction(stopAction);
-    connect(stopAction, &QAction::triggered, this, &MainWindow::ensureStopped);
 
     volumeSlider = new QSlider(Qt::Horizontal, this);
     volumeSlider->setMinimum(0);
@@ -151,6 +155,43 @@ void MainWindow::setupToolBar()
     convertToGifCheckbox = new QCheckBox("gif", this);
     convertToGifCheckbox->setChecked(true);
     toolBar->addWidget(convertToGifCheckbox);
+}
+
+void MainWindow::showAboutApplication()
+{
+    const auto copyright =
+        QStringLiteral("Copyright &copy; 2023 <a href=\"https://www.demensdeum.com/\">Ilia Prokhorov (DemensDeum)</a>");
+    const auto license =
+        QStringLiteral("<a href=\"https://opensource.org/license/mit/\">MIT License</a>");
+    const auto sourceCode =
+        QStringLiteral("<a href=\"https://github.com/demensdeum/RaidenVideoRipper/\">https://github.com/demensdeum/RaidenVideoRipper</a>");
+
+    QMessageBox::about(
+        this,
+        tr("About %1").arg(qApp->applicationName()),
+        tr(
+            "<h1>Version %1 %2</h1>"
+            "<p><a href=\"%3\">%1</a> is a free, open source, cross platform video editor.</p>"
+            "<small><p>%4</p>"
+            "<p>Licensed under the %5</p>"
+            "<p>This program proudly uses the following projects:<ul>"
+            "<li><a href=\"https://www.qt.io/\">Qt</a> application and UI framework</li>"
+            "<li><a href=\"https://www.ffmpeg.org/\">FFmpeg</a> multimedia format and codec libraries</li>"
+            "</ul></p>"
+            "<p>The source code used to build this program can be downloaded from "
+            "%6</p>"
+            "This program is distributed in the hope that it will be useful, "
+            "but WITHOUT ANY WARRANTY; without even the implied warranty of "
+            "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</small>"
+            )
+            .arg(qApp->applicationName())
+            .arg(qApp->applicationVersion())
+            .arg("https://github.com/demensdeum/RaidenVideoRipper")
+            .arg(copyright)
+            .arg(license)
+            .arg(sourceCode)
+//        "Raiden Video Ripper is an open-source project designed for video editing and format conversion. It's built using Qt 6 (Qt Creator) and allows you to trim and convert videos to MP4 or GIF formats.\n<a href=\"https://google.com\">Website: https://github.com/demensdeum/RaidenVideoRipper/tree/main</a>\nEmail: demensdeum@gmail.com"
+    );
 }
 
 void MainWindow::open()
@@ -257,7 +298,7 @@ void MainWindow::processStarted()
 
 void MainWindow::processReadyReadStandardOutput()
 {
-    QByteArray outputData = process->readAllStandardOutput();
+    auto outputData = process->readAllStandardOutput();
     qDebug() << "Standard Output: " << QString(outputData);
 }
 
@@ -265,8 +306,8 @@ void MainWindow::processStateChanged()
 {
     qDebug() << "State changed";
 
-    QByteArray outputData = process->readAllStandardOutput();
-    QByteArray errorData = process->readAllStandardError();
+    auto outputData = process->readAllStandardOutput();
+    auto errorData = process->readAllStandardError();
 
     qDebug() << "Standard Output: " << QString(outputData);
     qDebug() << "Standard Error: " << QString(errorData);
@@ -284,7 +325,7 @@ void MainWindow::showAlert(const QString &title, const QString &message)
 void MainWindow::processFinished()
 {
     qDebug("Process Finished");
-    QProcess::ExitStatus exitStatus = process->exitStatus();
+    auto exitStatus = process->exitStatus();
 
     if (exitStatus == QProcess::NormalExit)
     {

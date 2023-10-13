@@ -1,3 +1,8 @@
+VERSION = "1.0.0.0"
+APPLICATION_NAME = "Raiden\ Video\ Ripper"
+
+DEFINES += RAIDEN_VIDEO_RIPPER_APPLICATION_VERSION=\\\"$$VERSION\\\" RAIDEN_VIDEO_RIPPER_APPLICATION_NAME=\\\"$$APPLICATION_NAME\\\"
+
 QT       += core gui
 
 equals(QT_MAJOR_VERSION, 6): QT += widgets multimedia multimediawidgets

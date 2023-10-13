@@ -32,12 +32,13 @@ private slots:
     void processStarted();
     void processReadyReadStandardOutput();
     void processStateChanged();
-    void showAlert(const QString &title, const QString &message);
     void processFinished();
     void playbackSliderMoved(qint64 position);
     void playbackChanged(qint64 position);
     void ensureStopped();
     void updateButtons(QMediaPlayer::PlaybackState state);
+
+    void showAboutApplication();
 
 private:
     void createWidgets();
@@ -48,6 +49,8 @@ private:
     void setupToolBar();
     void showStatusMessage(const QString &message);
     void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
+
+    static void showAlert(const QString &title, const QString &message);
 
     QMediaPlayer *player;
     QAudioOutput *audioOutput;
@@ -66,7 +69,6 @@ private:
     QAction *playAction;
     QAction *pauseAction;
     QAction *stopAction;
-    QAction *aboutQtAction;
 
     QString videoPath;
     QString ffmpegPath;
