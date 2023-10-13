@@ -1,18 +1,10 @@
-VERSION = "1.0.0.0"
-APPLICATION_NAME = "Raiden\\ Video\\ Ripper"
-COMPANY_NAME = "DemensDeum"
-COMPANY_DOMAIN = "demensdeum.com"
-
-DEFINES += RAIDEN_VIDEO_RIPPER_APPLICATION_VERSION=\\\"$$VERSION\\\" \
-            RAIDEN_VIDEO_RIPPER_APPLICATION_NAME=\\\"$$APPLICATION_NAME\\\" \
-            RAIDEN_VIDEO_RIPPER_COMPANY_NAME=\\\"$$COMPANY_NAME\\\" \
-            RAIDEN_VIDEO_RIPPER_COMPANY_DOMAIN=\\\"$$COMPANY_DOMAIN\\\"
-
 QT       += core gui
 
 equals(QT_MAJOR_VERSION, 6): QT += widgets multimedia multimediawidgets
 
 CONFIG += c++17
+
+QMAKE_CXXFLAGS += -Werror
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -25,9 +17,6 @@ SOURCES += \
 HEADERS += \
     constants.h \
     mainwindow.h
-
-#FORMS += \
-#    mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -18,7 +18,6 @@
 
 MainWindow::MainWindow()
 {
-    qApp->setApplicationVersion(RAIDEN_VIDEO_RIPPER_APPLICATION_VERSION);
     state = VIDEO_STATE;
     createUI();
     createLayout();
@@ -37,7 +36,7 @@ MainWindow::MainWindow()
 
 void MainWindow::createUI()
 {
-    setWindowTitle("Raiden Video Ripper " + QString(RAIDEN_VIDEO_RIPPER_APPLICATION_VERSION));
+    setWindowTitle("Raiden Video Ripper " + QString(applicationVersion));
 }
 
 void MainWindow::setupActions()
@@ -165,7 +164,7 @@ void MainWindow::showAboutApplication()
 {
     const auto copyright =
         tr("Copyright &copy; 2023 <a href=\"https://www.demensdeum.com/\">Ilia Prokhorov (%1)</a>")
-                               .arg(RAIDEN_VIDEO_RIPPER_COMPANY_NAME);
+                               .arg(applicationName);
     const auto license =
         QStringLiteral("<a href=\"https://opensource.org/license/mit/\">MIT License</a>");
     const auto sourceCode =
