@@ -14,6 +14,7 @@
 #include <QStyle>
 #include <QStatusBar>
 #include <QScreen>
+#include <QShortcut>
 #include "constants.h"
 
 MainWindow::MainWindow()
@@ -133,6 +134,11 @@ void MainWindow::setupToolBar()
     toolBar->addAction(stopAction);
     playMenu->addAction(stopAction);
 
+    QKeySequence keySequence(Qt::Key_Space);
+    QShortcut *shortcut = new QShortcut(keySequence, this);
+    shortcut->setEnabled(true);
+    QObject::connect(shortcut, &QShortcut::activated, this, &MainWindow::togglePlayback);
+
     volumeSlider = new QSlider(Qt::Horizontal, this);
     volumeSlider->setMinimum(0);
     volumeSlider->setMaximum(100);
@@ -158,6 +164,16 @@ void MainWindow::setupToolBar()
     convertToGifCheckbox = new QCheckBox("gif", this);
     convertToGifCheckbox->setChecked(true);
     toolBar->addWidget(convertToGifCheckbox);
+}
+
+void MainWindow::togglePlayback() {
+    qDebug() << "wha";
+    if (player->playbackState() == QMediaPlayer::PlayingState) {
+        player->pause();
+    }
+    else {
+        player->play();
+    }
 }
 
 void MainWindow::showAboutApplication()
