@@ -2,12 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
-
-#include <QMainWindow>
 #include <QMediaPlayer>
 #include <QAudioOutput>
 #include <QToolBar>
@@ -18,6 +12,10 @@ QT_END_NAMESPACE
 #include <QProcess>
 #include <QString>
 #include <QVBoxLayout>
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
@@ -38,8 +36,8 @@ private slots:
     void processFinished();
     void playbackSliderMoved(qint64 position);
     void playbackChanged(qint64 position);
-    void ensure_stopped();
-    void update_buttons(QMediaPlayer::PlaybackState state);
+    void ensureStopped();
+    void updateButtons(QMediaPlayer::PlaybackState state);
 
 private:
     void createWidgets();
@@ -48,8 +46,8 @@ private:
     void initializePlayer();
     void createUI();
     void setupToolBar();
-    void show_status_message(const QString &message);
-    void handle_player_error(QMediaPlayer::Error error, const QString& errorString);
+    void showStatusMessage(const QString &message);
+    void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
 
     QMediaPlayer *player;
     QAudioOutput *audioOutput;
@@ -68,7 +66,7 @@ private:
     QAction *playAction;
     QAction *pauseAction;
     QAction *stopAction;
-    QAction *about_qt_action;
+    QAction *aboutQtAction;
 
     QString videoPath;
     QString ffmpegPath;

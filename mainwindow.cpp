@@ -1,5 +1,4 @@
 #include "mainwindow.h"
-
 #include <QApplication>
 #include <QMainWindow>
 #include <QMediaPlayer>
@@ -19,14 +18,11 @@
 MainWindow::MainWindow()
 {
     state = VIDEO_STATE;
-
     createUI();
     createLayout();
     initializePlayer();
     setupActions();
     setupToolBar();
-
-    update_buttons(player->playbackState());
 
     ffmpegPath = qgetenv("FFMPEG_BINARY");
     if (ffmpegPath.isEmpty())
@@ -49,19 +45,17 @@ void MainWindow::setupActions()
     connect(openAction, &QAction::triggered, this, &MainWindow::open);
 
     QAction *exitAction = new QAction("Exit", this);
-    //exitAction->setShortcut("Ctrl+Q");
     connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
 
-    // Добавьте элементы меню "File" только к главному меню
-    QMenu *file_menu = menuBar()->addMenu("&File");
-    file_menu->addAction(openAction);
-    file_menu->addAction(exitAction);
+    QMenu *fileMenu = menuBar()->addMenu("&File");
+    fileMenu->addAction(openAction);
+    fileMenu->addAction(exitAction);
 }
 
 void MainWindow::createLayout()
 {
     videoWidget = new QVideoWidget();
-    videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);  // Установите желаемый режим соотношения сторон
+    videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
     videoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     QVBoxLayout *layout = new QVBoxLayout();
@@ -82,7 +76,7 @@ void MainWindow::createLayout()
     widget->setLayout(layout);
     setCentralWidget(widget);
 
-    this->resize(800, 600);
+    resize(800, 600);
 }
 
 void MainWindow::initializePlayer()
@@ -92,8 +86,8 @@ void MainWindow::initializePlayer()
     player->setAudioOutput(audioOutput);
 
     connect(player, &QMediaPlayer::positionChanged, this, &MainWindow::playbackChanged);
-    connect(player, &QMediaPlayer::playbackStateChanged, this, &MainWindow::update_buttons);
-    connect(player, &QMediaPlayer::errorOccurred, this, &MainWindow::handle_player_error);
+    connect(player, &QMediaPlayer::playbackStateChanged, this, &MainWindow::updateButtons);
+    connect(player, &QMediaPlayer::errorOccurred, this, &MainWindow::handlePlayerError);
     player->setVideoOutput(videoWidget);
 }
 
@@ -104,11 +98,9 @@ void MainWindow::setupToolBar()
 
     toolBar->addAction(openAction);
 
-    // Создание меню "Play"
-    QMenu* playMenu = menuBar()->addMenu("&Play");
-    QStyle* style = this->style();
+    QMenu *playMenu = menuBar()->addMenu("&Play");
+    QStyle *style = this->style();
 
-    // Создание действия "Play"
     playAction = new QAction("Play", this);
     QIcon playIcon = QIcon::fromTheme("media-playback-start.png", style->standardIcon(QStyle::SP_MediaPlay));
     playAction->setIcon(playIcon);
@@ -116,13 +108,11 @@ void MainWindow::setupToolBar()
     toolBar->addAction(playAction);
     playMenu->addAction(playAction);
 
-    // About
-    QMenu* about_menu = menuBar()->addMenu("&About");
-    about_qt_action = new QAction("About &Qt", this);
-    connect(about_qt_action, &QAction::triggered, qApp, &QApplication::aboutQt);
-    about_menu->addAction(about_qt_action);
+    QMenu *aboutMenu = menuBar()->addMenu("&About");
+    aboutQtAction = new QAction("About &Qt", this);
+    connect(aboutQtAction, &QAction::triggered, qApp, &QApplication::aboutQt);
+    aboutMenu->addAction(aboutQtAction);
 
-    // Создание действия "Pause"
     pauseAction = new QAction("Pause", this);
     QIcon pauseIcon = QIcon::fromTheme("media-playback-pause.png", style->standardIcon(QStyle::SP_MediaPause));
     pauseAction->setIcon(pauseIcon);
@@ -130,13 +120,12 @@ void MainWindow::setupToolBar()
     playMenu->addAction(pauseAction);
     connect(pauseAction, &QAction::triggered, player, &QMediaPlayer::pause);
 
-    // Создание действия "Stop"
     stopAction = new QAction("Stop", this);
     QIcon stopIcon = QIcon::fromTheme("media-playback-stop.png", style->standardIcon(QStyle::SP_MediaStop));
     stopAction->setIcon(stopIcon);
     toolBar->addAction(stopAction);
     playMenu->addAction(stopAction);
-    connect(stopAction, &QAction::triggered, this, &MainWindow::ensure_stopped);
+    connect(stopAction, &QAction::triggered, this, &MainWindow::ensureStopped);
 
     volumeSlider = new QSlider(Qt::Horizontal, this);
     volumeSlider->setMinimum(0);
@@ -166,15 +155,15 @@ void MainWindow::setupToolBar()
 
 void MainWindow::open()
 {
-    QFileDialog file_dialog(this);
-    QString movies_location = QStandardPaths::writableLocation(QStandardPaths::MoviesLocation);
+    QFileDialog fileDialog(this);
+    QString moviesLocation = QStandardPaths::writableLocation(QStandardPaths::MoviesLocation);
 
-    file_dialog.setDirectory(movies_location);
-    if (file_dialog.exec() == QDialog::Accepted)
+    fileDialog.setDirectory(moviesLocation);
+    if (fileDialog.exec() == QDialog::Accepted)
     {
         state = VIDEO_STATE;
 
-        QUrl url = file_dialog.selectedUrls().at(0);
+        QUrl url = fileDialog.selectedUrls().at(0);
         videoPath = QDir::toNativeSeparators(url.toLocalFile());
 
         player->setSource(url);
@@ -191,7 +180,6 @@ void MainWindow::open()
 
         endPositionSlider->setMinimum(startPositionSlider->minimum());
         endPositionSlider->setMaximum(startPositionSlider->maximum());
-        endPositionSlider->setSliderPosition(endPositionSlider->maximum());
         endPositionSlider->setSliderPosition(endPositionSlider->maximum());
 
         qDebug() << player->duration();
@@ -210,10 +198,10 @@ void MainWindow::ripButtonClicked()
 
 void MainWindow::volumeSliderMoved(qint64 position)
 {
-    auto volume = static_cast<float>(position) / static_cast<float>(this->volumeSlider->maximum());
+    auto volume = static_cast<float>(position) / static_cast<float>(volumeSlider->maximum());
     qDebug() << position;
     qDebug() << volume;
-    this->audioOutput->setVolume(volume);
+    audioOutput->setVolume(volume);
 }
 
 void MainWindow::rip()
@@ -260,7 +248,6 @@ void MainWindow::rip()
     connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &MainWindow::processFinished);
     process->start(commandLine);
 }
-
 
 void MainWindow::processStarted()
 {
@@ -335,7 +322,7 @@ void MainWindow::playbackChanged(qint64 position)
     playbackSlider->blockSignals(false);
 }
 
-void MainWindow::ensure_stopped()
+void MainWindow::ensureStopped()
 {
     if (player->playbackState() != QMediaPlayer::StoppedState)
     {
@@ -343,22 +330,20 @@ void MainWindow::ensure_stopped()
     }
 }
 
-void MainWindow::update_buttons(QMediaPlayer::PlaybackState state)
+void MainWindow::updateButtons(QMediaPlayer::PlaybackState state)
 {
     playAction->setEnabled(state != QMediaPlayer::PlayingState);
     pauseAction->setEnabled(state == QMediaPlayer::PlayingState);
     stopAction->setEnabled(state != QMediaPlayer::StoppedState);
 }
 
-void MainWindow::show_status_message(const QString &message)
+void MainWindow::showStatusMessage(const QString &message)
 {
     statusBar()->showMessage(message, 5000);
 }
 
-void MainWindow::handle_player_error(QMediaPlayer::Error error, const QString& errorString)
+void MainWindow::handlePlayerError(QMediaPlayer::Error error, const QString &errorString)
 {
     Q_UNUSED(error);
-    show_status_message(errorString);
+    showStatusMessage(errorString);
 }
-
-
