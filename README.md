@@ -10,7 +10,7 @@ Here are the steps:
 
 1. Download FFmpeg for Windows.  
 1. Extract it to a directory of your choice.  
-1. Set the FFMPEG_BINARY environment variable to the absolute path of the FFMPEG executable (FFMPEG.exe).  
+1. Set the FFMPEG_BINARY environment variable to the absolute path of the FFmpeg executable (FFmpeg.exe).  
 
 Raiden Video Ripper simplifies video editing and conversion, making it an accessible tool for open-source enthusiasts.  
 
