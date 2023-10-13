@@ -147,8 +147,9 @@ void MainWindow::setupToolBar()
     volumeSlider->setToolTip("Volume");
     auto savedVolume = settings.value(volumeSettingsKey, volumeSlider->maximum()).value<qint64>();
     volumeSlider->setValue(savedVolume);
-    connect(volumeSlider, &QSlider::valueChanged, this, &MainWindow::volumeSliderMoved);
+    connect(volumeSlider, &QSlider::valueChanged, this, &MainWindow::volumeChanged);
     toolBar->addWidget(volumeSlider);
+    this->volumeChanged(savedVolume);
 
     QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
     int availableWidth = availableGeometry.width();
@@ -262,7 +263,7 @@ void MainWindow::ripButtonClicked()
     rip();
 }
 
-void MainWindow::volumeSliderMoved(qint64 position)
+void MainWindow::volumeChanged(qint64 position)
 {
     auto volume = static_cast<float>(position) / static_cast<float>(volumeSlider->maximum());
     qDebug() << position;

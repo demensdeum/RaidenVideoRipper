@@ -28,7 +28,7 @@ public:
 private slots:
     void open();
     void ripButtonClicked();
-    void volumeSliderMoved(qint64 position);
+    void volumeChanged(qint64 position);
     void rip();
     void processStarted();
     void processReadyReadStandardOutput();
