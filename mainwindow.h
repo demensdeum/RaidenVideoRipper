@@ -35,9 +35,11 @@ private slots:
     void processReadyReadStandardOutput();
     void processStateChanged();
     void processFinished();
+    void stopButtonClicked();
     void playbackSliderMoved(qint64 position);
     void playbackChanged(qint64 position);
     void ensureStopped();
+    void playbackStateChanged(QMediaPlayer::PlaybackState state);
     void updateButtons(QMediaPlayer::PlaybackState state);
     void togglePlayback();
     void startPositionSliderMoved(qint64 position);
@@ -52,11 +54,13 @@ private:
     void initializePlayer();
     void createUI();
     void setupToolBar();
+    void playButtonClicked();
     void showStatusMessage(const QString &message);
     void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
 
     static void showAlert(const QString &title, const QString &message);
 
+    bool userForcedStop;
     QThreadPool threadPool;
     QSettings settings;
 
@@ -65,12 +69,12 @@ private:
     QToolBar *toolBar;
     QCheckBox *convertToVideoCheckbox;
     QCheckBox *convertToGifCheckbox;
+    QCheckBox *previewCheckbox;
 
     QSlider *volumeSlider;
     QSlider *playbackSlider;
     QSlider *startPositionSlider;
     QSlider *endPositionSlider;
-    QPushButton *ripButton;
     QVideoWidget *videoWidget;
 
     QAction *openAction;

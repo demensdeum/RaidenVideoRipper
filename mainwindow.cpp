@@ -21,6 +21,7 @@
 
 MainWindow::MainWindow()
 {
+    userForcedStop = false;
     state = VIDEO_STATE;
     createUI();
     createLayout();
@@ -66,7 +67,7 @@ void MainWindow::createLayout()
     connect(endPositionSlider,&QSlider::sliderMoved, this, &MainWindow::endPositionSliderMoved);
     layout->addWidget(endPositionSlider);
 
-    ripButton = new QPushButton("RIP EM!");
+    auto ripButton = new QPushButton("RIP EM!");
     connect(ripButton, &QPushButton::clicked, this, &MainWindow::ripButtonClicked);
     layout->addWidget(ripButton);
 
@@ -74,7 +75,11 @@ void MainWindow::createLayout()
     widget->setLayout(layout);
     setCentralWidget(widget);
 
-    resize(800, 600);
+    auto availableGeometry = QApplication::primaryScreen()->availableGeometry();
+    auto width = availableGeometry.width() * 0.8;
+    auto height = availableGeometry.height() * 0.8;
+
+    resize(width, height);
 }
 
 void MainWindow::startPositionSliderMoved(qint64 position) {
@@ -92,9 +97,21 @@ void MainWindow::initializePlayer()
     player->setAudioOutput(audioOutput);
 
     connect(player, &QMediaPlayer::positionChanged, this, &MainWindow::playbackChanged);
-    connect(player, &QMediaPlayer::playbackStateChanged, this, &MainWindow::updateButtons);
+    connect(player, &QMediaPlayer::playbackStateChanged, this, &MainWindow::playbackStateChanged);
     connect(player, &QMediaPlayer::errorOccurred, this, &MainWindow::handlePlayerError);
     player->setVideoOutput(videoWidget);
+}
+
+void MainWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
+{
+    updateButtons(state);
+
+    if (previewCheckbox->isChecked()) {
+        if (state == QMediaPlayer::StoppedState && userForcedStop == false) {
+            qDebug() << "hurr";
+            player->play();
+        }
+    }
 }
 
 void MainWindow::setupToolBar()
@@ -110,7 +127,7 @@ void MainWindow::setupToolBar()
     playAction = new QAction("Play", this);
     QIcon playIcon = QIcon::fromTheme("media-playback-start.png", style->standardIcon(QStyle::SP_MediaPlay));
     playAction->setIcon(playIcon);
-    connect(playAction, &QAction::triggered, player, &QMediaPlayer::play);
+    connect(playAction, &QAction::triggered, this, &MainWindow::playButtonClicked);
     toolBar->addAction(playAction);
     playMenu->addAction(playAction);
 
@@ -134,7 +151,7 @@ void MainWindow::setupToolBar()
     stopAction = new QAction("Stop", this);
     QIcon stopIcon = QIcon::fromTheme("media-playback-stop.png", style->standardIcon(QStyle::SP_MediaStop));
     stopAction->setIcon(stopIcon);
-    connect(stopAction, &QAction::triggered, player, &QMediaPlayer::stop);
+    connect(stopAction, &QAction::triggered, this, &MainWindow::stopButtonClicked);
     toolBar->addAction(stopAction);
     playMenu->addAction(stopAction);
 
@@ -169,10 +186,24 @@ void MainWindow::setupToolBar()
     convertToGifCheckbox = new QCheckBox("gif", this);
     convertToGifCheckbox->setChecked(true);
     toolBar->addWidget(convertToGifCheckbox);
+
+    previewCheckbox = new QCheckBox("preview", this);
+    previewCheckbox->setChecked(true);
+    toolBar->addWidget(previewCheckbox);
+}
+
+void MainWindow::playButtonClicked() {
+    userForcedStop = false;
+    player->play();
+}
+
+void MainWindow::stopButtonClicked() {
+    userForcedStop = true;
+    player->stop();
 }
 
 void MainWindow::togglePlayback() {
-    qDebug() << "wha";
+    userForcedStop = false;
     if (player->playbackState() == QMediaPlayer::PlayingState) {
         player->pause();
     }
@@ -185,7 +216,7 @@ void MainWindow::showAboutApplication()
 {
     const auto copyright =
         tr("Copyright &copy; 2023 <a href=\"https://www.demensdeum.com/\">Ilia Prokhorov (%1)</a>")
-                               .arg(applicationName);
+            .arg(applicationName);
     const auto license =
         QStringLiteral("<a href=\"https://opensource.org/license/mit/\">MIT License</a>");
     const auto sourceCode =
@@ -215,7 +246,7 @@ void MainWindow::showAboutApplication()
             .arg(copyright)
             .arg(license)
             .arg(sourceCode)
-    );
+        );
 }
 
 void MainWindow::open()
@@ -375,9 +406,23 @@ void MainWindow::playbackSliderMoved(qint64 position)
 
 void MainWindow::playbackChanged(qint64 position)
 {
-    playbackSlider->blockSignals(true);
-    playbackSlider->setSliderPosition(position);
-    playbackSlider->blockSignals(false);
+    auto sliderUpdate = [this] (int position) {
+        playbackSlider->blockSignals(true);
+        playbackSlider->setSliderPosition(position);
+        playbackSlider->blockSignals(false);
+    };
+
+    if (this->previewCheckbox->isChecked()) {
+        auto startPosition = startPositionSlider->value();
+        auto endPosition = endPositionSlider->value();
+        if (position > endPosition) {
+            player->setPosition(startPosition);
+        }
+        else if (position < startPosition) {
+            player->setPosition(startPosition);
+        }
+    }
+    sliderUpdate(player->position());
 }
 
 void MainWindow::ensureStopped()
