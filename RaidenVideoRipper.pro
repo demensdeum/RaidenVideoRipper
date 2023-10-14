@@ -16,7 +16,10 @@ SOURCES += \
 
 HEADERS += \
     constants.h \
+    ffmpeg_headless.h \
     mainwindow.h
+
+LIBS += C:/Users/Demensdeum/Documents/Sources/RaidenVideoRipper/headless_ffmpeg.dll.a
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
