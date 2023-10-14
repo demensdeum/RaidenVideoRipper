@@ -12,12 +12,14 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    videoprocessor.cpp
 
 HEADERS += \
     constants.h \
     ffmpeg_headless.h \
-    mainwindow.h
+    mainwindow.h \
+    videoprocessor.h
 
 LIBS += C:/Users/Demensdeum/Documents/Sources/RaidenVideoRipper/headless_ffmpeg.dll.a
 

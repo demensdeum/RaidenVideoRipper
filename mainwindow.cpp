@@ -15,11 +15,9 @@
 #include <QStatusBar>
 #include <QScreen>
 #include <QShortcut>
-#include "constants.h"
+#include <videoprocessor.h>
 
-extern "C" {
-#include "ffmpeg_headless.h"
-}
+#include "constants.h"
 
 MainWindow::MainWindow()
 {
@@ -29,14 +27,6 @@ MainWindow::MainWindow()
     initializePlayer();
     setupActions();
     setupToolBar();
-
-//    ffmpegPath = qgetenv("FFMPEG_BINARY");
-//    if (ffmpegPath.isEmpty())
-//    {
-//        showAlert("WHAT!", "INSTALL FFMPEG and add FFMPEG_BINARY Environment variable to ffmpeg.exe!!!");
-//        qWarning() << "WUT NO FFMPEG_BINARY ENVIRONMENT VARIABLE?! EXIT!";
-//        exit(1);
-//    }
 }
 
 void MainWindow::createUI()
@@ -313,38 +303,8 @@ void MainWindow::rip()
         return;
     }
 
-    auto ffmpegPath = strdup("ffmpeg");
-    auto overrideCommand = strdup("-y");
-    auto inputCommand = strdup("-i");
-    auto inputFile = strdup(videoPath.toStdString().c_str());
-    auto startPositionCommand = strdup("-ss");
-    auto startPositionMillisecondsString = std::to_string(startPosition);
-    startPositionMillisecondsString += "ms";
-    auto startPositionCommandArgument = strdup(startPositionMillisecondsString.c_str());
-    auto endPositionCommand = strdup("-to");
-    auto endPositionMillisecondsString = std::to_string(endPosition);
-    endPositionMillisecondsString += "ms";
-    auto endPositionCommandArgument = strdup(endPositionMillisecondsString.c_str());
-    auto outputFile = strdup(outputVideoPath.toStdString().c_str());
-
-    #define ARGUMENTS_LENGTH 9
-
-    int argc = ARGUMENTS_LENGTH;
-    char *argv[ARGUMENTS_LENGTH];
-
-    argv[0] = ffmpegPath;
-    argv[1] = overrideCommand;
-    argv[2] = inputCommand;
-    argv[3] = inputFile;
-    argv[4] = startPositionCommand;
-    argv[5] = startPositionCommandArgument;
-    argv[6] = endPositionCommand;
-    argv[7] = endPositionCommandArgument;
-    argv[8] = outputFile;
-
-    headless_main(argc, argv);
-
-    // memory leaks from strdup!!!!!
+    auto videoProcessor = new VideoProcessor(startPosition, endPosition, videoPath, outputVideoPath);
+    threadPool.start(videoProcessor);
 }
 
 void MainWindow::processStarted()

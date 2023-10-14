@@ -13,6 +13,7 @@
 #include <QString>
 #include <QVBoxLayout>
 #include <QSettings>
+#include <QThreadPool>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -56,6 +57,7 @@ private:
 
     static void showAlert(const QString &title, const QString &message);
 
+    QThreadPool threadPool;
     QSettings settings;
 
     QMediaPlayer *player;
