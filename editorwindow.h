@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef EDITORWINDOW_H
+#define EDITORWINDOW_H
 
 #include <QMainWindow>
 #include <QMediaPlayer>
@@ -15,26 +15,21 @@
 #include <QSettings>
 #include <QThreadPool>
 
-QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
-QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow
+class EditorWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow();
+    EditorWindow();
 
 private slots:
     void open();
-    void ripButtonClicked();
+    void cutButtonClicked();
     void volumeChanged(qint64 position);
-    void rip();
+    void cut();
     void processStarted();
     void processReadyReadStandardOutput();
     void processStateChanged();
-    void processFinished();
     void stopButtonClicked();
     void playbackSliderMoved(qint64 position);
     void playbackChanged(qint64 position);
@@ -44,8 +39,8 @@ private slots:
     void togglePlayback();
     void startPositionSliderMoved(qint64 position);
     void endPositionSliderMoved(qint64 position);
-
     void showAboutApplication();
+    void processDidFinish(bool isSuccess);
 
 private:
     void createWidgets();
@@ -88,7 +83,5 @@ private:
 
     const QString VIDEO_STATE = "VIDEO";
     const QString GIF_STATE = "GIF";
-
-    QProcess *process;
 };
-#endif // MAINWINDOW_H
+#endif // EDITORWINDOW_H

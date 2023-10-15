@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "editorwindow.h"
 
 #include <QApplication>
 #include "constants.h"
@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     application.setOrganizationDomain(companyDomain);
     application.setApplicationName(applicationName);
     application.setApplicationVersion(applicationVersion);
-    MainWindow window;
+    EditorWindow window;
     window.show();
     return application.exec();
 }

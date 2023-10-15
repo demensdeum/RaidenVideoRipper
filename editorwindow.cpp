@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "editorwindow.h"
 #include <QApplication>
 #include <QMainWindow>
 #include <QMediaPlayer>
@@ -19,7 +19,7 @@
 
 #include "constants.h"
 
-MainWindow::MainWindow()
+EditorWindow::EditorWindow()
 {
     userForcedStop = false;
     state = VIDEO_STATE;
@@ -30,16 +30,16 @@ MainWindow::MainWindow()
     setupToolBar();
 }
 
-void MainWindow::createUI()
+void EditorWindow::createUI()
 {
     setWindowTitle("Raiden Video Ripper " + QString(applicationVersion));
 }
 
-void MainWindow::setupActions()
+void EditorWindow::setupActions()
 {
     openAction = new QAction("Open...", this);
     openAction->setShortcut(QKeySequence::Open);
-    connect(openAction, &QAction::triggered, this, &MainWindow::open);
+    connect(openAction, &QAction::triggered, this, &EditorWindow::open);
 
     auto exitAction = new QAction("Exit", this);
     connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
@@ -49,7 +49,7 @@ void MainWindow::setupActions()
     fileMenu->addAction(exitAction);
 }
 
-void MainWindow::createLayout()
+void EditorWindow::createLayout()
 {
     videoWidget = new QVideoWidget();
     videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
@@ -61,15 +61,15 @@ void MainWindow::createLayout()
     playbackSlider = new QSlider(Qt::Horizontal);
     layout->addWidget(playbackSlider);
     startPositionSlider = new QSlider(Qt::Horizontal);
-    connect(startPositionSlider,&QSlider::sliderMoved, this, &MainWindow::startPositionSliderMoved);
+    connect(startPositionSlider,&QSlider::sliderMoved, this, &EditorWindow::startPositionSliderMoved);
     layout->addWidget(startPositionSlider);
     endPositionSlider = new QSlider(Qt::Horizontal);
-    connect(endPositionSlider,&QSlider::sliderMoved, this, &MainWindow::endPositionSliderMoved);
+    connect(endPositionSlider,&QSlider::sliderMoved, this, &EditorWindow::endPositionSliderMoved);
     layout->addWidget(endPositionSlider);
 
-    auto ripButton = new QPushButton("RIP EM!");
-    connect(ripButton, &QPushButton::clicked, this, &MainWindow::ripButtonClicked);
-    layout->addWidget(ripButton);
+    auto cutButton = new QPushButton("Cut");
+    connect(cutButton, &QPushButton::clicked, this, &EditorWindow::cutButtonClicked);
+    layout->addWidget(cutButton);
 
     auto widget = new QWidget();
     widget->setLayout(layout);
@@ -82,27 +82,27 @@ void MainWindow::createLayout()
     resize(width, height);
 }
 
-void MainWindow::startPositionSliderMoved(qint64 position) {
+void EditorWindow::startPositionSliderMoved(qint64 position) {
     player->setPosition(position);
 }
 
-void MainWindow::endPositionSliderMoved(qint64 position) {
+void EditorWindow::endPositionSliderMoved(qint64 position) {
     player->setPosition(position);
 }
 
-void MainWindow::initializePlayer()
+void EditorWindow::initializePlayer()
 {
     audioOutput = new QAudioOutput();
     player = new QMediaPlayer();
     player->setAudioOutput(audioOutput);
 
-    connect(player, &QMediaPlayer::positionChanged, this, &MainWindow::playbackChanged);
-    connect(player, &QMediaPlayer::playbackStateChanged, this, &MainWindow::playbackStateChanged);
-    connect(player, &QMediaPlayer::errorOccurred, this, &MainWindow::handlePlayerError);
+    connect(player, &QMediaPlayer::positionChanged, this, &EditorWindow::playbackChanged);
+    connect(player, &QMediaPlayer::playbackStateChanged, this, &EditorWindow::playbackStateChanged);
+    connect(player, &QMediaPlayer::errorOccurred, this, &EditorWindow::handlePlayerError);
     player->setVideoOutput(videoWidget);
 }
 
-void MainWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
+void EditorWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
 {
     updateButtons(state);
 
@@ -114,7 +114,7 @@ void MainWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
     }
 }
 
-void MainWindow::setupToolBar()
+void EditorWindow::setupToolBar()
 {
     toolBar = new QToolBar();
     addToolBar(toolBar);
@@ -127,7 +127,7 @@ void MainWindow::setupToolBar()
     playAction = new QAction("Play", this);
     QIcon playIcon = QIcon::fromTheme("media-playback-start.png", style->standardIcon(QStyle::SP_MediaPlay));
     playAction->setIcon(playIcon);
-    connect(playAction, &QAction::triggered, this, &MainWindow::playButtonClicked);
+    connect(playAction, &QAction::triggered, this, &EditorWindow::playButtonClicked);
     toolBar->addAction(playAction);
     playMenu->addAction(playAction);
 
@@ -151,14 +151,14 @@ void MainWindow::setupToolBar()
     stopAction = new QAction("Stop", this);
     QIcon stopIcon = QIcon::fromTheme("media-playback-stop.png", style->standardIcon(QStyle::SP_MediaStop));
     stopAction->setIcon(stopIcon);
-    connect(stopAction, &QAction::triggered, this, &MainWindow::stopButtonClicked);
+    connect(stopAction, &QAction::triggered, this, &EditorWindow::stopButtonClicked);
     toolBar->addAction(stopAction);
     playMenu->addAction(stopAction);
 
     QKeySequence keySequence(Qt::Key_Space);
     QShortcut *shortcut = new QShortcut(keySequence, this);
     shortcut->setEnabled(true);
-    QObject::connect(shortcut, &QShortcut::activated, this, &MainWindow::togglePlayback);
+    QObject::connect(shortcut, &QShortcut::activated, this, &EditorWindow::togglePlayback);
 
     volumeSlider = new QSlider(Qt::Horizontal, this);
     volumeSlider->setMinimum(0);
@@ -168,7 +168,7 @@ void MainWindow::setupToolBar()
     volumeSlider->setToolTip("Volume");
     auto savedVolume = settings.value(volumeSettingsKey, volumeSlider->maximum()).value<qint64>();
     volumeSlider->setValue(savedVolume);
-    connect(volumeSlider, &QSlider::valueChanged, this, &MainWindow::volumeChanged);
+    connect(volumeSlider, &QSlider::valueChanged, this, &EditorWindow::volumeChanged);
     toolBar->addWidget(volumeSlider);
     this->volumeChanged(savedVolume);
 
@@ -179,6 +179,10 @@ void MainWindow::setupToolBar()
 
     toolBar->addSeparator();
 
+    previewCheckbox = new QCheckBox("Preview", this);
+    previewCheckbox->setChecked(true);
+    toolBar->addWidget(previewCheckbox);
+
     convertToVideoCheckbox = new QCheckBox("mp4", this);
     convertToVideoCheckbox->setChecked(true);
     toolBar->addWidget(convertToVideoCheckbox);
@@ -186,23 +190,19 @@ void MainWindow::setupToolBar()
     convertToGifCheckbox = new QCheckBox("gif", this);
     convertToGifCheckbox->setChecked(true);
     toolBar->addWidget(convertToGifCheckbox);
-
-    previewCheckbox = new QCheckBox("preview", this);
-    previewCheckbox->setChecked(true);
-    toolBar->addWidget(previewCheckbox);
 }
 
-void MainWindow::playButtonClicked() {
+void EditorWindow::playButtonClicked() {
     userForcedStop = false;
     player->play();
 }
 
-void MainWindow::stopButtonClicked() {
+void EditorWindow::stopButtonClicked() {
     userForcedStop = true;
     player->stop();
 }
 
-void MainWindow::togglePlayback() {
+void EditorWindow::togglePlayback() {
     userForcedStop = false;
     if (player->playbackState() == QMediaPlayer::PlayingState) {
         player->pause();
@@ -212,7 +212,7 @@ void MainWindow::togglePlayback() {
     }
 }
 
-void MainWindow::showAboutApplication()
+void EditorWindow::showAboutApplication()
 {
     const auto copyright =
         tr("Copyright &copy; 2023 <a href=\"https://www.demensdeum.com/\">Ilia Prokhorov (%1)</a>")
@@ -249,7 +249,7 @@ void MainWindow::showAboutApplication()
         );
 }
 
-void MainWindow::open()
+void EditorWindow::open()
 {
     QFileDialog fileDialog(this);
 
@@ -273,7 +273,7 @@ void MainWindow::open()
 
         playbackSlider->setMinimum(0);
         playbackSlider->setMaximum(player->duration());
-        connect(playbackSlider, &QSlider::valueChanged, this, &MainWindow::playbackSliderMoved);
+        connect(playbackSlider, &QSlider::valueChanged, this, &EditorWindow::playbackSliderMoved);
         playbackSlider->setSliderPosition(0);
 
         startPositionSlider->setMinimum(0);
@@ -288,17 +288,17 @@ void MainWindow::open()
     }
 }
 
-void MainWindow::ripButtonClicked()
+void EditorWindow::cutButtonClicked()
 {
     if (state == VIDEO_STATE && !convertToVideoCheckbox->isChecked())
     {
         state = GIF_STATE;
     }
 
-    rip();
+    cut();
 }
 
-void MainWindow::volumeChanged(qint64 position)
+void EditorWindow::volumeChanged(qint64 position)
 {
     auto volume = static_cast<float>(position) / static_cast<float>(volumeSlider->maximum());
     qDebug() << position;
@@ -307,7 +307,7 @@ void MainWindow::volumeChanged(qint64 position)
     settings.setValue(volumeSettingsKey, position);
 }
 
-void MainWindow::rip()
+void EditorWindow::cut()
 {
     int startPosition = startPositionSlider->sliderPosition();
     int endPosition = endPositionSlider->sliderPosition();
@@ -335,33 +335,35 @@ void MainWindow::rip()
     }
 
     auto videoProcessor = new VideoProcessor(startPosition, endPosition, videoPath, outputVideoPath);
+    videoProcessor->setAutoDelete(true);
+
+    //connect(playbackSlider, &QSlider::valueChanged, this, &EditorWindow::playbackSliderMoved);
+    connect(
+        videoProcessor,
+        &VideoProcessor::videoProcessingDidFinish,
+        this,
+        &EditorWindow::processDidFinish
+    );
     threadPool.start(videoProcessor);
 }
 
-void MainWindow::processStarted()
+void EditorWindow::processStarted()
 {
     qDebug("Process Started");
     showAlert("Started!", QString("Rippin %1!!").arg(state));
 }
 
-void MainWindow::processReadyReadStandardOutput()
+void EditorWindow::processReadyReadStandardOutput()
 {
-    auto outputData = process->readAllStandardOutput();
-    qDebug() << "Standard Output: " << QString(outputData);
+
 }
 
-void MainWindow::processStateChanged()
+void EditorWindow::processStateChanged()
 {
-    qDebug() << "State changed";
 
-    auto outputData = process->readAllStandardOutput();
-    auto errorData = process->readAllStandardError();
-
-    qDebug() << "Standard Output: " << QString(outputData);
-    qDebug() << "Standard Error: " << QString(errorData);
 }
 
-void MainWindow::showAlert(const QString &title, const QString &message)
+void EditorWindow::showAlert(const QString &title, const QString &message)
 {
     QMessageBox messageBox;
     messageBox.setWindowTitle(title);
@@ -370,12 +372,11 @@ void MainWindow::showAlert(const QString &title, const QString &message)
     messageBox.exec();
 }
 
-void MainWindow::processFinished()
+void EditorWindow::processDidFinish(bool isSuccess)
 {
     qDebug("Process Finished");
-    auto exitStatus = process->exitStatus();
 
-    if (exitStatus == QProcess::NormalExit)
+    if (isSuccess)
     {
         qDebug("SUCCESS!!!");
         showAlert("WOW!", state + " Ripped Successfully!");
@@ -384,7 +385,7 @@ void MainWindow::processFinished()
             if (convertToVideoCheckbox->isChecked())
             {
                 state = GIF_STATE;
-                rip();
+                cut();
             }
         }
         else if (state == GIF_STATE)
@@ -395,16 +396,16 @@ void MainWindow::processFinished()
     else
     {
         showAlert("Ugh!!", "Rip Failed! :-(");
-        qDebug("Not normal exit: %d", static_cast<int>(exitStatus));
+        qDebug("Not normal exit: %d", isSuccess);
     }
 }
 
-void MainWindow::playbackSliderMoved(qint64 position)
+void EditorWindow::playbackSliderMoved(qint64 position)
 {
     player->setPosition(position);
 }
 
-void MainWindow::playbackChanged(qint64 position)
+void EditorWindow::playbackChanged(qint64 position)
 {
     auto sliderUpdate = [this] (int position) {
         playbackSlider->blockSignals(true);
@@ -412,7 +413,7 @@ void MainWindow::playbackChanged(qint64 position)
         playbackSlider->blockSignals(false);
     };
 
-    if (this->previewCheckbox->isChecked()) {
+    if (player->isPlaying() && this->previewCheckbox->isChecked()) {
         auto startPosition = startPositionSlider->value();
         auto endPosition = endPositionSlider->value();
         if (position > endPosition) {
@@ -425,7 +426,7 @@ void MainWindow::playbackChanged(qint64 position)
     sliderUpdate(player->position());
 }
 
-void MainWindow::ensureStopped()
+void EditorWindow::ensureStopped()
 {
     if (player->playbackState() != QMediaPlayer::StoppedState)
     {
@@ -433,19 +434,19 @@ void MainWindow::ensureStopped()
     }
 }
 
-void MainWindow::updateButtons(QMediaPlayer::PlaybackState state)
+void EditorWindow::updateButtons(QMediaPlayer::PlaybackState state)
 {
     playAction->setEnabled(state != QMediaPlayer::PlayingState);
     pauseAction->setEnabled(state == QMediaPlayer::PlayingState);
     stopAction->setEnabled(state != QMediaPlayer::StoppedState);
 }
 
-void MainWindow::showStatusMessage(const QString &message)
+void EditorWindow::showStatusMessage(const QString &message)
 {
     statusBar()->showMessage(message, 5000);
 }
 
-void MainWindow::handlePlayerError(QMediaPlayer::Error error, const QString &errorString)
+void EditorWindow::handlePlayerError(QMediaPlayer::Error error, const QString &errorString)
 {
     Q_UNUSED(error);
     showStatusMessage(errorString);
