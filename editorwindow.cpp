@@ -334,6 +334,9 @@ void EditorWindow::cut()
         return;
     }
 
+    QString text = "Rippin " + state;
+    showAlert("WOW!", text);
+
     auto videoProcessor = new VideoProcessor(startPosition, endPosition, videoPath, outputVideoPath);
     videoProcessor->setAutoDelete(true);
 
