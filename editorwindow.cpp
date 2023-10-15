@@ -83,10 +83,12 @@ void EditorWindow::createLayout()
 }
 
 void EditorWindow::startPositionSliderMoved(qint64 position) {
+    if (!previewCheckbox->isChecked()) return;
     player->setPosition(position);
 }
 
 void EditorWindow::endPositionSliderMoved(qint64 position) {
+    if (!previewCheckbox->isChecked()) return;
     player->setPosition(position);
 }
 
