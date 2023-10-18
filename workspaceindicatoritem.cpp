@@ -88,7 +88,7 @@ int WorkspaceIndicatorItem::getX() {
 void WorkspaceIndicatorItem::setX(int x) {
     qDebug() <<"setX: " << x;
 
-    if (DEBUG_NAME == "endIndicator") {
+    if (DEBUG_NAME == "startIndicator") {
         qDebug() << "sthop!!";
     }
 
@@ -120,7 +120,7 @@ void WorkspaceIndicatorItem::setRange(int minimal, int value, int maximal) {
 
     auto ratio = float(value) / float(maximal);
     auto x = ratio * rangeLineWidth;
-    x += rangeLineHorizontalIndent;
+    //x += rangeLineHorizontalIndent;
 
     rectangle = QRect(
         x,

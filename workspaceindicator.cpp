@@ -30,6 +30,8 @@ void WorkspaceIndicator::createIndicators() {
     playbackIndicator = createIndicator(playbackValue, WorkspaceIndicatorItem::Center, playbackIndicatorImage);
     endIndicator = createIndicator(endValue, WorkspaceIndicatorItem::Right, endIndicatorImage);
 
+    startIndicator->DEBUG_NAME = "startIndicator";
+
     indicators = {startIndicator, endIndicator, playbackIndicator};
 }
 
@@ -240,6 +242,7 @@ void WorkspaceIndicator::drawItem(WorkspaceIndicatorItem* item) {
 
     QImage image = item->getImage();
     painter.drawImage(item->getRectangle(), image);
+    //painter.drawRect(item->getRectangle());
 }
 
 int WorkspaceIndicator::rangeLineWidth() {
@@ -255,13 +258,26 @@ void WorkspaceIndicator::paintEvent([[maybe_unused]] QPaintEvent* event) {
     //painter.drawRect(QRect(0, 0, width(), height()));
 
     // Range line
+
     painter.setPen(QPen(Qt::gray, rangeLineBorderHeight));
     painter.setBrush(QColor(0xe7eaea));
-
     QRect rangeLineRectangle(rangeLineHorizontalIndent, height() / 2 - rangeLineHeight / 2, rangeLineWidth(), rangeLineHeight);
     painter.drawRoundedRect(rangeLineRectangle, 1, 1);
 
+    painter.setPen(QPen(Qt::gray, rangeLineBorderHeight));
+    painter.setBrush(Qt::yellow);
+    QRect selectedRangeLineRectangle(
+        startIndicator->getRightBorder(),
+        height() / 2 - rangeLineHeight / 2,
+        rangeLineWidth() - startIndicator->getX() - (width() - endIndicator->getX()),
+        rangeLineHeight
+        );
+    painter.drawRoundedRect(selectedRangeLineRectangle, 1, 1);
+
     for (auto indicator : indicators) {
+        if (indicator->DEBUG_NAME == "startIndicator") {
+            qDebug() << "startIndicator->getX: " << indicator->getX();
+        }
         drawItem(indicator);
     }
 }
