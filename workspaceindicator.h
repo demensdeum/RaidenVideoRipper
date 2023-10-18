@@ -36,7 +36,10 @@ private:
     int safeBound(int min, int value, int max);
     void setupUi();
     void createIndicators();
-    WorkspaceIndicatorItem* createIndicator(int value, WorkspaceIndicatorItem::Alignment alignment);
+    WorkspaceIndicatorItem* createIndicator(
+        int value, WorkspaceIndicatorItem::Alignment alignment,
+        QImage image
+        );
     void moveIndicator(WorkspaceIndicatorItem* item, int x);
     void highlightIndicatorIfNeeded(int x, int y);
     void drawItem(WorkspaceIndicatorItem* item);
@@ -47,7 +50,7 @@ private:
 
     static const int rangeLineBorderHeight = 1;
     static const int rangeLineHeight = 5;
-    static const int rangeLineHorizontalIndent = 20;
+    static const int rangeLineHorizontalIndent = 10;
 
     int startValue;
     int playbackValue;
@@ -66,4 +69,8 @@ private:
     WorkspaceIndicatorItem* endIndicator;
 
     WorkspaceIndicatorItem* draggingIndicator;
+
+    QImage startIndicatorImage;
+    QImage playbackIndicatorImage;
+    QImage endIndicatorImage;
 };

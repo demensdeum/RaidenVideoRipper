@@ -10,6 +10,9 @@ WorkspaceIndicator::WorkspaceIndicator(QWidget* parent) : QWidget(parent) {
 }
 
 void WorkspaceIndicator::setupUi() {
+    startIndicatorImage = QImage("startIndicatorImage.png");
+    playbackIndicatorImage = QImage("playbackIndicatorImage.png");
+    endIndicatorImage = QImage("endIndicatorImage.png");
     layout = new QVBoxLayout(this);
     setMinimumHeight(heightConstant);
     setMaximumHeight(heightConstant);
@@ -19,20 +22,30 @@ void WorkspaceIndicator::setupUi() {
     playbackValue = 50;
     endValue = maximalValue;
     setMouseTracking(true);
-
     createIndicators();
 }
 
 void WorkspaceIndicator::createIndicators() {
-    startIndicator = createIndicator(startValue, WorkspaceIndicatorItem::Left);
-    playbackIndicator = createIndicator(playbackValue, WorkspaceIndicatorItem::Center);
-    endIndicator = createIndicator(endValue, WorkspaceIndicatorItem::Right);
+    startIndicator = createIndicator(startValue, WorkspaceIndicatorItem::Left, startIndicatorImage);
+    playbackIndicator = createIndicator(playbackValue, WorkspaceIndicatorItem::Center, playbackIndicatorImage);
+    endIndicator = createIndicator(endValue, WorkspaceIndicatorItem::Right, endIndicatorImage);
 
-    indicators = {startIndicator, playbackIndicator, endIndicator};
+    indicators = {startIndicator, endIndicator, playbackIndicator};
 }
 
-WorkspaceIndicatorItem* WorkspaceIndicator::createIndicator(int value, WorkspaceIndicatorItem::Alignment alignment) {
-    return new WorkspaceIndicatorItem(minimalValue, value, maximalValue, rangeLineHorizontalIndent, alignment);
+WorkspaceIndicatorItem* WorkspaceIndicator::createIndicator(
+    int value,
+    WorkspaceIndicatorItem::Alignment alignment,
+    QImage image
+    ) {
+    return new WorkspaceIndicatorItem(
+        minimalValue,
+        value,
+        maximalValue,
+        rangeLineHorizontalIndent,
+        image,
+        alignment
+        );
 }
 
 int WorkspaceIndicator::getStartValue() {
@@ -122,11 +135,11 @@ void WorkspaceIndicator::mouseMoveEvent([[maybe_unused]] QMouseEvent* event) {
         moveIndicator(draggingIndicator, x);
         return;
     }
-
-    if (startIndicator->hitTest(x, y)) {
-        moveIndicator(startIndicator, x);
-    } else if (playbackIndicator->hitTest(x, y)) {
+    if (playbackIndicator->hitTest(x, y)) {
         moveIndicator(playbackIndicator, x);
+    }
+    else if (startIndicator->hitTest(x, y)) {
+        moveIndicator(startIndicator, x);
     } else if (endIndicator->hitTest(x, y)) {
         moveIndicator(endIndicator, x);
     }
@@ -208,7 +221,7 @@ void WorkspaceIndicator::drawItem(WorkspaceIndicatorItem* item) {
     if (!item->getIsVisible()) return;
 
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, QPainter::Antialiasing);
     painter.setPen(QPen(Qt::yellow, WorkspaceIndicatorItem::borderWidth));
 
     if (item->isHighlighted()) {
@@ -225,7 +238,8 @@ void WorkspaceIndicator::drawItem(WorkspaceIndicatorItem* item) {
         painter.setBrush(Qt::blue);
     }
 
-    painter.drawRect(item->getRectangle());
+    QImage image = item->getImage();
+    painter.drawImage(item->getRectangle(), image);
 }
 
 int WorkspaceIndicator::rangeLineWidth() {
@@ -237,15 +251,15 @@ void WorkspaceIndicator::paintEvent([[maybe_unused]] QPaintEvent* event) {
     painter.setRenderHint(QPainter::Antialiasing);
 
     // DEBUG BACKGROUND
-    painter.setBrush(Qt::green);
-    painter.drawRect(QRect(0, 0, width(), height()));
+    //painter.setBrush(Qt::green);
+    //painter.drawRect(QRect(0, 0, width(), height()));
 
     // Range line
-    painter.setPen(QPen(Qt::red, rangeLineBorderHeight));
-    painter.setBrush(Qt::blue);
+    painter.setPen(QPen(Qt::gray, rangeLineBorderHeight));
+    painter.setBrush(QColor(0xe7eaea));
 
     QRect rangeLineRectangle(rangeLineHorizontalIndent, height() / 2 - rangeLineHeight / 2, rangeLineWidth(), rangeLineHeight);
-    painter.drawRect(rangeLineRectangle);
+    painter.drawRoundedRect(rangeLineRectangle, 1, 1);
 
     for (auto indicator : indicators) {
         drawItem(indicator);

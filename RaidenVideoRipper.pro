@@ -25,7 +25,7 @@ HEADERS += \
     workspaceindicator.h \
     workspaceindicatoritem.h
 
-LIBS += C:/Users/Demensdeum/Documents/Sources/RaidenVideoRipperFucked/headless_ffmpeg.dll.a
+LIBS += $$PWD/headless_ffmpeg.dll.a
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

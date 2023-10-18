@@ -87,7 +87,7 @@ void EditorWindow::createLayout()
 
     auto availableGeometry = QApplication::primaryScreen()->availableGeometry();
     auto width = availableGeometry.width() * 0.4;
-    auto height = availableGeometry.height() * 0.4;
+    auto height = width * 0.8;
 
     resize(width, height);
 }

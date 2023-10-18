@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QRect>
+#include <QImage>
 
 class WorkspaceIndicatorItem
 {
@@ -16,7 +17,8 @@ public:
         int value,
         int maximal,
         int rangeLineHorizontalIndent,
-        Alignment align = Center
+        QImage image,
+        Alignment alignment
         );
 
     void update(QSize parentSize);
@@ -29,14 +31,16 @@ public:
 
     QRect getRectangle();
 
-    static const int borderWidth = 2;
-    static const int width = 10;
+    static const int borderWidth = 0;
+    static const int width = 20;
     static const int height = 20;
 
     bool hitTest(int x, int y);
     bool isHighlighted();
     void setIsHighlighted(bool isHighlighted);
     void setIsVisible(bool isVisible);
+
+    QImage getImage();
 
     QString DEBUG_NAME = "";
 
@@ -54,4 +58,5 @@ private:
     int rangeLineWidth;
     bool isVisible;
     QRect rectangle;
+    QImage image;
 };

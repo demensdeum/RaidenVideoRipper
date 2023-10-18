@@ -8,6 +8,7 @@ WorkspaceIndicatorItem::WorkspaceIndicatorItem(
     int value,
     int maximal,
     int rangeLineHorizontalIndent,
+    QImage image,
     Alignment alignment
     )
 {
@@ -18,8 +19,13 @@ WorkspaceIndicatorItem::WorkspaceIndicatorItem(
     this->maximal = maximal;
     this->rangeLineHorizontalIndent = rangeLineHorizontalIndent;
     this->rangeLineWidth = 1;
+    this->image = image;
     this->alignment = alignment;
     this->indicatorPositionX = 0;
+}
+
+QImage WorkspaceIndicatorItem::getImage() {
+    return image;
 }
 
 bool WorkspaceIndicatorItem::getIsVisible() {
