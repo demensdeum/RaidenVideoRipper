@@ -86,48 +86,60 @@ int WorkspaceIndicatorItem::getX() {
 }
 
 void WorkspaceIndicatorItem::setX(int x) {
-    qDebug() <<"setX: " << x;
+    auto adaptedX = x;
 
-    if (DEBUG_NAME == "startIndicator") {
-        qDebug() << "sthop!!";
+    switch (alignment) {
+    case WorkspaceIndicatorItem::Left:
+        adaptedX = x - width;
+        break;
+    case WorkspaceIndicatorItem::Center:
+        adaptedX = x - width / 2;
+        break;
+    case WorkspaceIndicatorItem::Right:
+        break;
     }
 
-    if (x < 0) {
-        qDebug() << "sthap";
-    }
+    qDebug() << "1";
 
     rectangle = QRect(
-        x - width / 2,
+        adaptedX,
         rectangle.y(),
-        rectangle.width(),
-        rectangle.height()
+        width,
+        height
         );
 
-    auto ratio = float(x - rangeLineHorizontalIndent) / float(rangeLineWidth);
+    auto ratio = float(adaptedX - rangeLineHorizontalIndent * 2) / float(rangeLineWidth);
     auto value = ratio * maximal;
-    qDebug() << "value: " << value;
     setValue(value);
+
+    if (DEBUG_NAME == "playbackIndicatorX") {
+        qDebug() << "set playbackIndicator setX";
+    }
 };
 
 void WorkspaceIndicatorItem::setRange(int minimal, int value, int maximal) {
     this->minimal = minimal;
     setValue(value);
     this->maximal = maximal;
-
-    if (DEBUG_NAME == "startIndicator") {
-        qDebug() << "sthop!!";
-    }
-
     auto ratio = float(value) / float(maximal);
     auto x = ratio * rangeLineWidth;
-    //x += rangeLineHorizontalIndent;
+    auto adaptedX = x;
+    if (alignment == WorkspaceIndicatorItem::Center) {
+        adaptedX -= width / 2;
+    }
+
+    qDebug() << "2";
 
     rectangle = QRect(
-        x,
+        adaptedX,
         rectangle.y(),
         rectangle.width(),
         rectangle.height()
         );
+
+    if (DEBUG_NAME == "startIndicator") {
+        qDebug() << "setRange";
+    }
 }
 
 QRect WorkspaceIndicatorItem::getRectangle() {
@@ -143,19 +155,22 @@ void WorkspaceIndicatorItem::update(QSize parentSize) {
     auto ratio = float(getValue()) / float(maximal);
     indicatorPositionX = rangeLineHorizontalIndent + (rangeLineWidth * ratio) - width / 2;
 
-//    if (DEBUG_NAME == "startIndicator") {
-//        qDebug() << "sthop!!";
-//    }
-
     switch (alignment) {
     case WorkspaceIndicatorItem::Left:
-        indicatorPositionX -= width / 2;
+        indicatorPositionX -= width;
         break;
     case WorkspaceIndicatorItem::Center:
         break;
     case WorkspaceIndicatorItem::Right:
-        indicatorPositionX += width / 2;
+        indicatorPositionX += width;
         break;
+    }
+
+    if (indicatorPositionX + width / 2 < rangeLineHorizontalIndent) {
+        indicatorPositionX = 0;
+    }
+    else if (indicatorPositionX > parentSize.width() - rangeLineHorizontalIndent) {
+        indicatorPositionX = parentSize.width() - rangeLineHorizontalIndent * 2;
     }
 
     rectangle = QRect(

@@ -30,7 +30,7 @@ void WorkspaceIndicator::createIndicators() {
     playbackIndicator = createIndicator(playbackValue, WorkspaceIndicatorItem::Center, playbackIndicatorImage);
     endIndicator = createIndicator(endValue, WorkspaceIndicatorItem::Right, endIndicatorImage);
 
-    startIndicator->DEBUG_NAME = "startIndicator";
+    playbackIndicator->DEBUG_NAME = "playbackIndicator";
 
     indicators = {startIndicator, endIndicator, playbackIndicator};
 }
@@ -153,10 +153,9 @@ void WorkspaceIndicator::moveIndicator(WorkspaceIndicatorItem* item, int x) {
     float aspect = static_cast<float>(lineX) / static_cast<float>(lineWidth);
     int value = static_cast<int>(aspect * static_cast<float>(maximalValue));
 
-    int leftBorder = rangeLineHorizontalIndent - startIndicator->width / 2;
-    int rightBorder = rangeLineHorizontalIndent + rangeLineWidth() + startIndicator->width / 2;
+    int rightBorder = rangeLineHorizontalIndent + rangeLineWidth() + startIndicator->width;
 
-    bool isInStartRange = (x >= leftBorder) && (x <= (rangeLineHorizontalIndent + rangeLineWidth()));
+    bool isInStartRange = (x >= startIndicator->width) && (x <= (rangeLineHorizontalIndent + rangeLineWidth()));
     bool isInEndRange = (x >= (rangeLineHorizontalIndent + endIndicator->width / 2)) && (x <= rightBorder);
 
     if (item == startIndicator) {
@@ -164,8 +163,7 @@ void WorkspaceIndicator::moveIndicator(WorkspaceIndicatorItem* item, int x) {
             item->setX(x);
         }
     } else if (item == playbackIndicator) {
-        bool canMovePlayback = (freeplayMode && (isInStartRange || isInEndRange)) ||
-                               (!freeplayMode && (x > startIndicator->getRightBorder() && x < endIndicator->getX()));
+        auto canMovePlayback = x > WorkspaceIndicator::rangeLineHorizontalIndent && x < width() - WorkspaceIndicator::rangeLineHorizontalIndent;
         if (canMovePlayback) {
             item->setX(x);
         }
@@ -224,25 +222,11 @@ void WorkspaceIndicator::drawItem(WorkspaceIndicatorItem* item) {
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, QPainter::Antialiasing);
-    painter.setPen(QPen(Qt::yellow, WorkspaceIndicatorItem::borderWidth));
-
-    if (item->isHighlighted()) {
-        painter.setBrush(Qt::red);
-    } else {
-        painter.setBrush(Qt::yellow);
-    }
-
-    if (item == startIndicator) {
-        painter.setBrush(Qt::red);
-    } else if (item == playbackIndicator) {
-        painter.setBrush(Qt::green);
-    } else if (item == endIndicator) {
-        painter.setBrush(Qt::blue);
-    }
+    painter.setPen(QPen(Qt::red, WorkspaceIndicatorItem::borderWidth));
 
     QImage image = item->getImage();
     painter.drawImage(item->getRectangle(), image);
-    //painter.drawRect(item->getRectangle());
+    painter.drawRect(item->getRectangle());
 }
 
 int WorkspaceIndicator::rangeLineWidth() {
@@ -267,9 +251,9 @@ void WorkspaceIndicator::paintEvent([[maybe_unused]] QPaintEvent* event) {
     painter.setPen(QPen(Qt::gray, rangeLineBorderHeight));
     painter.setBrush(Qt::yellow);
     QRect selectedRangeLineRectangle(
-        startIndicator->getRightBorder(),
+        startIndicator->getRightBorder() - startIndicator->width / 2,
         height() / 2 - rangeLineHeight / 2,
-        rangeLineWidth() - startIndicator->getX() - (width() - endIndicator->getX()),
+        rangeLineWidth() - startIndicator->getX() - (width() - endIndicator->getX()) + startIndicator->width,
         rangeLineHeight
         );
     painter.drawRoundedRect(selectedRangeLineRectangle, 1, 1);
