@@ -14,10 +14,17 @@
 #include <QVBoxLayout>
 #include <QSettings>
 #include <QThreadPool>
+#include <workspaceindicator.h>
 
 class EditorWindow : public QMainWindow
 {
     Q_OBJECT
+
+    enum State {
+        VIDEO = 0,
+        GIF,
+        EnumCount
+    };
 
 public:
     EditorWindow();
@@ -27,9 +34,6 @@ private slots:
     void cutButtonClicked();
     void volumeChanged(qint64 position);
     void cut();
-    void processStarted();
-    void processReadyReadStandardOutput();
-    void processStateChanged();
     void stopButtonClicked();
     void playbackSliderMoved(qint64 position);
     void playbackChanged(qint64 position);
@@ -40,7 +44,7 @@ private slots:
     void startPositionSliderMoved(qint64 position);
     void endPositionSliderMoved(qint64 position);
     void showAboutApplication();
-    void processDidFinish(bool isSuccess);
+    void convertingDidFinish(bool result);
 
 private:
     void createWidgets();
@@ -52,10 +56,14 @@ private:
     void playButtonClicked();
     void showStatusMessage(const QString &message);
     void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
+    void previewCheckboxStateChange(int state);
 
     static void showAlert(const QString &title, const QString &message);
 
     bool userForcedStop;
+
+    WorkspaceIndicator *workspaceIndicator;
+
     QThreadPool threadPool;
     QSettings settings;
 
@@ -67,9 +75,7 @@ private:
     QCheckBox *previewCheckbox;
 
     QSlider *volumeSlider;
-    QSlider *playbackSlider;
-    QSlider *startPositionSlider;
-    QSlider *endPositionSlider;
+
     QVideoWidget *videoWidget;
 
     QAction *openAction;
@@ -79,9 +85,8 @@ private:
 
     QString videoPath;
     QString ffmpegPath;
-    QString state;
+    State state;
 
-    const QString VIDEO_STATE = "VIDEO";
-    const QString GIF_STATE = "GIF";
+    std::map<int, QString> stateToString;
 };
 #endif // EDITORWINDOW_H

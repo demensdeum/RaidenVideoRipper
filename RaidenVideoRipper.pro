@@ -13,15 +13,19 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 SOURCES += \
     editorwindow.cpp \
     main.cpp \
-    videoprocessor.cpp
+    videoprocessor.cpp \
+    workspaceindicator.cpp \
+    workspaceindicatoritem.cpp
 
 HEADERS += \
     constants.h \
     editorwindow.h \
     ffmpeg_headless.h \
-    videoprocessor.h
+    videoprocessor.h \
+    workspaceindicator.h \
+    workspaceindicatoritem.h
 
-LIBS += C:/Users/Demensdeum/Documents/Sources/RaidenVideoRipper/headless_ffmpeg.dll.a
+LIBS += C:/Users/Demensdeum/Documents/Sources/RaidenVideoRipperFucked/headless_ffmpeg.dll.a
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

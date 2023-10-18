@@ -5,7 +5,6 @@
 
 int main(int argc, char *argv[])
 {
-
     QApplication application(argc, argv);
     application.setOrganizationName(companyName);
     application.setOrganizationDomain(companyDomain);

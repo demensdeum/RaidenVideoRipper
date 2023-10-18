@@ -21,8 +21,20 @@
 
 EditorWindow::EditorWindow()
 {
+    for (int state = 0; state < State::EnumCount; state++) {
+        switch (state) {
+        case VIDEO:
+            stateToString[state] = "VIDEO";
+            break;
+        case GIF:
+            stateToString[state] = "GIF";
+            break;
+        case EnumCount:
+            break;
+        }
+    }
     userForcedStop = false;
-    state = VIDEO_STATE;
+    state = VIDEO;
     createUI();
     createLayout();
     initializePlayer();
@@ -58,14 +70,12 @@ void EditorWindow::createLayout()
     auto layout = new QVBoxLayout();
     layout->addWidget(videoWidget);
 
-    playbackSlider = new QSlider(Qt::Horizontal);
-    layout->addWidget(playbackSlider);
-    startPositionSlider = new QSlider(Qt::Horizontal);
-    connect(startPositionSlider,&QSlider::sliderMoved, this, &EditorWindow::startPositionSliderMoved);
-    layout->addWidget(startPositionSlider);
-    endPositionSlider = new QSlider(Qt::Horizontal);
-    connect(endPositionSlider,&QSlider::sliderMoved, this, &EditorWindow::endPositionSliderMoved);
-    layout->addWidget(endPositionSlider);
+    workspaceIndicator = new WorkspaceIndicator();
+    layout->addWidget(workspaceIndicator);
+
+    connect(workspaceIndicator, &WorkspaceIndicator::startValueChanged, this, &EditorWindow::startPositionSliderMoved);
+    connect(workspaceIndicator, &WorkspaceIndicator::playbackValueChanged, this, &EditorWindow::playbackSliderMoved);
+    connect(workspaceIndicator, &WorkspaceIndicator::endValueChanged, this, &EditorWindow::endPositionSliderMoved);
 
     auto cutButton = new QPushButton("Cut");
     connect(cutButton, &QPushButton::clicked, this, &EditorWindow::cutButtonClicked);
@@ -76,8 +86,8 @@ void EditorWindow::createLayout()
     setCentralWidget(widget);
 
     auto availableGeometry = QApplication::primaryScreen()->availableGeometry();
-    auto width = availableGeometry.width() * 0.8;
-    auto height = availableGeometry.height() * 0.8;
+    auto width = availableGeometry.width() * 0.4;
+    auto height = availableGeometry.height() * 0.4;
 
     resize(width, height);
 }
@@ -110,7 +120,6 @@ void EditorWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
 
     if (previewCheckbox->isChecked()) {
         if (state == QMediaPlayer::StoppedState && userForcedStop == false) {
-            qDebug() << "hurr";
             player->play();
         }
     }
@@ -183,6 +192,7 @@ void EditorWindow::setupToolBar()
 
     previewCheckbox = new QCheckBox("Preview", this);
     previewCheckbox->setChecked(true);
+    connect(previewCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::previewCheckboxStateChange);
     toolBar->addWidget(previewCheckbox);
 
     convertToVideoCheckbox = new QCheckBox("mp4", this);
@@ -192,6 +202,24 @@ void EditorWindow::setupToolBar()
     convertToGifCheckbox = new QCheckBox("gif", this);
     convertToGifCheckbox->setChecked(true);
     toolBar->addWidget(convertToGifCheckbox);
+}
+
+void EditorWindow::previewCheckboxStateChange(int _state) {
+    Qt::CheckState state = (Qt::CheckState)_state;
+    switch (state) {
+    case Qt::Unchecked:
+        workspaceIndicator->setFreeplayMode(true);
+        update();
+        break;
+    case Qt::Checked:
+        workspaceIndicator->setFreeplayMode(false);
+        update();
+        break;
+    default:
+        break;
+    }
+
+    qDebug() << "previewChecboxStateChange" << state;
 }
 
 void EditorWindow::playButtonClicked() {
@@ -243,12 +271,14 @@ void EditorWindow::showAboutApplication()
             "but WITHOUT ANY WARRANTY; without even the implied warranty of "
             "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</small>"
             )
-            .arg(qApp->applicationName())
-            .arg(qApp->applicationVersion())
-            .arg("https://github.com/demensdeum/RaidenVideoRipper")
-            .arg(copyright)
-            .arg(license)
-            .arg(sourceCode)
+            .arg(
+                qApp->applicationName(),
+                qApp->applicationVersion(),
+                "https://github.com/demensdeum/RaidenVideoRipper",
+                copyright,
+                license,
+                sourceCode
+                )
         );
 }
 
@@ -263,7 +293,7 @@ void EditorWindow::open()
 
     if (fileDialog.exec() == QDialog::Accepted)
     {
-        state = VIDEO_STATE;
+        state = VIDEO;
 
         QUrl url = fileDialog.selectedUrls().at(0);
         videoPath = QDir::toNativeSeparators(url.toLocalFile());
@@ -274,28 +304,19 @@ void EditorWindow::open()
         player->setSource(url);
         player->play();
 
-        playbackSlider->setMinimum(0);
-        playbackSlider->setMaximum(player->duration());
-        connect(playbackSlider, &QSlider::valueChanged, this, &EditorWindow::playbackSliderMoved);
-        playbackSlider->setSliderPosition(0);
+        workspaceIndicator->setMaximalValue(player->duration());
 
-        startPositionSlider->setMinimum(0);
-        startPositionSlider->setMaximum(player->duration());
-        startPositionSlider->setSliderPosition(0);
-
-        endPositionSlider->setMinimum(startPositionSlider->minimum());
-        endPositionSlider->setMaximum(startPositionSlider->maximum());
-        endPositionSlider->setSliderPosition(endPositionSlider->maximum());
-
-        qDebug() << player->duration();
+        workspaceIndicator->setStartValue(0);
+        workspaceIndicator->setPlaybackValue(0);
+        workspaceIndicator->setEndValue(player->duration());
     }
 }
 
 void EditorWindow::cutButtonClicked()
 {
-    if (state == VIDEO_STATE && !convertToVideoCheckbox->isChecked())
+    if (state == VIDEO && !convertToVideoCheckbox->isChecked())
     {
-        state = GIF_STATE;
+        state = GIF;
     }
 
     cut();
@@ -312,8 +333,8 @@ void EditorWindow::volumeChanged(qint64 position)
 
 void EditorWindow::cut()
 {
-    int startPosition = startPositionSlider->sliderPosition();
-    int endPosition = endPositionSlider->sliderPosition();
+    int startPosition = workspaceIndicator->getStartValue();
+    int endPosition = workspaceIndicator->getEndValue();
 
     if (endPosition < startPosition)
     {
@@ -322,11 +343,11 @@ void EditorWindow::cut()
     }
 
     QString outputVideoPath;
-    if (state == VIDEO_STATE)
+    if (state == VIDEO)
     {
         outputVideoPath = videoPath + "_output.mp4";
     }
-    else if (state == GIF_STATE)
+    else if (state == GIF)
     {
         outputVideoPath = videoPath + "_output.gif";
     }
@@ -337,7 +358,7 @@ void EditorWindow::cut()
         return;
     }
 
-    QString text = "Rippin " + state;
+    QString text = "Rippin " + stateToString[state];
     showAlert("WOW!", text);
 
     auto videoProcessor = new VideoProcessor(startPosition, endPosition, videoPath, outputVideoPath);
@@ -347,25 +368,9 @@ void EditorWindow::cut()
         videoProcessor,
         &VideoProcessor::videoProcessingDidFinish,
         this,
-        &EditorWindow::processDidFinish
-    );
+        &EditorWindow::convertingDidFinish
+        );
     threadPool.start(videoProcessor);
-}
-
-void EditorWindow::processStarted()
-{
-    qDebug("Process Started");
-    showAlert("Started!", QString("Rippin %1!!").arg(state));
-}
-
-void EditorWindow::processReadyReadStandardOutput()
-{
-
-}
-
-void EditorWindow::processStateChanged()
-{
-
 }
 
 void EditorWindow::showAlert(const QString &title, const QString &message)
@@ -377,31 +382,33 @@ void EditorWindow::showAlert(const QString &title, const QString &message)
     messageBox.exec();
 }
 
-void EditorWindow::processDidFinish(bool isSuccess)
+void EditorWindow::convertingDidFinish(bool result)
 {
     qDebug("Process Finished");
+
+    auto isSuccess = result == 0;
 
     if (isSuccess)
     {
         qDebug("SUCCESS!!!");
-        showAlert("WOW!", state + " Ripped Successfully!");
-        if (state == VIDEO_STATE)
+        showAlert("WOW!", stateToString[state] + " Ripped Successfully!");
+        if (state == VIDEO)
         {
             if (convertToVideoCheckbox->isChecked())
             {
-                state = GIF_STATE;
+                state = GIF;
                 cut();
             }
         }
-        else if (state == GIF_STATE)
+        else if (state == GIF)
         {
-            state = VIDEO_STATE;
+            state = VIDEO;
         }
     }
     else
     {
-        showAlert("Ugh!!", "Rip Failed! :-(");
-        qDebug("Not normal exit: %d", isSuccess);
+        showAlert("Ugh!!", "Cut Failed! :-(");
+        qDebug("Not normal FFmpeg-Headless exit: %d", result);
     }
 }
 
@@ -413,14 +420,14 @@ void EditorWindow::playbackSliderMoved(qint64 position)
 void EditorWindow::playbackChanged(qint64 position)
 {
     auto sliderUpdate = [this] (int position) {
-        playbackSlider->blockSignals(true);
-        playbackSlider->setSliderPosition(position);
-        playbackSlider->blockSignals(false);
+        workspaceIndicator->blockSignals(true);
+        workspaceIndicator->setPlaybackValue(position);
+        workspaceIndicator->blockSignals(false);
     };
 
     if (player->isPlaying() && this->previewCheckbox->isChecked()) {
-        auto startPosition = startPositionSlider->value();
-        auto endPosition = endPositionSlider->value();
+        auto startPosition = workspaceIndicator->getStartValue();
+        auto endPosition = workspaceIndicator->getEndValue();
         if (position > endPosition) {
             player->setPosition(startPosition);
         }
