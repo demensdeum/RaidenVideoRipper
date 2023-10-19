@@ -46,6 +46,8 @@ private slots:
     void convertingDidFinish(bool result);
 
 private:
+    void endIndicatorDraggingStarted();
+    void endIndicatorDraggingFinished();
     void openFileIfNeeded();
     void handleOpenFile(QUrl url);
     void updateWindowTitle();
@@ -90,6 +92,8 @@ private:
     QString videoPath;
     QString ffmpegPath;
     State state;
+
+    bool playerWasPlaying;
 
     std::map<int, QString> stateToString;
 };

@@ -22,6 +22,10 @@ signals:
     void startValueChanged(int value);
     void playbackValueChanged(int value);
     void endValueChanged(int value);
+    void startSliderDraggingStarted();
+    void startSliderDraggingFinished();
+    void endSliderDraggingStarted();
+    void endSliderDraggingFinished();
 
 protected:
     void resizeEvent(QResizeEvent *event);

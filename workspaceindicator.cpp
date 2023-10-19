@@ -210,6 +210,9 @@ void WorkspaceIndicator::mousePressEvent(QMouseEvent *event)
         auto hitSlider = slider->hitTest(x, y);
         if (hitSlider) {
             draggingSlider = slider;
+            if (draggingSlider == endSlider) {
+                emit endSliderDraggingStarted();
+            }
             break;
         }
     }
@@ -223,7 +226,9 @@ void WorkspaceIndicator::mouseMoveEvent(QMouseEvent *event)
     }
     auto x = event->position().x();
     dragSlider(draggingSlider, x);
-    emit startValueChanged(draggingSlider->getValue());
+    if (draggingSlider == startSlider) {
+        emit startValueChanged(draggingSlider->getValue());
+    }
     update();
 }
 
@@ -232,6 +237,12 @@ void WorkspaceIndicator::mouseReleaseEvent([[maybe_unused]]QMouseEvent *event)
     auto x = event->position().x();
     if (draggingSlider) {
         dragSlider(draggingSlider, x);
+        if (draggingSlider == startSlider) {
+            emit startSliderDraggingFinished();
+        }
+        else if (draggingSlider == endSlider) {
+            emit endSliderDraggingFinished();
+        }
         draggingSlider = nullptr;
     }
 }

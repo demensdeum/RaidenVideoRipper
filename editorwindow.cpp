@@ -33,6 +33,7 @@ EditorWindow::EditorWindow()
             break;
         }
     }
+    playerWasPlaying = false;
     userForcedStop = false;
     state = VIDEO;
     createLayout();
@@ -78,11 +79,42 @@ void EditorWindow::createLayout()
     layout->addWidget(videoWidget);
 
     workspaceIndicator = new WorkspaceIndicator(this, 100);
-    layout->addWidget(workspaceIndicator);
+    connect(
+        workspaceIndicator,
+        &WorkspaceIndicator::endSliderDraggingStarted,
+        this,
+        &EditorWindow::endIndicatorDraggingStarted
+        );
 
-    connect(workspaceIndicator, &WorkspaceIndicator::startValueChanged, this, &EditorWindow::startPositionSliderMoved);
-    connect(workspaceIndicator, &WorkspaceIndicator::playbackValueChanged, this, &EditorWindow::playbackSliderMoved);
-    connect(workspaceIndicator, &WorkspaceIndicator::endValueChanged, this, &EditorWindow::endPositionSliderMoved);
+    connect(
+        workspaceIndicator,
+        &WorkspaceIndicator::endSliderDraggingFinished,
+        this,
+        &EditorWindow::endIndicatorDraggingFinished
+        );
+
+    connect(
+        workspaceIndicator,
+        &WorkspaceIndicator::startValueChanged,
+        this,
+        &EditorWindow::startPositionSliderMoved
+        );
+
+    connect(
+        workspaceIndicator,
+        &WorkspaceIndicator::playbackValueChanged,
+        this,
+        &EditorWindow::playbackSliderMoved
+        );
+
+    connect(
+        workspaceIndicator,
+        &WorkspaceIndicator::endValueChanged,
+        this,
+        &EditorWindow::endPositionSliderMoved
+        );
+
+    layout->addWidget(workspaceIndicator);
 
     auto cutButton = new QPushButton("Cut");
     connect(cutButton, &QPushButton::clicked, this, &EditorWindow::cutButtonClicked);
@@ -322,6 +354,22 @@ void EditorWindow::showAboutApplication()
                 sourceCode
                 )
         );
+}
+
+void EditorWindow::endIndicatorDraggingStarted()
+{
+    if (player->isPlaying()) {
+        playerWasPlaying = true;
+        player->pause();
+    }
+}
+
+void EditorWindow::endIndicatorDraggingFinished()
+{
+    if (playerWasPlaying) {
+        playerWasPlaying = false;
+        player->play();
+    }
 }
 
 void EditorWindow::open()
