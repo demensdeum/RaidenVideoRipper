@@ -229,6 +229,12 @@ void WorkspaceIndicator::mouseMoveEvent(QMouseEvent *event)
     if (draggingSlider == startSlider) {
         emit startValueChanged(draggingSlider->getValue());
     }
+    else if (draggingSlider == playbackSlider) {
+        emit playbackValueChanged(draggingSlider->getValue());
+    }
+    else if (draggingSlider == endSlider) {
+        emit endValueChanged(draggingSlider->getValue());
+    }
     update();
 }
 
