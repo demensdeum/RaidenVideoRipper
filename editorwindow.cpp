@@ -21,6 +21,15 @@
 
 EditorWindow::EditorWindow()
 {
+    auto style = this->style();
+    playIcon = QIcon::fromTheme(
+        "media-playback-start.png",
+        style->standardIcon(QStyle::SP_MediaPlay)
+        );
+    pauseIcon = QIcon::fromTheme(
+        "media-playback-pause.png",
+        style->standardIcon(QStyle::SP_MediaPause)
+    );
     for (int state = 0; state < State::EnumCount; state++) {
         switch (state) {
         case VIDEO:
@@ -189,12 +198,11 @@ void EditorWindow::setupToolBar()
     auto playMenu = menuBar()->addMenu("&Play");
     auto style = this->style();
 
-    playAction = new QAction("Play", this);
-    QIcon playIcon = QIcon::fromTheme("media-playback-start.png", style->standardIcon(QStyle::SP_MediaPlay));
-    playAction->setIcon(playIcon);
-    connect(playAction, &QAction::triggered, this, &EditorWindow::playButtonClicked);
-    toolBar->addAction(playAction);
-    playMenu->addAction(playAction);
+    playToggleAction = new QAction("Play", this);
+    playToggleAction->setIcon(playIcon);
+    connect(playToggleAction, &QAction::triggered, this, &EditorWindow::playToggleButtonClicked);
+    toolBar->addAction(playToggleAction);
+    playMenu->addAction(playToggleAction);
 
     auto aboutMenu = menuBar()->addMenu("&About");
 
@@ -205,13 +213,6 @@ void EditorWindow::setupToolBar()
     auto aboutQtAction = new QAction("About &Qt", this);
     connect(aboutQtAction, &QAction::triggered, qApp, &QApplication::aboutQt);
     aboutMenu->addAction(aboutQtAction);
-
-    pauseAction = new QAction("Pause", this);
-    QIcon pauseIcon = QIcon::fromTheme("media-playback-pause.png", style->standardIcon(QStyle::SP_MediaPause));
-    pauseAction->setIcon(pauseIcon);
-    connect(pauseAction, &QAction::triggered, player, &QMediaPlayer::pause);
-    toolBar->addAction(pauseAction);
-    playMenu->addAction(pauseAction);
 
     stopAction = new QAction("Stop", this);
     QIcon stopIcon = QIcon::fromTheme("media-playback-stop.png", style->standardIcon(QStyle::SP_MediaStop));
@@ -325,9 +326,9 @@ void EditorWindow::previewCheckboxStateChange(int _state)
     qDebug() << "previewChecboxStateChange" << state;
 }
 
-void EditorWindow::playButtonClicked() {
+void EditorWindow::playToggleButtonClicked() {
     userForcedStop = false;
-    player->play();
+    togglePlayback();
 }
 
 void EditorWindow::stopButtonClicked() {
@@ -594,8 +595,12 @@ void EditorWindow::ensureStopped()
 
 void EditorWindow::updateButtons(QMediaPlayer::PlaybackState state)
 {
-    playAction->setEnabled(state != QMediaPlayer::PlayingState);
-    pauseAction->setEnabled(state == QMediaPlayer::PlayingState);
+    if (player->isPlaying()) {
+        playToggleAction->setIcon(pauseIcon);
+    }
+    else {
+        playToggleAction->setIcon(playIcon);
+    }
     stopAction->setEnabled(state != QMediaPlayer::StoppedState);
 }
 
