@@ -14,6 +14,7 @@ SOURCES += \
     editorwindow.cpp \
     main.cpp \
     videoprocessor.cpp \
+    videowidget.cpp \
     workspaceindicator.cpp \
     workspaceindicatorslider.cpp
 
@@ -22,6 +23,7 @@ HEADERS += \
     editorwindow.h \
     ffmpeg_headless.h \
     videoprocessor.h \
+    videowidget.h \
     workspaceindicator.h \
     workspaceindicatorslider.h
 

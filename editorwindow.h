@@ -13,6 +13,7 @@
 #include <QVBoxLayout>
 #include <QSettings>
 #include <QThreadPool>
+#include <videowidget.h>
 #include <workspaceindicator.h>
 
 class EditorWindow : public QMainWindow
@@ -20,15 +21,16 @@ class EditorWindow : public QMainWindow
     Q_OBJECT
 
     enum State {
-        VIDEO = 0,
-        GIF,
+        IDLE = 0,
+        VIDEO_PROCESSING,
+        GIF_PROCESSING,
         EnumCount
     };
 
 public:
     EditorWindow();
 
-private slots:
+private:
     void open();
     void cutButtonClicked();
     void volumeChanged(qint64 position);
@@ -44,15 +46,13 @@ private slots:
     void endPositionSliderMoved(qint64 position);
     void showAboutApplication();
     void convertingDidFinish(bool result);
-
-private:
     void handleLeftKeyPress();
     void handleRightKeyPress();
     void startSliderDraggingStarted();
     void startSliderDraggingFinished();
     void endSliderDraggingStarted();
     void endSliderDraggingFinished();
-    void openFileIfNeeded();
+    void openArgumentsFileIfNeeded();
     void handleOpenFile(QUrl url);
     void updateWindowTitle();
     void createWidgets();
@@ -67,6 +67,7 @@ private:
     void previewCheckboxStateChange(int state);
     void checkboxVideoStateChanged(int _state);
     void checkboxGifStateChanged(int _state);
+    void handleDropUrl(QUrl url);
 
     static void showAlert(const QString &title, const QString &message);
 
@@ -86,7 +87,7 @@ private:
 
     QSlider *volumeSlider;
 
-    QVideoWidget *videoWidget;
+    VideoWidget *videoWidget;
 
     QAction *openAction;
     QAction *playToggleAction;

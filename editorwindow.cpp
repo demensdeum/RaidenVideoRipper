@@ -32,10 +32,10 @@ EditorWindow::EditorWindow()
     );
     for (int state = 0; state < State::EnumCount; state++) {
         switch (state) {
-        case VIDEO:
+        case VIDEO_PROCESSING:
             stateToString[state] = "VIDEO";
             break;
-        case GIF:
+        case GIF_PROCESSING:
             stateToString[state] = "GIF";
             break;
         case EnumCount:
@@ -44,16 +44,16 @@ EditorWindow::EditorWindow()
     }
     playerWasPlaying = false;
     userForcedStop = false;
-    state = VIDEO;
+    state = IDLE;
     createLayout();
     initializePlayer();
     setupActions();
     setupToolBar();
     updateWindowTitle();
-    openFileIfNeeded();
+    openArgumentsFileIfNeeded();
 }
 
-void EditorWindow::openFileIfNeeded()
+void EditorWindow::openArgumentsFileIfNeeded()
 {
     auto application = QCoreApplication::instance();
     auto arguments = application->arguments();
@@ -80,9 +80,15 @@ void EditorWindow::setupActions()
 
 void EditorWindow::createLayout()
 {
-    videoWidget = new QVideoWidget();
+    videoWidget = new VideoWidget(this);
     videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
     videoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    connect(
+        videoWidget,
+        &VideoWidget::dragDidDropUrl,
+        this,
+        &EditorWindow::handleDropUrl
+        );
 
     auto layout = new QVBoxLayout();
     layout->addWidget(videoWidget);
@@ -153,6 +159,14 @@ void EditorWindow::createLayout()
     auto height = width * 0.8;
 
     resize(width, height);
+}
+
+void EditorWindow::handleDropUrl(QUrl url)
+{
+    if (state != IDLE) {
+        return;
+    }
+    handleOpenFile(url);
 }
 
 void EditorWindow::startPositionSliderMoved(qint64 position) {
@@ -429,7 +443,6 @@ void EditorWindow::open()
 
     if (fileDialog.exec() == QDialog::Accepted)
     {
-        state = VIDEO;
         QUrl url = fileDialog.selectedUrls().at(0);
         handleOpenFile(url);
     }
@@ -437,6 +450,9 @@ void EditorWindow::open()
 
 void EditorWindow::handleOpenFile(QUrl url)
 {
+    if (state != IDLE) {
+        return;
+    }
     videoPath = QDir::toNativeSeparators(url.toLocalFile());
     auto videoPathDirectory = QFileInfo(videoPath).absolutePath();
     settings.setValue(lastWorkingPathKey, videoPathDirectory);
@@ -461,9 +477,14 @@ void EditorWindow::updateWindowTitle()
 
 void EditorWindow::cutButtonClicked()
 {
-    if (state == VIDEO && !convertToVideoCheckbox->isChecked())
-    {
-        state = GIF;
+    if (state != IDLE) {
+        return;
+    }
+    if (convertToVideoCheckbox->isChecked()) {
+        state = VIDEO_PROCESSING;
+    }
+    else if (convertToGifCheckbox->isChecked()) {
+        state = GIF_PROCESSING;
     }
 
     cut();
@@ -490,11 +511,11 @@ void EditorWindow::cut()
     }
 
     QString outputVideoPath;
-    if (state == VIDEO)
+    if (state == VIDEO_PROCESSING)
     {
         outputVideoPath = videoPath + "_output.mp4";
     }
-    else if (state == GIF)
+    else if (state == GIF_PROCESSING)
     {
         outputVideoPath = videoPath + "_output.gif";
     }
@@ -539,17 +560,20 @@ void EditorWindow::convertingDidFinish(bool result)
     {
         qDebug("SUCCESS!!!");
         showAlert("WOW!", stateToString[state] + " Ripped Successfully!");
-        if (state == VIDEO)
+        if (state == VIDEO_PROCESSING)
         {
             if (convertToGifCheckbox->isChecked())
             {
-                state = GIF;
+                state = GIF_PROCESSING;
                 cut();
             }
+            else {
+                state = IDLE;
+            }
         }
-        else if (state == GIF)
+        else if (state == GIF_PROCESSING)
         {
-            state = VIDEO;
+            state = IDLE;
         }
     }
     else
