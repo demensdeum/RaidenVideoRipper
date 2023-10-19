@@ -59,6 +59,8 @@ private:
     void showStatusMessage(const QString &message);
     void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
     void previewCheckboxStateChange(int state);
+    void checkboxVideoStateChanged(int _state);
+    void checkboxGifStateChanged(int _state);
 
     static void showAlert(const QString &title, const QString &message);
 

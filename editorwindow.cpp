@@ -198,28 +198,63 @@ void EditorWindow::setupToolBar()
     toolBar->addSeparator();
 
     previewCheckbox = new QCheckBox("Preview", this);
-    previewCheckbox->setChecked(true);
+    previewCheckbox->setChecked(settings.value(previewCheckboxStateKey, true).value<bool>());
     connect(previewCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::previewCheckboxStateChange);
     toolBar->addWidget(previewCheckbox);
 
     convertToVideoCheckbox = new QCheckBox("mp4", this);
-    convertToVideoCheckbox->setChecked(true);
+    convertToVideoCheckbox->setChecked(settings.value(convertToVideoCheckboxStateKey, true).value<bool>());
+    connect(convertToVideoCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxVideoStateChanged);
     toolBar->addWidget(convertToVideoCheckbox);
 
     convertToGifCheckbox = new QCheckBox("gif", this);
-    convertToGifCheckbox->setChecked(true);
+    convertToGifCheckbox->setChecked(settings.value(convertToGifCheckboxStateKey, true).value<bool>());
+    connect(convertToGifCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxGifStateChanged);
     toolBar->addWidget(convertToGifCheckbox);
 }
 
-void EditorWindow::previewCheckboxStateChange(int _state) {
+void EditorWindow::checkboxVideoStateChanged(int _state)
+{
+    Qt::CheckState state = (Qt::CheckState)_state;
+    switch (state) {
+    case Qt::Unchecked:
+        settings.setValue(convertToVideoCheckboxStateKey, _state);
+        break;
+    case Qt::Checked:
+        settings.setValue(convertToVideoCheckboxStateKey, _state);
+        break;
+    default:
+        break;
+    }
+}
+
+void EditorWindow::checkboxGifStateChanged(int _state)
+{
+    Qt::CheckState state = (Qt::CheckState)_state;
+    switch (state) {
+    case Qt::Unchecked:
+        settings.setValue(convertToGifCheckboxStateKey, _state);
+        break;
+    case Qt::Checked:
+        settings.setValue(convertToGifCheckboxStateKey, _state);
+        break;
+    default:
+        break;
+    }
+}
+
+void EditorWindow::previewCheckboxStateChange(int _state)
+{
     Qt::CheckState state = (Qt::CheckState)_state;
     switch (state) {
     case Qt::Unchecked:
         workspaceIndicator->setFreeplayMode(true);
+        settings.setValue(previewCheckboxStateKey, false);
         update();
         break;
     case Qt::Checked:
         workspaceIndicator->setFreeplayMode(false);
+        settings.setValue(previewCheckboxStateKey, true);
         update();
         break;
     default:
