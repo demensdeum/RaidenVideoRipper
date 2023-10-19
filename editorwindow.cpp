@@ -79,18 +79,33 @@ void EditorWindow::createLayout()
     layout->addWidget(videoWidget);
 
     workspaceIndicator = new WorkspaceIndicator(this, 100);
+
+    connect(
+        workspaceIndicator,
+        &WorkspaceIndicator::startSliderDraggingStarted,
+        this,
+        &EditorWindow::startSliderDraggingStarted
+        );
+
+    connect(
+        workspaceIndicator,
+        &WorkspaceIndicator::startSliderDraggingFinished,
+        this,
+        &EditorWindow::startSliderDraggingFinished
+        );
+
     connect(
         workspaceIndicator,
         &WorkspaceIndicator::endSliderDraggingStarted,
         this,
-        &EditorWindow::endIndicatorDraggingStarted
+        &EditorWindow::endSliderDraggingStarted
         );
 
     connect(
         workspaceIndicator,
         &WorkspaceIndicator::endSliderDraggingFinished,
         this,
-        &EditorWindow::endIndicatorDraggingFinished
+        &EditorWindow::endSliderDraggingFinished
         );
 
     connect(
@@ -337,7 +352,7 @@ void EditorWindow::showAboutApplication()
             "<p>This program proudly uses the following projects:<ul>"
             "<li><a href=\"https://www.qt.io/\">Qt</a> application and UI framework</li>"
             "<li><a href=\"https://www.ffmpeg.org/\">FFmpeg</a> multimedia format and codec libraries</li>"
-            "<li><a href=\"https://github.com/demensdeum/Dullahan-FFmpeg/\">Dullahan-FFmpeg</a>FFmpeg CLI as shared library </li>"
+            "<li><a href=\"https://github.com/demensdeum/Dullahan-FFmpeg/\">Dullahan-FFmpeg</a> FFmpeg CLI as shared library </li>"
             "</ul></p>"
             "<p>The source code used to build this program can be downloaded from "
             "%6</p>"
@@ -356,7 +371,7 @@ void EditorWindow::showAboutApplication()
         );
 }
 
-void EditorWindow::endIndicatorDraggingStarted()
+void EditorWindow::startSliderDraggingStarted()
 {
     if (player->isPlaying()) {
         playerWasPlaying = true;
@@ -364,7 +379,23 @@ void EditorWindow::endIndicatorDraggingStarted()
     }
 }
 
-void EditorWindow::endIndicatorDraggingFinished()
+void EditorWindow::startSliderDraggingFinished()
+{
+    if (playerWasPlaying) {
+        playerWasPlaying = false;
+        player->play();
+    }
+}
+
+void EditorWindow::endSliderDraggingStarted()
+{
+    if (player->isPlaying()) {
+        playerWasPlaying = true;
+        player->pause();
+    }
+}
+
+void EditorWindow::endSliderDraggingFinished()
 {
     if (playerWasPlaying) {
         playerWasPlaying = false;
@@ -495,7 +526,7 @@ void EditorWindow::convertingDidFinish(bool result)
         showAlert("WOW!", stateToString[state] + " Ripped Successfully!");
         if (state == VIDEO)
         {
-            if (convertToVideoCheckbox->isChecked())
+            if (convertToGifCheckbox->isChecked())
             {
                 state = GIF;
                 cut();

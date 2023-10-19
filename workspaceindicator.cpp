@@ -210,7 +210,10 @@ void WorkspaceIndicator::mousePressEvent(QMouseEvent *event)
         auto hitSlider = slider->hitTest(x, y);
         if (hitSlider) {
             draggingSlider = slider;
-            if (draggingSlider == endSlider) {
+            if (draggingSlider == startSlider) {
+                emit startSliderDraggingStarted();
+            }
+            else if (draggingSlider == endSlider) {
                 emit endSliderDraggingStarted();
             }
             break;

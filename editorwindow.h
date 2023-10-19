@@ -46,8 +46,10 @@ private slots:
     void convertingDidFinish(bool result);
 
 private:
-    void endIndicatorDraggingStarted();
-    void endIndicatorDraggingFinished();
+    void startSliderDraggingStarted();
+    void startSliderDraggingFinished();
+    void endSliderDraggingStarted();
+    void endSliderDraggingFinished();
     void openFileIfNeeded();
     void handleOpenFile(QUrl url);
     void updateWindowTitle();
