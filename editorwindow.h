@@ -46,6 +46,7 @@ private slots:
     void convertingDidFinish(bool result);
 
 private:
+    void updateWindowTitle();
     void createWidgets();
     void setupActions();
     void createLayout();

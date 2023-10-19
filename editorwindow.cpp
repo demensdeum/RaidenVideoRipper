@@ -35,16 +35,11 @@ EditorWindow::EditorWindow()
     }
     userForcedStop = false;
     state = VIDEO;
-    createUI();
     createLayout();
     initializePlayer();
     setupActions();
     setupToolBar();
-}
-
-void EditorWindow::createUI()
-{
-    setWindowTitle("Raiden Video Ripper " + QString(applicationVersion));
+    updateWindowTitle();
 }
 
 void EditorWindow::setupActions()
@@ -309,7 +304,19 @@ void EditorWindow::open()
         workspaceIndicator->setStartValue(0);
         workspaceIndicator->setPlaybackValue(0);
         workspaceIndicator->setEndValue(player->duration());
+
+        updateWindowTitle();
     }
+}
+
+void EditorWindow::updateWindowTitle()
+{
+    auto applicationTitle = QString(applicationName) + " " + QString(applicationVersion);
+    auto title = applicationTitle;
+    if (!videoPath.isEmpty()) {
+        title = QFileInfo(videoPath).fileName() + " - " + applicationTitle;
+    }
+    this->setWindowTitle(title);
 }
 
 void EditorWindow::cutButtonClicked()
