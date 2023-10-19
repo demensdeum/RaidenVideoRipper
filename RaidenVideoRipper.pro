@@ -15,7 +15,7 @@ SOURCES += \
     main.cpp \
     videoprocessor.cpp \
     workspaceindicator.cpp \
-    workspaceindicatoritem.cpp
+    workspaceindicatorslider.cpp
 
 HEADERS += \
     constants.h \
@@ -23,7 +23,7 @@ HEADERS += \
     ffmpeg_headless.h \
     videoprocessor.h \
     workspaceindicator.h \
-    workspaceindicatoritem.h
+    workspaceindicatorslider.h
 
 LIBS += $$PWD/headless_ffmpeg.dll.a
 

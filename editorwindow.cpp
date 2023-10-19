@@ -70,7 +70,7 @@ void EditorWindow::createLayout()
     auto layout = new QVBoxLayout();
     layout->addWidget(videoWidget);
 
-    workspaceIndicator = new WorkspaceIndicator();
+    workspaceIndicator = new WorkspaceIndicator(this, 100);
     layout->addWidget(workspaceIndicator);
 
     connect(workspaceIndicator, &WorkspaceIndicator::startValueChanged, this, &EditorWindow::startPositionSliderMoved);
@@ -304,7 +304,7 @@ void EditorWindow::open()
         player->setSource(url);
         player->play();
 
-        workspaceIndicator->setMaximalValue(player->duration());
+        workspaceIndicator->setMaximumValue(player->duration());
 
         workspaceIndicator->setStartValue(0);
         workspaceIndicator->setPlaybackValue(0);

@@ -1,24 +1,22 @@
 #pragma once
 
 #include <QWidget>
-#include <QVBoxLayout>
-#include <workspaceindicatoritem.h>
+#include <workspaceindicatorslider.h>
 
 class WorkspaceIndicator : public QWidget {
     Q_OBJECT
 
 public:
-    WorkspaceIndicator(QWidget *parent = nullptr);
+    WorkspaceIndicator(QWidget* parent, int maximumValue);
+    ~WorkspaceIndicator();
 
     int getStartValue();
-    int getPlaybackValue();
     int getEndValue();
-
+    void setFreeplayMode(bool freeplayMode);
     void setStartValue(int startValue);
     void setPlaybackValue(int playbackValue);
     void setEndValue(int endValue);
-    void setMaximalValue(int maximalValue);
-    void setFreeplayMode(bool freeplayMode);
+    void setMaximumValue(int maximumValue);
 
 signals:
     void startValueChanged(int value);
@@ -33,44 +31,22 @@ protected:
     void mouseReleaseEvent([[maybe_unused]] QMouseEvent *event);
 
 private:
-    int safeBound(int min, int value, int max);
-    void setupUi();
-    void createIndicators();
-    WorkspaceIndicatorItem* createIndicator(
-        int value, WorkspaceIndicatorItem::Alignment alignment,
-        QImage image
-        );
-    void moveIndicator(WorkspaceIndicatorItem* item, int x);
-    void highlightIndicatorIfNeeded(int x, int y);
-    void drawItem(WorkspaceIndicatorItem* item);
-    int rangeLineWidth();
+    WorkspaceIndicatorSlider *startSlider;
+    WorkspaceIndicatorSlider *playbackSlider;
+    WorkspaceIndicatorSlider *endSlider;
 
-    QVBoxLayout *layout;
-    int heightConstant = 40;
+    void dragSlider(WorkspaceIndicatorSlider *slider, int x);
 
-    static const int rangeLineBorderHeight = 1;
-    static const int rangeLineHeight = 5;
-    static const int rangeLineHorizontalIndent = 10;
+    void drawBackgroundIfNeeded();
+    void drawLine();
+    void drawSliders();
+    void drawSlider(WorkspaceIndicatorSlider *slider);
+    void redraw();
 
-    int startValue;
-    int playbackValue;
-    int endValue;
-
-    int minimalValue;
-    int maximalValue;
-
-    bool cursorIsPressed;
+    const int lineHeight = 20;
+    const int minimumHeight = 100;
+    const int minimumValue = 0;
+    int maximumValue;
     bool freeplayMode;
-
-    std::vector<WorkspaceIndicatorItem*> indicators;
-
-    WorkspaceIndicatorItem* startIndicator;
-    WorkspaceIndicatorItem* playbackIndicator;
-    WorkspaceIndicatorItem* endIndicator;
-
-    WorkspaceIndicatorItem* draggingIndicator;
-
-    QImage startIndicatorImage;
-    QImage playbackIndicatorImage;
-    QImage endIndicatorImage;
+    WorkspaceIndicatorSlider* draggingSlider;
 };
