@@ -46,6 +46,8 @@ private slots:
     void convertingDidFinish(bool result);
 
 private:
+    void handleLeftKeyPress();
+    void handleRightKeyPress();
     void startSliderDraggingStarted();
     void startSliderDraggingFinished();
     void endSliderDraggingStarted();

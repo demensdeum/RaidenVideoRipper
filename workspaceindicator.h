@@ -17,6 +17,8 @@ public:
     void setPlaybackValue(int playbackValue);
     void setEndValue(int endValue);
     void setMaximumValue(int maximumValue);
+    void moveLeft();
+    void moveRight();
 
 signals:
     void startValueChanged(int value);
@@ -47,6 +49,7 @@ private:
     void drawSliders();
     void drawSlider(WorkspaceIndicatorSlider *slider);
     void redraw();
+    void movePlaybackIndicatorByOffset(int offset);
 
     const int lineHeight = 4;
     const int minimumHeight = 20;

@@ -220,10 +220,14 @@ void EditorWindow::setupToolBar()
     toolBar->addAction(stopAction);
     playMenu->addAction(stopAction);
 
-    QKeySequence keySequence(Qt::Key_Space);
-    QShortcut *shortcut = new QShortcut(keySequence, this);
-    shortcut->setEnabled(true);
-    QObject::connect(shortcut, &QShortcut::activated, this, &EditorWindow::togglePlayback);
+    auto leftKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
+    QObject::connect(leftKeyShortcut, &QShortcut::activated, this, &EditorWindow::handleLeftKeyPress);
+
+    auto rightKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
+    QObject::connect(rightKeyShortcut, &QShortcut::activated, this, &EditorWindow::handleRightKeyPress);
+
+    auto playToggleKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Space), this);
+    QObject::connect(playToggleKeyShortcut, &QShortcut::activated, this, &EditorWindow::togglePlayback);
 
     volumeSlider = new QSlider(Qt::Horizontal, this);
     volumeSlider->setMinimum(0);
@@ -258,6 +262,16 @@ void EditorWindow::setupToolBar()
     convertToGifCheckbox->setChecked(settings.value(convertToGifCheckboxStateKey, true).value<bool>());
     connect(convertToGifCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxGifStateChanged);
     toolBar->addWidget(convertToGifCheckbox);
+}
+
+void EditorWindow::handleLeftKeyPress()
+{
+    workspaceIndicator->moveLeft();
+}
+
+void EditorWindow::handleRightKeyPress()
+{
+    workspaceIndicator->moveRight();
 }
 
 void EditorWindow::checkboxVideoStateChanged(int _state)

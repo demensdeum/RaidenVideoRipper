@@ -192,7 +192,33 @@ void WorkspaceIndicator::dragSlider(WorkspaceIndicatorSlider *slider, int x)
         return;
     }
 
-    draggingSlider->drag(x);
+    draggingSlider->dragToX(x);
+}
+
+void WorkspaceIndicator::movePlaybackIndicatorByOffset(int offset)
+{
+    if (draggingSlider)
+    {
+        return;
+    }
+    auto x = playbackSlider->getTargetX() + offset;
+    auto ratio = playbackSlider->xToRatio(x);
+    if (ratio < 0 || ratio > 1) {
+        return;
+    }
+    playbackSlider->dragToX(x);
+    emit playbackValueChanged(playbackSlider->getValue());
+    update();
+}
+
+void WorkspaceIndicator::moveLeft()
+{
+    movePlaybackIndicatorByOffset(-4);
+}
+
+void WorkspaceIndicator::moveRight()
+{
+    movePlaybackIndicatorByOffset(+4);
 }
 
 void WorkspaceIndicator::mousePressEvent(QMouseEvent *event)

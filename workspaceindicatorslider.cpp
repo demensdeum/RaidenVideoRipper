@@ -94,7 +94,7 @@ bool WorkspaceIndicatorSlider::hitTest(int x, int y)
     return true;
 }
 
-void WorkspaceIndicatorSlider::drag(int x){
+void WorkspaceIndicatorSlider::dragToX(int x){
     auto ratio = xToRatio(x);
     setValue(maximumValue * ratio);
 }
@@ -111,7 +111,7 @@ int WorkspaceIndicatorSlider::getTargetX()
     case Left:
         return adaptedX + width;
     case Center:
-        return adaptedX;
+        return adaptedX + width / 2;
     case Right:
         return adaptedX;
     }

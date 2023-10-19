@@ -27,7 +27,7 @@ public:
     void setMaximumValue(int value);
     void setParentSize(QSize parentSize);
     bool hitTest(int x, int y);
-    void drag(int x);
+    void dragToX(int x);
     QRect getRenderRectangle();
     int alignRenderX(int x);
     int lineWidth();
