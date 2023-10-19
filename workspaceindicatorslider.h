@@ -2,6 +2,7 @@
 
 #include <QSize>
 #include <QRect>
+#include <QImage>
 
 class WorkspaceIndicatorSlider
 {
@@ -15,9 +16,12 @@ public:
     WorkspaceIndicatorSlider(
         int value,
         int maximumValue,
-        Alignment alignment
+        Alignment alignment,
+        QImage image,
+        bool isHidden
         );
 
+    QImage getImage();
     int getValue();
     void setValue(int value);
     void setMaximumValue(int value);
@@ -26,6 +30,11 @@ public:
     void drag(int x);
     QRect getRenderRectangle();
     int alignRenderX(int x);
+    int lineWidth();
+    float xToRatio(int x);
+    float ratio();
+    void setIsHidden(bool isHidden);
+    bool getIsHidden();
 
     static const int width = 20;
     static const int height = 20;
@@ -41,5 +50,7 @@ private:
     QRect renderRectangle;
 
     Alignment alignment;
-    int x;
+    QImage image;
+
+    bool isHidden;
 };

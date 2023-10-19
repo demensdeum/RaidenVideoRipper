@@ -1,14 +1,48 @@
 #include "workspaceindicatorslider.h"
+#include <QDebug>
 
 WorkspaceIndicatorSlider::WorkspaceIndicatorSlider(
     int value,
     int maximumValue,
-    Alignment alignment
+    Alignment alignment,
+    QImage image,
+    bool isHidden
     )
 {
+    this->isHidden = isHidden;
     this->value = value;
     this->maximumValue = maximumValue;
     this->alignment = alignment;
+    this->image = image;
+}
+
+float WorkspaceIndicatorSlider::ratio() {
+    auto ratio = float(value) / float(maximumValue);
+    return ratio;
+}
+
+float WorkspaceIndicatorSlider::xToRatio(int x) {
+    auto adaptedX = x;
+    switch (alignment) {
+    case WorkspaceIndicatorSlider::Left:
+        adaptedX -= width / 2;
+        break;
+
+    case WorkspaceIndicatorSlider::Center:
+        adaptedX -= width;
+        break;
+
+    case WorkspaceIndicatorSlider::Right:
+        adaptedX -= width * 1.5;
+        break;
+    }
+    auto ratio = float(adaptedX) / float(lineWidth());
+    return ratio;
+}
+
+QImage WorkspaceIndicatorSlider::getImage()
+{
+    return image;
 }
 
 int WorkspaceIndicatorSlider::getValue()
@@ -19,11 +53,13 @@ int WorkspaceIndicatorSlider::getValue()
 void WorkspaceIndicatorSlider::setValue(int value)
 {
     this->value = value;
+    this->updateRenderRectangle();
 }
 
 void WorkspaceIndicatorSlider::setMaximumValue(int value)
 {
     this->maximumValue = value;
+    this->updateRenderRectangle();
 }
 
 void WorkspaceIndicatorSlider::setParentSize(QSize parentSize)
@@ -59,8 +95,18 @@ bool WorkspaceIndicatorSlider::hitTest(int x, int y)
 }
 
 void WorkspaceIndicatorSlider::drag(int x){
-    // TODO: convert x to value
-    this->x = x;
+    auto ratio = xToRatio(x);
+    setValue(maximumValue * ratio);
+}
+
+void WorkspaceIndicatorSlider::setIsHidden(bool isHidden)
+{
+    this->isHidden = isHidden;
+}
+
+bool WorkspaceIndicatorSlider::getIsHidden()
+{
+    return isHidden;
 }
 
 int WorkspaceIndicatorSlider::alignRenderX(int renderX)
@@ -77,11 +123,16 @@ int WorkspaceIndicatorSlider::alignRenderX(int renderX)
     return renderX;
 }
 
+int WorkspaceIndicatorSlider::lineWidth()
+{
+    auto lineWidth = parentSize.width() - width * 2;
+    return lineWidth;
+}
+
 void WorkspaceIndicatorSlider::updateRenderRectangle()
 {
     auto ratio = float(value) / float(maximumValue);
-    auto lineWidth = parentSize.width() - width * 2;
-    auto renderX = lineWidth * ratio;
+    auto renderX = lineWidth() * ratio;
     renderX = alignRenderX(renderX);
     auto renderY = parentSize.height() / 2 - height / 2;
     renderRectangle = QRect(

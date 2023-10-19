@@ -43,8 +43,8 @@ private:
     void drawSlider(WorkspaceIndicatorSlider *slider);
     void redraw();
 
-    const int lineHeight = 20;
-    const int minimumHeight = 100;
+    const int lineHeight = 4;
+    const int minimumHeight = 20;
     const int minimumValue = 0;
     int maximumValue;
     bool freeplayMode;
