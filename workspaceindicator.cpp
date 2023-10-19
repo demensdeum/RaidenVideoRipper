@@ -15,21 +15,21 @@ WorkspaceIndicator::WorkspaceIndicator(QWidget* parent, int maximumValue) : QWid
         startValue,
         maximumValue,
         WorkspaceIndicatorSlider::Left,
-        QImage("startSliderImage.png"),
+        QImage("://resources/images/startSliderImage.png"),
         false
         );
     playbackSlider = new WorkspaceIndicatorSlider(
         playbackValue,
         maximumValue,
         WorkspaceIndicatorSlider::Center,
-        QImage("playbackSliderImage.png"),
+        QImage("://resources/images/playbackSliderImage.png"),
         false
         );
     endSlider = new WorkspaceIndicatorSlider(
         endValue,
         maximumValue,
         WorkspaceIndicatorSlider::Right,
-        QImage("endSliderImage.png"),
+        QImage("://resources/images/endSliderImage.png"),
         false
         );
     this->draggingSlider = nullptr;

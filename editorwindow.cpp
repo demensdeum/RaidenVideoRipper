@@ -263,7 +263,7 @@ void EditorWindow::showAboutApplication()
             "<p>This program proudly uses the following projects:<ul>"
             "<li><a href=\"https://www.qt.io/\">Qt</a> application and UI framework</li>"
             "<li><a href=\"https://www.ffmpeg.org/\">FFmpeg</a> multimedia format and codec libraries</li>"
-            "<li><a href=\"https://github.com/demensdeum/Headless-FFmpeg/\">Headless-FFmpeg</a> FFmpeg CLI as library </li>"
+            "<li><a href=\"https://github.com/demensdeum/Dullahan-FFmpeg/\">Dullahan-FFmpeg</a>FFmpeg CLI as shared library </li>"
             "</ul></p>"
             "<p>The source code used to build this program can be downloaded from "
             "%6</p>"

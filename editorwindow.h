@@ -1,5 +1,4 @@
-#ifndef EDITORWINDOW_H
-#define EDITORWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <QMediaPlayer>
@@ -89,4 +88,3 @@ private:
 
     std::map<int, QString> stateToString;
 };
-#endif // EDITORWINDOW_H
