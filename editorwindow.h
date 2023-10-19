@@ -46,6 +46,8 @@ private slots:
     void convertingDidFinish(bool result);
 
 private:
+    void openFileIfNeeded();
+    void handleOpenFile(QUrl url);
     void updateWindowTitle();
     void createWidgets();
     void setupActions();

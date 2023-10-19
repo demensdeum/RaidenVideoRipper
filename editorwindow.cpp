@@ -40,6 +40,18 @@ EditorWindow::EditorWindow()
     setupActions();
     setupToolBar();
     updateWindowTitle();
+    openFileIfNeeded();
+}
+
+void EditorWindow::openFileIfNeeded()
+{
+    auto application = QCoreApplication::instance();
+    auto arguments = application->arguments();
+    if (arguments.length() == 2) {
+        auto filepath = arguments.at(1);
+        auto url = QUrl::fromLocalFile(filepath);
+        handleOpenFile(url);
+    }
 }
 
 void EditorWindow::setupActions()
@@ -289,24 +301,23 @@ void EditorWindow::open()
     if (fileDialog.exec() == QDialog::Accepted)
     {
         state = VIDEO;
-
         QUrl url = fileDialog.selectedUrls().at(0);
-        videoPath = QDir::toNativeSeparators(url.toLocalFile());
-        auto videoPathDirectory = QFileInfo(videoPath).absolutePath();
-
-        settings.setValue(lastWorkingPathKey, videoPathDirectory);
-
-        player->setSource(url);
-        player->play();
-
-        workspaceIndicator->setMaximumValue(player->duration());
-
-        workspaceIndicator->setStartValue(0);
-        workspaceIndicator->setPlaybackValue(0);
-        workspaceIndicator->setEndValue(player->duration());
-
-        updateWindowTitle();
+        handleOpenFile(url);
     }
+}
+
+void EditorWindow::handleOpenFile(QUrl url)
+{
+    videoPath = QDir::toNativeSeparators(url.toLocalFile());
+    auto videoPathDirectory = QFileInfo(videoPath).absolutePath();
+    settings.setValue(lastWorkingPathKey, videoPathDirectory);
+    player->setSource(url);
+    player->play();
+    workspaceIndicator->setMaximumValue(player->duration());
+    workspaceIndicator->setStartValue(0);
+    workspaceIndicator->setPlaybackValue(0);
+    workspaceIndicator->setEndValue(player->duration());
+    updateWindowTitle();
 }
 
 void EditorWindow::updateWindowTitle()
