@@ -35,6 +35,7 @@ public:
     float ratio();
     void setIsHidden(bool isHidden);
     bool getIsHidden();
+    int getTargetX();
 
     static const int width = 20;
     static const int height = 20;

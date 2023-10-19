@@ -39,6 +39,7 @@ private:
 
     void drawBackgroundIfNeeded();
     void drawLine();
+    void drawRangeLine();
     void drawSliders();
     void drawSlider(WorkspaceIndicatorSlider *slider);
     void redraw();

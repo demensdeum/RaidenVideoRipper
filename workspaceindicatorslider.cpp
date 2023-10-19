@@ -104,6 +104,21 @@ void WorkspaceIndicatorSlider::setIsHidden(bool isHidden)
     this->isHidden = isHidden;
 }
 
+int WorkspaceIndicatorSlider::getTargetX()
+{
+    auto adaptedX = renderRectangle.x();
+    switch (alignment) {
+    case Left:
+        return adaptedX + width;
+    case Center:
+        return adaptedX;
+    case Right:
+        return adaptedX;
+    }
+
+    return adaptedX;
+}
+
 bool WorkspaceIndicatorSlider::getIsHidden()
 {
     return isHidden;

@@ -104,6 +104,21 @@ void WorkspaceIndicator::drawBackgroundIfNeeded()
 #endif
 }
 
+void WorkspaceIndicator::drawRangeLine()
+{
+    auto rectangle = QRect(
+        startSlider->getTargetX(),
+        height() / 2 - lineHeight / 2,
+        endSlider->getTargetX() - startSlider->getTargetX(),
+        lineHeight
+        );
+    auto painter = QPainter(this);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, QPainter::Antialiasing);
+    painter.setPen(QPen(Qt::lightGray, 1));
+    painter.setBrush(Qt::blue);
+    painter.drawRoundedRect(rectangle, 1, 1);
+}
+
 void WorkspaceIndicator::drawLine()
 {
     auto rectangle = QRect(
@@ -154,13 +169,18 @@ void WorkspaceIndicator::redraw()
 {
     drawBackgroundIfNeeded();
     drawLine();
+    drawRangeLine();
     drawSliders();
 }
 
 void WorkspaceIndicator::dragSlider(WorkspaceIndicatorSlider *slider, int x)
 {
+    if (draggingSlider->getIsHidden()) {
+        return;
+    }
+
     auto ratio = slider->xToRatio(x);
-    if (ratio < 0 && ratio > 1) {
+    if (ratio < 0 || ratio > 1) {
         return;
     }
 
