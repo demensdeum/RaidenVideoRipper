@@ -120,7 +120,7 @@ void TimelineIndicator::drawRangeLine()
     auto painter = QPainter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, QPainter::Antialiasing);
     painter.setPen(QPen(Qt::lightGray, 1));
-    painter.setBrush(Qt::blue);
+    painter.setBrush(QColor(0x007ad9));
     painter.drawRoundedRect(rectangle, 1, 1);
 }
 

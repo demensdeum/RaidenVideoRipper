@@ -156,8 +156,8 @@ void EditorWindow::createLayout()
     volumeSlider = new QSlider(Qt::Horizontal, this);
     volumeSlider->setMinimum(0);
     volumeSlider->setMaximum(100);
-//    volumeSlider->setTickInterval(10);
-//    volumeSlider->setTickPosition(QSlider::TicksBelow);
+    //    volumeSlider->setTickInterval(10);
+    //    volumeSlider->setTickPosition(QSlider::TicksBelow);
     volumeSlider->setToolTip("Volume");
     volumeSlider->setFixedWidth(80);
     auto savedVolume = settings.value(volumeSettingsKey, volumeSlider->maximum()).value<qint64>();
@@ -176,13 +176,19 @@ void EditorWindow::createLayout()
     auto bottomSecondaryPanel = new QWidget();
     bottomSecondaryPanel->setFixedHeight(secondaryPanelHeight);
 
-//    auto openButton = new QPushButton("Open");
-//    connect(openButton, &QPushButton::clicked, this, &EditorWindow::open);
+    //    auto openButton = new QPushButton("Open");
+    //    connect(openButton, &QPushButton::clicked, this, &EditorWindow::open);
 
-    auto cutButton = new QPushButton("START");
-    cutButton->setFixedWidth(100);
-    cutButton->setIcon(QIcon::fromTheme("edit-cut"));
-    connect(cutButton, &QPushButton::clicked, this, &EditorWindow::cutButtonClicked);
+    auto startButton = new QPushButton("START");
+    startButton->setFixedWidth(160);
+    startButton->setFixedHeight(24);
+    startButton->setStyleSheet("QPushButton {"
+                               "color: white;"
+                               "background-color: #007ad9;"
+                               "border: none;"
+                               "font-weight: bold;"
+                               "}");
+    connect(startButton, &QPushButton::clicked, this, &EditorWindow::startButtonClicked);
 
     durationLabel = new QLabel("00:00:00.00 - 00:00:00.00 - 00:00:00.00");
     durationLabel->setAlignment(Qt::AlignCenter);
@@ -200,7 +206,7 @@ void EditorWindow::createLayout()
     bottomSecondaryHorizontalPanelLayout->addWidget(durationLabel);
     //bottomSecondaryHorizontalPanelLayout->addWidget(convertToVideoCheckbox);
     //bottomSecondaryHorizontalPanelLayout->addWidget(convertToGifCheckbox);
-    bottomSecondaryHorizontalPanelLayout->addWidget(cutButton);
+    bottomSecondaryHorizontalPanelLayout->addWidget(startButton);
     //bottomSecondaryHorizontalPanelLayout->addWidget(previewCheckbox);
     //bottomSecondaryHorizontalPanelLayout->addWidget(volumeSlider);
 
@@ -286,10 +292,10 @@ void EditorWindow::createLayout()
     auto horizontalIndicators = new QWidget();
     auto horizontalIndicatorsLayout = new QHBoxLayout(horizontalIndicators);
     horizontalIndicatorsLayout->setContentsMargins(0, 0, 0, 0);
-//    horizontalIndicatorsLayout->addWidget(playbackButton);
-//    horizontalIndicatorsLayout->addWidget(stopButton);
+    //    horizontalIndicatorsLayout->addWidget(playbackButton);
+    //    horizontalIndicatorsLayout->addWidget(stopButton);
     horizontalIndicatorsLayout->addWidget(timelineIndicator);
-//    horizontalIndicatorsLayout->addWidget(volumeSlider);
+    //    horizontalIndicatorsLayout->addWidget(volumeSlider);
     layout->addWidget(horizontalIndicators);
     layout->addWidget(bottomSecondaryPanel);
     //layout->addWidget(bottomPrimaryHorizontalPanel);
@@ -407,8 +413,8 @@ void EditorWindow::setupToolBar()
     volumeSlider = new QSlider(Qt::Horizontal, this);
     volumeSlider->setMinimum(0);
     volumeSlider->setMaximum(100);
-//    volumeSlider->setTickInterval(10);
-//    volumeSlider->setTickPosition(QSlider::TicksBelow);
+    //    volumeSlider->setTickInterval(10);
+    //    volumeSlider->setTickPosition(QSlider::TicksBelow);
     volumeSlider->setToolTip("Volume");
     auto savedVolume = settings.value(volumeSettingsKey, volumeSlider->maximum()).value<qint64>();
     volumeSlider->setValue(savedVolume);
@@ -416,10 +422,10 @@ void EditorWindow::setupToolBar()
     toolBar->addWidget(volumeSlider);
     this->volumeChanged(savedVolume);
 
-//    QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
-//    int availableWidth = availableGeometry.width();
-//    int volumeSliderWidth = availableWidth * 0.01;
-//    volumeSlider->setFixedWidth(volumeSliderWidth);
+    //    QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
+    //    int availableWidth = availableGeometry.width();
+    //    int volumeSliderWidth = availableWidth * 0.01;
+    //    volumeSlider->setFixedWidth(volumeSliderWidth);
 
     toolBar->addSeparator();
 
@@ -635,7 +641,7 @@ void EditorWindow::updateWindowTitle()
     this->setWindowTitle(title);
 }
 
-void EditorWindow::cutButtonClicked()
+void EditorWindow::startButtonClicked()
 {
     switch (state) {
     case IDLE:

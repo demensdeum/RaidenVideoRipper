@@ -33,7 +33,7 @@ public:
 
 private:
     void open();
-    void cutButtonClicked();
+    void startButtonClicked();
     void volumeChanged(qint64 position);
     void cut();
     void stopButtonClicked();
