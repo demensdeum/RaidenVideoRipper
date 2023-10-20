@@ -5,7 +5,6 @@
 #include <QEvent>
 #include <QUrl>
 
-
 class VideoWidget: public QVideoWidget
 {
     Q_OBJECT

@@ -49,14 +49,13 @@ EditorWindow::EditorWindow()
             break;
         }
     }
-    playerWasPlaying = false;
+    playerWasPlaying = std::make_tuple(false, 0);
     userForcedStop = false;
     state = IDLE;
     audioOutput = nullptr;
     createLayout();
     initializePlayer();
     setupActions();
-    //setupToolBar();
     updateWindowTitle();
     openArgumentsFileIfNeeded();
     updateDurationLabel();
@@ -88,9 +87,16 @@ void EditorWindow::setupActions()
 
     auto optionsMenu = menuBar()->addMenu("&Options");
 
+    auto isPreviewChecked = settings.value(previewCheckboxStateKey, true).value<bool>();
     previewCheckboxAction = new QAction("Preview", this);
     previewCheckboxAction->setCheckable(true);
-    previewCheckboxAction->setChecked(settings.value(previewCheckboxStateKey, true).value<bool>());
+    previewCheckboxAction->setChecked(isPreviewChecked);
+    connect(
+        previewCheckboxAction,
+        &QAction::triggered,
+        this,
+        &EditorWindow::previewCheckboxStateChange
+        );
     optionsMenu->addAction(previewCheckboxAction);
 
     convertToVideoCheckboxAction = new QAction("Convert to Video", this);
@@ -145,8 +151,6 @@ void EditorWindow::updateDurationLabel()
 
 void EditorWindow::createLayout()
 {
-    // Bottom Primary Panel
-
     auto bottomPrimaryHorizontalPanel = new QWidget();
     bottomPrimaryHorizontalPanel->setFixedHeight(primaryPanelHeight);
 
@@ -168,8 +172,6 @@ void EditorWindow::createLayout()
     volumeSlider = new QSlider(Qt::Horizontal, this);
     volumeSlider->setMinimum(0);
     volumeSlider->setMaximum(100);
-    //    volumeSlider->setTickInterval(10);
-    //    volumeSlider->setTickPosition(QSlider::TicksBelow);
     volumeSlider->setToolTip("Volume");
     volumeSlider->setFixedWidth(80);
     auto savedVolume = settings.value(volumeSettingsKey, volumeSlider->maximum()).value<qint64>();
@@ -177,8 +179,6 @@ void EditorWindow::createLayout()
     connect(volumeSlider, &QSlider::valueChanged, this, &EditorWindow::volumeChanged);
     bottomPrimaryHorizontalPanelLayout->addWidget(volumeSlider);
     this->volumeChanged(savedVolume);
-
-    // Bottom Secondary Panel
 
     auto bottomSecondaryPanel = new QWidget();
     bottomSecondaryPanel->setFixedHeight(secondaryPanelHeight);
@@ -296,16 +296,15 @@ void EditorWindow::createLayout()
         &EditorWindow::endPositionSliderMoved
         );
 
+    auto isPreviewChecked = settings.value(previewCheckboxStateKey, true).value<bool>();
+    timelineIndicator->setFreeplayMode(!isPreviewChecked);
+
     auto horizontalIndicators = new QWidget();
     auto horizontalIndicatorsLayout = new QHBoxLayout(horizontalIndicators);
     horizontalIndicatorsLayout->setContentsMargins(0, 0, 0, 0);
-    //    horizontalIndicatorsLayout->addWidget(playbackButton);
-    //    horizontalIndicatorsLayout->addWidget(stopButton);
     horizontalIndicatorsLayout->addWidget(timelineIndicator);
-    //    horizontalIndicatorsLayout->addWidget(volumeSlider);
     layout->addWidget(horizontalIndicators);
     layout->addWidget(bottomSecondaryPanel);
-    //layout->addWidget(bottomPrimaryHorizontalPanel);
 
     auto widget = new QWidget();
     widget->setLayout(layout);
@@ -321,15 +320,15 @@ void EditorWindow::createLayout()
 void EditorWindow::playbackSliderDraggingStarted()
 {
     if (player->isPlaying()) {
-        playerWasPlaying = true;
+        playerWasPlaying = std::make_tuple(true, player->position());
         player->pause();
     }
 }
 
 void EditorWindow::playbackSliderDraggingFinished()
 {
-    if (playerWasPlaying) {
-        playerWasPlaying = false;
+    if (std::get<0>(playerWasPlaying)) {
+        playerWasPlaying = std::make_tuple(false, 0);
         player->play();
     }
 }
@@ -377,73 +376,6 @@ void EditorWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
     }
 }
 
-//void EditorWindow::setupToolBar()
-//{
-//    toolBar = new QToolBar();
-//    //addToolBar(toolBar);
-
-//    toolBar->addAction(openAction);
-
-//    auto playMenu = menuBar()->addMenu("&Play");
-
-//    playToggleAction = new QAction("Play", this);
-//    playToggleAction->setIcon(playIcon);
-//    connect(playToggleAction, &QAction::triggered, this, &EditorWindow::playToggleButtonClicked);
-//    toolBar->addAction(playToggleAction);
-//    playMenu->addAction(playToggleAction);
-
-
-
-//    stopAction = new QAction("Stop", this);
-//    stopAction->setIcon(stopIcon);
-//    connect(stopAction, &QAction::triggered, this, &EditorWindow::stopButtonClicked);
-//    toolBar->addAction(stopAction);
-//    playMenu->addAction(stopAction);
-
-//    auto leftKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
-//    QObject::connect(leftKeyShortcut, &QShortcut::activated, this, &EditorWindow::handleLeftKeyPress);
-
-//    auto rightKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
-//    QObject::connect(rightKeyShortcut, &QShortcut::activated, this, &EditorWindow::handleRightKeyPress);
-
-//    auto playToggleKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Space), this);
-//    QObject::connect(playToggleKeyShortcut, &QShortcut::activated, this, &EditorWindow::togglePlayback);
-
-//    volumeSlider = new QSlider(Qt::Horizontal, this);
-//    volumeSlider->setMinimum(0);
-//    volumeSlider->setMaximum(100);
-//    //    volumeSlider->setTickInterval(10);
-//    //    volumeSlider->setTickPosition(QSlider::TicksBelow);
-//    volumeSlider->setToolTip("Volume");
-//    auto savedVolume = settings.value(volumeSettingsKey, volumeSlider->maximum()).value<qint64>();
-//    volumeSlider->setValue(savedVolume);
-//    connect(volumeSlider, &QSlider::valueChanged, this, &EditorWindow::volumeChanged);
-//    toolBar->addWidget(volumeSlider);
-//    this->volumeChanged(savedVolume);
-
-//    //    QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
-//    //    int availableWidth = availableGeometry.width();
-//    //    int volumeSliderWidth = availableWidth * 0.01;
-//    //    volumeSlider->setFixedWidth(volumeSliderWidth);
-
-//    toolBar->addSeparator();
-
-//    previewCheckbox = new QCheckBox("Preview", this);
-//    previewCheckbox->setChecked(settings.value(previewCheckboxStateKey, true).value<bool>());
-//    connect(previewCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::previewCheckboxStateChange);
-//    toolBar->addWidget(previewCheckbox);
-
-//    convertToVideoCheckbox = new QCheckBox("mp4", this);
-//    convertToVideoCheckbox->setChecked(settings.value(convertToVideoCheckboxStateKey, true).value<bool>());
-//    connect(convertToVideoCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxVideoStateChanged);
-//    toolBar->addWidget(convertToVideoCheckbox);
-
-//    convertToGifCheckbox = new QCheckBox("gif", this);
-//    convertToGifCheckbox->setChecked(settings.value(convertToGifCheckboxStateKey, true).value<bool>());
-//    connect(convertToGifCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxGifStateChanged);
-//    toolBar->addWidget(convertToGifCheckbox);
-//}
-
 void EditorWindow::handleLeftKeyPress()
 {
     timelineIndicator->moveLeft();
@@ -484,25 +416,11 @@ void EditorWindow::checkboxGifStateChanged(int _state)
     }
 }
 
-void EditorWindow::previewCheckboxStateChange(int _state)
+void EditorWindow::previewCheckboxStateChange(bool isChecked)
 {
-    Qt::CheckState state = (Qt::CheckState)_state;
-    switch (state) {
-    case Qt::Unchecked:
-        timelineIndicator->setFreeplayMode(true);
-        settings.setValue(previewCheckboxStateKey, false);
-        update();
-        break;
-    case Qt::Checked:
-        timelineIndicator->setFreeplayMode(false);
-        settings.setValue(previewCheckboxStateKey, true);
-        update();
-        break;
-    default:
-        break;
-    }
-
-    qDebug() << "previewChecboxStateChange" << state;
+    timelineIndicator->setFreeplayMode(!isChecked);
+    settings.setValue(previewCheckboxStateKey, isChecked);
+    update();
 }
 
 void EditorWindow::playToggleButtonClicked() {
@@ -565,36 +483,43 @@ void EditorWindow::showAboutApplication()
         );
 }
 
-void EditorWindow::startSliderDraggingStarted()
+void EditorWindow::pauseAndSavePlaybackPosition()
 {
     if (player->isPlaying()) {
-        playerWasPlaying = true;
         player->pause();
+        playerWasPlaying = std::make_tuple(true, player->position());
     }
+}
+
+void EditorWindow::jumpToPlaybackPositionAndPlay()
+{
+    auto played = std::get<0>(playerWasPlaying);
+    auto position = std::get<1>(playerWasPlaying);
+    if (played) {
+        player->setPosition(position);
+        player->play();
+        playerWasPlaying = std::make_tuple(false, 0);
+    }
+}
+
+void EditorWindow::startSliderDraggingStarted()
+{
+    pauseAndSavePlaybackPosition();
 }
 
 void EditorWindow::startSliderDraggingFinished()
 {
-    if (playerWasPlaying) {
-        playerWasPlaying = false;
-        player->play();
-    }
+    jumpToPlaybackPositionAndPlay();
 }
 
 void EditorWindow::endSliderDraggingStarted()
 {
-    if (player->isPlaying()) {
-        playerWasPlaying = true;
-        player->pause();
-    }
+    pauseAndSavePlaybackPosition();
 }
 
 void EditorWindow::endSliderDraggingFinished()
 {
-    if (playerWasPlaying) {
-        playerWasPlaying = false;
-        player->play();
-    }
+    jumpToPlaybackPositionAndPlay();
 }
 
 void EditorWindow::open()

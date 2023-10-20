@@ -63,15 +63,16 @@ private:
     void createLayout();
     void initializePlayer();
     void createUI();
-//    void setupToolBar();
+    void previewCheckboxStateChange(bool checked);
     void playToggleButtonClicked();
     void showStatusMessage(const QString &message);
     void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
-    void previewCheckboxStateChange(int state);
     void checkboxVideoStateChanged(int _state);
     void checkboxGifStateChanged(int _state);
     void handleDropUrl(QUrl url);
     void updateDurationLabel();
+    void pauseAndSavePlaybackPosition();
+    void jumpToPlaybackPositionAndPlay();
 
     static void showAlert(const QString &title, const QString &message);
 
@@ -94,8 +95,6 @@ private:
     VideoWidget *videoWidget;
 
     QAction *openAction;
-    //QAction *playToggleAction;
-    //QAction *stopAction;
 
     QString videoPath;
     QString ffmpegPath;
@@ -109,7 +108,7 @@ private:
     QIcon pauseIcon;
     QIcon stopIcon;
 
-    bool playerWasPlaying;
+    std::tuple<bool, int> playerWasPlaying;
 
     std::map<int, QString> stateToString;
 

@@ -23,11 +23,13 @@ bool VideoWidget::eventFilter(QObject *object, QEvent *event)
         }
         else if(event->type() == QEvent::DragMove)
         {
+            event->accept();
             return true;
         }
         else if(event->type() == QEvent::Drop)
         {
             handleDragDidDrop(static_cast<QDropEvent *>(event));
+            event->accept();
             return true;
         }
     }
