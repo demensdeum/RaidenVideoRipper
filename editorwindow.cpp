@@ -7,6 +7,7 @@
 #include <QAction>
 #include <QSlider>
 #include <QToolBar>
+#include <QLabel>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QSize>
@@ -15,8 +16,10 @@
 #include <QStatusBar>
 #include <QScreen>
 #include <QShortcut>
+#include <QPushButton>
+#include <QDial>
+#include <QString>
 #include <videoprocessor.h>
-
 #include "constants.h"
 
 EditorWindow::EditorWindow()
@@ -29,7 +32,11 @@ EditorWindow::EditorWindow()
     pauseIcon = QIcon::fromTheme(
         "media-playback-pause.png",
         style->standardIcon(QStyle::SP_MediaPause)
-    );
+        );
+    stopIcon = QIcon::fromTheme(
+        "media-playback-stop.png",
+        style->standardIcon(QStyle::SP_MediaStop)
+        );
     for (int state = 0; state < State::EnumCount; state++) {
         switch (state) {
         case VIDEO_PROCESSING:
@@ -45,12 +52,14 @@ EditorWindow::EditorWindow()
     playerWasPlaying = false;
     userForcedStop = false;
     state = IDLE;
+    audioOutput = nullptr;
     createLayout();
     initializePlayer();
     setupActions();
     setupToolBar();
     updateWindowTitle();
     openArgumentsFileIfNeeded();
+    updateDurationLabel();
 }
 
 void EditorWindow::openArgumentsFileIfNeeded()
@@ -78,8 +87,124 @@ void EditorWindow::setupActions()
     fileMenu->addAction(exitAction);
 }
 
+void EditorWindow::updateDurationLabel()
+{
+    auto format = QString("hh:mm:ss.zzz");
+    auto start = timelineIndicator->getStartValue();
+    auto playback = timelineIndicator->getPlaybackValue();
+    auto end = timelineIndicator->getEndValue();
+
+    auto startTime = QTime(0, 0);
+    startTime = startTime.addMSecs(start);
+    auto startFormattedTime = startTime.toString(format);
+
+    auto endTime = QTime(0, 0);
+    endTime = endTime.addMSecs(end);
+    auto endFormattedTime = endTime.toString(format);
+
+    auto playbackTime = QTime(0, 0);
+    playbackTime = playbackTime.addMSecs(playback);
+    auto durationFormattedTime = playbackTime.toString(format);
+
+    auto text = QString("%1 - %2 - %3")
+                    .arg(
+                        startFormattedTime,
+                        durationFormattedTime,
+                        endFormattedTime
+                        );
+
+    durationLabel->setText(text);
+}
+
 void EditorWindow::createLayout()
 {
+    // Bottom Primary Panel
+
+    auto bottomPrimaryHorizontalPanel = new QWidget();
+    bottomPrimaryHorizontalPanel->setFixedHeight(primaryPanelHeight);
+
+    playbackButton = new QPushButton();
+    playbackButton->setFixedWidth(40);
+    playbackButton->setIcon(playIcon);
+    connect(playbackButton, &QPushButton::clicked, this, &EditorWindow::playToggleButtonClicked);
+
+    auto stopButton = new QPushButton();
+    stopButton->setFixedWidth(40);
+    stopButton->setIcon(stopIcon);
+    connect(stopButton, &QPushButton::clicked, this, &EditorWindow::stopButtonClicked);
+
+    auto bottomPrimaryHorizontalPanelLayout = new QHBoxLayout(bottomPrimaryHorizontalPanel);
+    bottomPrimaryHorizontalPanelLayout->setContentsMargins(0, 0, 0, 0);
+    bottomPrimaryHorizontalPanelLayout->addWidget(playbackButton);
+    bottomPrimaryHorizontalPanelLayout->addWidget(stopButton);
+
+    previewCheckbox = new QCheckBox("Preview", this);
+    previewCheckbox->setChecked(settings.value(previewCheckboxStateKey, true).value<bool>());
+    connect(previewCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::previewCheckboxStateChange);
+    bottomPrimaryHorizontalPanelLayout->addWidget(previewCheckbox);
+
+    convertToVideoCheckbox = new QCheckBox("mp4", this);
+    convertToVideoCheckbox->setChecked(settings.value(convertToVideoCheckboxStateKey, true).value<bool>());
+    connect(convertToVideoCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxVideoStateChanged);
+    bottomPrimaryHorizontalPanelLayout->addWidget(convertToVideoCheckbox);
+
+    convertToGifCheckbox = new QCheckBox("gif", this);
+    convertToGifCheckbox->setChecked(settings.value(convertToGifCheckboxStateKey, true).value<bool>());
+    connect(convertToGifCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxGifStateChanged);
+    bottomPrimaryHorizontalPanelLayout->addWidget(convertToGifCheckbox);
+
+    volumeSlider = new QSlider(Qt::Horizontal, this);
+    volumeSlider->setMinimum(0);
+    volumeSlider->setMaximum(100);
+//    volumeSlider->setTickInterval(10);
+//    volumeSlider->setTickPosition(QSlider::TicksBelow);
+    volumeSlider->setToolTip("Volume");
+    volumeSlider->setFixedWidth(80);
+    auto savedVolume = settings.value(volumeSettingsKey, volumeSlider->maximum()).value<qint64>();
+    volumeSlider->setValue(savedVolume);
+    connect(volumeSlider, &QSlider::valueChanged, this, &EditorWindow::volumeChanged);
+    bottomPrimaryHorizontalPanelLayout->addWidget(volumeSlider);
+    this->volumeChanged(savedVolume);
+
+    //QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
+    //int availableWidth = availableGeometry.width();
+    //int volumeSliderWidth = 80;
+    //volumeSlider->setFixedWidth(volumeSliderWidth);
+
+    // Bottom Secondary Panel
+
+    auto bottomSecondaryPanel = new QWidget();
+    bottomSecondaryPanel->setFixedHeight(secondaryPanelHeight);
+
+//    auto openButton = new QPushButton("Open");
+//    connect(openButton, &QPushButton::clicked, this, &EditorWindow::open);
+
+    auto cutButton = new QPushButton("START");
+    cutButton->setFixedWidth(100);
+    cutButton->setIcon(QIcon::fromTheme("edit-cut"));
+    connect(cutButton, &QPushButton::clicked, this, &EditorWindow::cutButtonClicked);
+
+    durationLabel = new QLabel("00:00:00.00 - 00:00:00.00 - 00:00:00.00");
+    durationLabel->setAlignment(Qt::AlignCenter);
+
+    auto emptySpace = new QWidget();
+    emptySpace->setFixedWidth(1);
+
+    auto bottomSecondaryHorizontalPanelLayout = new QHBoxLayout(bottomSecondaryPanel);
+    bottomSecondaryHorizontalPanelLayout->setContentsMargins(0, 0, 0, 0);
+    //bottomSecondaryHorizontalPanelLayout->addWidget(openButton);
+    bottomSecondaryHorizontalPanelLayout->addWidget(playbackButton);
+    bottomSecondaryHorizontalPanelLayout->addWidget(stopButton);
+    bottomSecondaryHorizontalPanelLayout->addWidget(emptySpace);
+    bottomSecondaryHorizontalPanelLayout->addWidget(volumeSlider);
+    bottomSecondaryHorizontalPanelLayout->addWidget(durationLabel);
+    //bottomSecondaryHorizontalPanelLayout->addWidget(convertToVideoCheckbox);
+    //bottomSecondaryHorizontalPanelLayout->addWidget(convertToGifCheckbox);
+    bottomSecondaryHorizontalPanelLayout->addWidget(cutButton);
+    //bottomSecondaryHorizontalPanelLayout->addWidget(previewCheckbox);
+    //bottomSecondaryHorizontalPanelLayout->addWidget(volumeSlider);
+
+
     videoWidget = new VideoWidget(this);
     videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
     videoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -93,72 +218,107 @@ void EditorWindow::createLayout()
     auto layout = new QVBoxLayout();
     layout->addWidget(videoWidget);
 
-    workspaceIndicator = new WorkspaceIndicator(this, 100);
+    timelineIndicator = new TimelineIndicator(this, 100);
 
     connect(
-        workspaceIndicator,
-        &WorkspaceIndicator::startSliderDraggingStarted,
+        timelineIndicator,
+        &TimelineIndicator::startSliderDraggingStarted,
         this,
         &EditorWindow::startSliderDraggingStarted
         );
 
     connect(
-        workspaceIndicator,
-        &WorkspaceIndicator::startSliderDraggingFinished,
+        timelineIndicator,
+        &TimelineIndicator::startSliderDraggingFinished,
         this,
         &EditorWindow::startSliderDraggingFinished
         );
 
     connect(
-        workspaceIndicator,
-        &WorkspaceIndicator::endSliderDraggingStarted,
+        timelineIndicator,
+        &TimelineIndicator::playbackSliderDraggingStarted,
+        this,
+        &EditorWindow::playbackSliderDraggingStarted
+        );
+
+    connect(
+        timelineIndicator,
+        &TimelineIndicator::playbackSliderDraggingFinished,
+        this,
+        &EditorWindow::playbackSliderDraggingFinished
+        );
+
+    connect(
+        timelineIndicator,
+        &TimelineIndicator::endSliderDraggingStarted,
         this,
         &EditorWindow::endSliderDraggingStarted
         );
 
     connect(
-        workspaceIndicator,
-        &WorkspaceIndicator::endSliderDraggingFinished,
+        timelineIndicator,
+        &TimelineIndicator::endSliderDraggingFinished,
         this,
         &EditorWindow::endSliderDraggingFinished
         );
 
     connect(
-        workspaceIndicator,
-        &WorkspaceIndicator::startValueChanged,
+        timelineIndicator,
+        &TimelineIndicator::startValueChanged,
         this,
         &EditorWindow::startPositionSliderMoved
         );
 
     connect(
-        workspaceIndicator,
-        &WorkspaceIndicator::playbackValueChanged,
+        timelineIndicator,
+        &TimelineIndicator::playbackValueChanged,
         this,
         &EditorWindow::playbackSliderMoved
         );
 
     connect(
-        workspaceIndicator,
-        &WorkspaceIndicator::endValueChanged,
+        timelineIndicator,
+        &TimelineIndicator::endValueChanged,
         this,
         &EditorWindow::endPositionSliderMoved
         );
 
-    layout->addWidget(workspaceIndicator);
-
-    auto cutButton = new QPushButton("Cut");
-    connect(cutButton, &QPushButton::clicked, this, &EditorWindow::cutButtonClicked);
-    layout->addWidget(cutButton);
+    auto horizontalIndicators = new QWidget();
+    auto horizontalIndicatorsLayout = new QHBoxLayout(horizontalIndicators);
+    horizontalIndicatorsLayout->setContentsMargins(0, 0, 0, 0);
+//    horizontalIndicatorsLayout->addWidget(playbackButton);
+//    horizontalIndicatorsLayout->addWidget(stopButton);
+    horizontalIndicatorsLayout->addWidget(timelineIndicator);
+//    horizontalIndicatorsLayout->addWidget(volumeSlider);
+    layout->addWidget(horizontalIndicators);
+    layout->addWidget(bottomSecondaryPanel);
+    //layout->addWidget(bottomPrimaryHorizontalPanel);
 
     auto widget = new QWidget();
     widget->setLayout(layout);
     setCentralWidget(widget);
 
-    auto availableGeometry = QApplication::primaryScreen()->availableGeometry();
+    QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
     auto width = availableGeometry.width() * 0.4;
     auto height = width * 0.8;
 
     resize(width, height);
+}
+
+void EditorWindow::playbackSliderDraggingStarted()
+{
+    if (player->isPlaying()) {
+        playerWasPlaying = true;
+        player->pause();
+    }
+}
+
+void EditorWindow::playbackSliderDraggingFinished()
+{
+    if (playerWasPlaying) {
+        playerWasPlaying = false;
+        player->play();
+    }
 }
 
 void EditorWindow::handleDropUrl(QUrl url)
@@ -172,11 +332,13 @@ void EditorWindow::handleDropUrl(QUrl url)
 void EditorWindow::startPositionSliderMoved(qint64 position) {
     if (!previewCheckbox->isChecked()) return;
     player->setPosition(position);
+    this->updateDurationLabel();
 }
 
 void EditorWindow::endPositionSliderMoved(qint64 position) {
     if (!previewCheckbox->isChecked()) return;
     player->setPosition(position);
+    this->updateDurationLabel();
 }
 
 void EditorWindow::initializePlayer()
@@ -205,12 +367,11 @@ void EditorWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
 void EditorWindow::setupToolBar()
 {
     toolBar = new QToolBar();
-    addToolBar(toolBar);
+    //addToolBar(toolBar);
 
     toolBar->addAction(openAction);
 
     auto playMenu = menuBar()->addMenu("&Play");
-    auto style = this->style();
 
     playToggleAction = new QAction("Play", this);
     playToggleAction->setIcon(playIcon);
@@ -229,7 +390,6 @@ void EditorWindow::setupToolBar()
     aboutMenu->addAction(aboutQtAction);
 
     stopAction = new QAction("Stop", this);
-    QIcon stopIcon = QIcon::fromTheme("media-playback-stop.png", style->standardIcon(QStyle::SP_MediaStop));
     stopAction->setIcon(stopIcon);
     connect(stopAction, &QAction::triggered, this, &EditorWindow::stopButtonClicked);
     toolBar->addAction(stopAction);
@@ -247,8 +407,8 @@ void EditorWindow::setupToolBar()
     volumeSlider = new QSlider(Qt::Horizontal, this);
     volumeSlider->setMinimum(0);
     volumeSlider->setMaximum(100);
-    volumeSlider->setTickInterval(10);
-    volumeSlider->setTickPosition(QSlider::TicksBelow);
+//    volumeSlider->setTickInterval(10);
+//    volumeSlider->setTickPosition(QSlider::TicksBelow);
     volumeSlider->setToolTip("Volume");
     auto savedVolume = settings.value(volumeSettingsKey, volumeSlider->maximum()).value<qint64>();
     volumeSlider->setValue(savedVolume);
@@ -256,10 +416,10 @@ void EditorWindow::setupToolBar()
     toolBar->addWidget(volumeSlider);
     this->volumeChanged(savedVolume);
 
-    QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
-    int availableWidth = availableGeometry.width();
-    int volumeSliderWidth = availableWidth / 10;
-    volumeSlider->setFixedWidth(volumeSliderWidth);
+//    QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
+//    int availableWidth = availableGeometry.width();
+//    int volumeSliderWidth = availableWidth * 0.01;
+//    volumeSlider->setFixedWidth(volumeSliderWidth);
 
     toolBar->addSeparator();
 
@@ -281,12 +441,12 @@ void EditorWindow::setupToolBar()
 
 void EditorWindow::handleLeftKeyPress()
 {
-    workspaceIndicator->moveLeft();
+    timelineIndicator->moveLeft();
 }
 
 void EditorWindow::handleRightKeyPress()
 {
-    workspaceIndicator->moveRight();
+    timelineIndicator->moveRight();
 }
 
 void EditorWindow::checkboxVideoStateChanged(int _state)
@@ -324,12 +484,12 @@ void EditorWindow::previewCheckboxStateChange(int _state)
     Qt::CheckState state = (Qt::CheckState)_state;
     switch (state) {
     case Qt::Unchecked:
-        workspaceIndicator->setFreeplayMode(true);
+        timelineIndicator->setFreeplayMode(true);
         settings.setValue(previewCheckboxStateKey, false);
         update();
         break;
     case Qt::Checked:
-        workspaceIndicator->setFreeplayMode(false);
+        timelineIndicator->setFreeplayMode(false);
         settings.setValue(previewCheckboxStateKey, true);
         update();
         break;
@@ -458,10 +618,10 @@ void EditorWindow::handleOpenFile(QUrl url)
     settings.setValue(lastWorkingPathKey, videoPathDirectory);
     player->setSource(url);
     player->play();
-    workspaceIndicator->setMaximumValue(player->duration());
-    workspaceIndicator->setStartValue(0);
-    workspaceIndicator->setPlaybackValue(0);
-    workspaceIndicator->setEndValue(player->duration());
+    timelineIndicator->setMaximumValue(player->duration());
+    timelineIndicator->setStartValue(0);
+    timelineIndicator->setPlaybackValue(0);
+    timelineIndicator->setEndValue(player->duration());
     updateWindowTitle();
 }
 
@@ -477,14 +637,27 @@ void EditorWindow::updateWindowTitle()
 
 void EditorWindow::cutButtonClicked()
 {
-    if (state != IDLE) {
-        return;
-    }
-    if (convertToVideoCheckbox->isChecked()) {
-        state = VIDEO_PROCESSING;
-    }
-    else if (convertToGifCheckbox->isChecked()) {
-        state = GIF_PROCESSING;
+    switch (state) {
+    case IDLE:
+        if (convertToVideoCheckbox->isChecked()) {
+            state = VIDEO_PROCESSING;
+        }
+        else if (convertToGifCheckbox->isChecked()) {
+            state = GIF_PROCESSING;
+        }
+        break;
+
+    case VIDEO_PROCESSING:
+        if (convertToGifCheckbox->isChecked()) {
+            state = GIF_PROCESSING;
+        }
+        break;
+
+    case GIF_PROCESSING:
+        break;
+
+    case EnumCount:
+        break;
     }
 
     cut();
@@ -493,16 +666,16 @@ void EditorWindow::cutButtonClicked()
 void EditorWindow::volumeChanged(qint64 position)
 {
     auto volume = static_cast<float>(position) / static_cast<float>(volumeSlider->maximum());
-    qDebug() << position;
-    qDebug() << volume;
-    audioOutput->setVolume(volume);
+    if (audioOutput) {
+        audioOutput->setVolume(volume);
+    }
     settings.setValue(volumeSettingsKey, position);
 }
 
 void EditorWindow::cut()
 {
-    int startPosition = workspaceIndicator->getStartValue();
-    int endPosition = workspaceIndicator->getEndValue();
+    int startPosition = timelineIndicator->getStartValue();
+    int endPosition = timelineIndicator->getEndValue();
 
     if (endPosition < startPosition)
     {
@@ -511,19 +684,30 @@ void EditorWindow::cut()
     }
 
     QString outputVideoPath;
-    if (state == VIDEO_PROCESSING)
+    switch (state)
     {
-        outputVideoPath = videoPath + "_output.mp4";
-    }
-    else if (state == GIF_PROCESSING)
-    {
-        outputVideoPath = videoPath + "_output.gif";
-    }
-    else
-    {
-        showAlert("WUT!", "UNKNOWN STATE!");
-        qDebug() << "WUT! UNKNOWN STATE!!";
+    case IDLE:
+        if (videoPath.isEmpty()) {
+            showAlert("WUT!", "Open file first!");
+        }
+        else if (
+            !convertToVideoCheckbox->isChecked() &&
+            !convertToGifCheckbox->isChecked()
+            ) {
+            showAlert("WUT!", "Select video/gif checkboxes first!");
+        }
         return;
+
+    case VIDEO_PROCESSING:
+        outputVideoPath = videoPath + "_output.mp4";
+        break;
+
+    case GIF_PROCESSING:
+        outputVideoPath = videoPath + "_output.gif";
+        break;
+
+    case EnumCount:
+        break;
     }
 
     QString text = "Rippin " + stateToString[state];
@@ -586,19 +770,20 @@ void EditorWindow::convertingDidFinish(bool result)
 void EditorWindow::playbackSliderMoved(qint64 position)
 {
     player->setPosition(position);
+    this->updateDurationLabel();
 }
 
 void EditorWindow::playbackChanged(qint64 position)
 {
     auto sliderUpdate = [this] (int position) {
-        workspaceIndicator->blockSignals(true);
-        workspaceIndicator->setPlaybackValue(position);
-        workspaceIndicator->blockSignals(false);
+        timelineIndicator->blockSignals(true);
+        timelineIndicator->setPlaybackValue(position);
+        timelineIndicator->blockSignals(false);
     };
 
     if (player->isPlaying() && this->previewCheckbox->isChecked()) {
-        auto startPosition = workspaceIndicator->getStartValue();
-        auto endPosition = workspaceIndicator->getEndValue();
+        auto startPosition = timelineIndicator->getStartValue();
+        auto endPosition = timelineIndicator->getEndValue();
         if (position > endPosition) {
             player->setPosition(startPosition);
         }
@@ -607,6 +792,7 @@ void EditorWindow::playbackChanged(qint64 position)
         }
     }
     sliderUpdate(player->position());
+    updateDurationLabel();
 }
 
 void EditorWindow::ensureStopped()
@@ -620,9 +806,11 @@ void EditorWindow::ensureStopped()
 void EditorWindow::updateButtons(QMediaPlayer::PlaybackState state)
 {
     if (player->isPlaying()) {
+        playbackButton->setIcon(pauseIcon);
         playToggleAction->setIcon(pauseIcon);
     }
     else {
+        playbackButton->setIcon(playIcon);
         playToggleAction->setIcon(playIcon);
     }
     stopAction->setEnabled(state != QMediaPlayer::StoppedState);

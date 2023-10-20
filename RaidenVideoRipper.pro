@@ -13,19 +13,19 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 SOURCES += \
     editorwindow.cpp \
     main.cpp \
+    timelineindicator.cpp \
+    timelineindicatorslider.cpp \
     videoprocessor.cpp \
-    videowidget.cpp \
-    workspaceindicator.cpp \
-    workspaceindicatorslider.cpp
+    videowidget.cpp
 
 HEADERS += \
     constants.h \
     editorwindow.h \
     ffmpeg_headless.h \
+    timelineindicator.h \
+    timelineindicatorslider.h \
     videoprocessor.h \
-    videowidget.h \
-    workspaceindicator.h \
-    workspaceindicatorslider.h
+    videowidget.h
 
 LIBS += $$PWD/headless_ffmpeg.dll.a
 

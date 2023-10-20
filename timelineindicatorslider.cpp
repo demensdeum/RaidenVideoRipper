@@ -1,7 +1,7 @@
-#include "workspaceindicatorslider.h"
+#include "timelineindicatorslider.h"
 #include <QDebug>
 
-WorkspaceIndicatorSlider::WorkspaceIndicatorSlider(
+TimelineIndicatorSlider::TimelineIndicatorSlider(
     int value,
     int maximumValue,
     Alignment alignment,
@@ -16,23 +16,23 @@ WorkspaceIndicatorSlider::WorkspaceIndicatorSlider(
     this->image = image;
 }
 
-float WorkspaceIndicatorSlider::ratio() {
+float TimelineIndicatorSlider::ratio() {
     auto ratio = float(value) / float(maximumValue);
     return ratio;
 }
 
-float WorkspaceIndicatorSlider::xToRatio(int x) {
+float TimelineIndicatorSlider::xToRatio(int x) {
     auto adaptedX = x;
     switch (alignment) {
-    case WorkspaceIndicatorSlider::Left:
+    case TimelineIndicatorSlider::Left:
         adaptedX -= width / 2;
         break;
 
-    case WorkspaceIndicatorSlider::Center:
+    case TimelineIndicatorSlider::Center:
         adaptedX -= width;
         break;
 
-    case WorkspaceIndicatorSlider::Right:
+    case TimelineIndicatorSlider::Right:
         adaptedX -= width * 1.5;
         break;
     }
@@ -40,39 +40,39 @@ float WorkspaceIndicatorSlider::xToRatio(int x) {
     return ratio;
 }
 
-QImage WorkspaceIndicatorSlider::getImage()
+QImage TimelineIndicatorSlider::getImage()
 {
     return image;
 }
 
-int WorkspaceIndicatorSlider::getValue()
+int TimelineIndicatorSlider::getValue()
 {
     return value;
 }
 
-void WorkspaceIndicatorSlider::setValue(int value)
+void TimelineIndicatorSlider::setValue(int value)
 {
     this->value = value;
     this->updateRenderRectangle();
 }
 
-void WorkspaceIndicatorSlider::setMaximumValue(int value)
+void TimelineIndicatorSlider::setMaximumValue(int value)
 {
     this->maximumValue = value;
     this->updateRenderRectangle();
 }
 
-void WorkspaceIndicatorSlider::setParentSize(QSize parentSize)
+void TimelineIndicatorSlider::setParentSize(QSize parentSize)
 {
     this->parentSize = parentSize;
     this->updateRenderRectangle();
 }
 
-QRect WorkspaceIndicatorSlider::getRenderRectangle() {
+QRect TimelineIndicatorSlider::getRenderRectangle() {
     return renderRectangle;
 }
 
-bool WorkspaceIndicatorSlider::hitTest(int x, int y)
+bool TimelineIndicatorSlider::hitTest(int x, int y)
 {
     if (x < renderRectangle.x())
     {
@@ -94,17 +94,17 @@ bool WorkspaceIndicatorSlider::hitTest(int x, int y)
     return true;
 }
 
-void WorkspaceIndicatorSlider::dragToX(int x){
+void TimelineIndicatorSlider::dragToX(int x){
     auto ratio = xToRatio(x);
     setValue(maximumValue * ratio);
 }
 
-void WorkspaceIndicatorSlider::setIsHidden(bool isHidden)
+void TimelineIndicatorSlider::setIsHidden(bool isHidden)
 {
     this->isHidden = isHidden;
 }
 
-int WorkspaceIndicatorSlider::getTargetX()
+int TimelineIndicatorSlider::getTargetX()
 {
     auto adaptedX = renderRectangle.x();
     switch (alignment) {
@@ -119,12 +119,12 @@ int WorkspaceIndicatorSlider::getTargetX()
     return adaptedX;
 }
 
-bool WorkspaceIndicatorSlider::getIsHidden()
+bool TimelineIndicatorSlider::getIsHidden()
 {
     return isHidden;
 }
 
-int WorkspaceIndicatorSlider::alignRenderX(int renderX)
+int TimelineIndicatorSlider::alignRenderX(int renderX)
 {
     switch (alignment) {
     case Left:
@@ -138,13 +138,13 @@ int WorkspaceIndicatorSlider::alignRenderX(int renderX)
     return renderX;
 }
 
-int WorkspaceIndicatorSlider::lineWidth()
+int TimelineIndicatorSlider::lineWidth()
 {
     auto lineWidth = parentSize.width() - width * 2;
     return lineWidth;
 }
 
-void WorkspaceIndicatorSlider::updateRenderRectangle()
+void TimelineIndicatorSlider::updateRenderRectangle()
 {
     auto ratio = float(value) / float(maximumValue);
     auto renderX = lineWidth() * ratio;

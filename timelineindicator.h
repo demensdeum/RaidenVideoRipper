@@ -1,16 +1,17 @@
 #pragma once
 
 #include <QWidget>
-#include <workspaceindicatorslider.h>
+#include <timelineindicatorslider.h>
 
-class WorkspaceIndicator : public QWidget {
+class TimelineIndicator : public QWidget {
     Q_OBJECT
 
 public:
-    WorkspaceIndicator(QWidget* parent, int maximumValue);
-    ~WorkspaceIndicator();
+    TimelineIndicator(QWidget* parent, int maximumValue);
+    ~TimelineIndicator();
 
     int getStartValue();
+    int getPlaybackValue();
     int getEndValue();
     void setFreeplayMode(bool freeplayMode);
     void setStartValue(int startValue);
@@ -24,8 +25,13 @@ signals:
     void startValueChanged(int value);
     void playbackValueChanged(int value);
     void endValueChanged(int value);
+
     void startSliderDraggingStarted();
     void startSliderDraggingFinished();
+
+    void playbackSliderDraggingStarted();
+    void playbackSliderDraggingFinished();
+
     void endSliderDraggingStarted();
     void endSliderDraggingFinished();
 
@@ -37,17 +43,17 @@ protected:
     void mouseReleaseEvent([[maybe_unused]] QMouseEvent *event);
 
 private:
-    WorkspaceIndicatorSlider *startSlider;
-    WorkspaceIndicatorSlider *playbackSlider;
-    WorkspaceIndicatorSlider *endSlider;
+    TimelineIndicatorSlider *startSlider;
+    TimelineIndicatorSlider *playbackSlider;
+    TimelineIndicatorSlider *endSlider;
 
-    void dragSlider(WorkspaceIndicatorSlider *slider, int x);
+    void dragSlider(TimelineIndicatorSlider *slider, int x);
 
     void drawBackgroundIfNeeded();
     void drawLine();
     void drawRangeLine();
     void drawSliders();
-    void drawSlider(WorkspaceIndicatorSlider *slider);
+    void drawSlider(TimelineIndicatorSlider *slider);
     void redraw();
     void movePlaybackIndicatorByOffset(int offset);
 
@@ -56,5 +62,6 @@ private:
     const int minimumValue = 0;
     int maximumValue;
     bool freeplayMode;
-    WorkspaceIndicatorSlider* draggingSlider;
+    TimelineIndicatorSlider* draggingSlider;
+    const bool debug = false;
 };

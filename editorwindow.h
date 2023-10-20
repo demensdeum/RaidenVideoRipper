@@ -13,8 +13,9 @@
 #include <QVBoxLayout>
 #include <QSettings>
 #include <QThreadPool>
+#include <QLabel>
 #include <videowidget.h>
-#include <workspaceindicator.h>
+#include <timelineindicator.h>
 
 class EditorWindow : public QMainWindow
 {
@@ -50,6 +51,8 @@ private:
     void handleRightKeyPress();
     void startSliderDraggingStarted();
     void startSliderDraggingFinished();
+    void playbackSliderDraggingStarted();
+    void playbackSliderDraggingFinished();
     void endSliderDraggingStarted();
     void endSliderDraggingFinished();
     void openArgumentsFileIfNeeded();
@@ -68,12 +71,13 @@ private:
     void checkboxVideoStateChanged(int _state);
     void checkboxGifStateChanged(int _state);
     void handleDropUrl(QUrl url);
+    void updateDurationLabel();
 
     static void showAlert(const QString &title, const QString &message);
 
     bool userForcedStop;
-
-    WorkspaceIndicator *workspaceIndicator;
+    
+    TimelineIndicator *timelineIndicator;
 
     QThreadPool threadPool;
     QSettings settings;
@@ -97,9 +101,17 @@ private:
     QString ffmpegPath;
     State state;
 
-    QIcon pauseIcon;
+    QPushButton *playbackButton;
+    QLabel *durationLabel;
+
     QIcon playIcon;
+    QIcon pauseIcon;
+    QIcon stopIcon;
+
     bool playerWasPlaying;
 
     std::map<int, QString> stateToString;
+
+    const int primaryPanelHeight = 40;
+    const int secondaryPanelHeight = 40;
 };

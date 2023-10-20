@@ -1,34 +1,34 @@
-#include "WorkspaceIndicator.h"
+#include "timelineindicator.h"
 #include <QLabel>
 #include <QPainter>
 #include <QColor>
 #include <QDebug>
 #include <QMouseEvent>
 
-WorkspaceIndicator::WorkspaceIndicator(QWidget* parent, int maximumValue) : QWidget(parent) {
+TimelineIndicator::TimelineIndicator(QWidget* parent, int maximumValue) : QWidget(parent) {
     auto startValue = 0;
     auto endValue = 10000;
     auto playbackValue = endValue / 2;
     maximumValue = endValue;
     this->maximumValue = maximumValue;
-    startSlider = new WorkspaceIndicatorSlider(
+    startSlider = new TimelineIndicatorSlider(
         startValue,
         maximumValue,
-        WorkspaceIndicatorSlider::Left,
+        TimelineIndicatorSlider::Left,
         QImage("://resources/images/startSliderImage.png"),
         false
         );
-    playbackSlider = new WorkspaceIndicatorSlider(
+    playbackSlider = new TimelineIndicatorSlider(
         playbackValue,
         maximumValue,
-        WorkspaceIndicatorSlider::Center,
+        TimelineIndicatorSlider::Center,
         QImage("://resources/images/playbackSliderImage.png"),
         false
         );
-    endSlider = new WorkspaceIndicatorSlider(
+    endSlider = new TimelineIndicatorSlider(
         endValue,
         maximumValue,
-        WorkspaceIndicatorSlider::Right,
+        TimelineIndicatorSlider::Right,
         QImage("://resources/images/endSliderImage.png"),
         false
         );
@@ -36,56 +36,61 @@ WorkspaceIndicator::WorkspaceIndicator(QWidget* parent, int maximumValue) : QWid
     this->setMinimumHeight(minimumHeight);
 }
 
-WorkspaceIndicator::~WorkspaceIndicator()
+TimelineIndicator::~TimelineIndicator()
 {
     delete startSlider;
     delete playbackSlider;
     delete endSlider;
 }
 
-int WorkspaceIndicator::getStartValue()
+int TimelineIndicator::getStartValue()
 {
     return startSlider->getValue();
 }
 
-int WorkspaceIndicator::getEndValue()
+int TimelineIndicator::getPlaybackValue()
+{
+    return playbackSlider->getValue();
+}
+
+int TimelineIndicator::getEndValue()
 {
     return endSlider->getValue();
 }
 
-void WorkspaceIndicator::setFreeplayMode(bool freeplayMode)
+void TimelineIndicator::setFreeplayMode(bool freeplayMode)
 {
     this->freeplayMode = freeplayMode;
     startSlider->setIsHidden(freeplayMode);
     endSlider->setIsHidden(freeplayMode);
 }
 
-void WorkspaceIndicator::setStartValue(int startValue)
+void TimelineIndicator::setStartValue(int startValue)
 {
     startSlider->setValue(startValue);
     update();
 }
 
-void WorkspaceIndicator::setPlaybackValue(int playbackValue)
+void TimelineIndicator::setPlaybackValue(int playbackValue)
 {
     playbackSlider->setValue(playbackValue);
     update();
 }
 
-void WorkspaceIndicator::setEndValue(int endValue)
+void TimelineIndicator::setEndValue(int endValue)
 {
     endSlider->setValue(endValue);
     update();
 }
 
-void WorkspaceIndicator::setMaximumValue(int maximumValue)
+void TimelineIndicator::setMaximumValue(int maximumValue)
 {
     startSlider->setMaximumValue(maximumValue);
     playbackSlider->setMaximumValue(maximumValue);
     endSlider->setMaximumValue(maximumValue);
 }
 
-void WorkspaceIndicator::resizeEvent(QResizeEvent *event)
+void TimelineIndicator::resizeEvent(QResizeEvent *event)
 {
     QSize parentSize = event->size();
     startSlider->setParentSize(parentSize);
@@ -93,18 +98,18 @@ void WorkspaceIndicator::resizeEvent(QResizeEvent *event)
     endSlider->setParentSize(parentSize);
 }
 
-void WorkspaceIndicator::drawBackgroundIfNeeded()
+void TimelineIndicator::drawBackgroundIfNeeded()
 {
-#if DEBUG
+    if (debug) {
     auto rectangle = QRect(0, 0, width(), height());
     auto painter = QPainter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, QPainter::Antialiasing);
     painter.setBrush(Qt::red);
     painter.drawRect(rectangle);
-#endif
+    }
 }
 
-void WorkspaceIndicator::drawRangeLine()
+void TimelineIndicator::drawRangeLine()
 {
     auto rectangle = QRect(
         startSlider->getTargetX(),
@@ -119,22 +124,22 @@ void WorkspaceIndicator::drawRangeLine()
     painter.drawRoundedRect(rectangle, 1, 1);
 }
 
-void WorkspaceIndicator::drawLine()
+void TimelineIndicator::drawLine()
 {
     auto rectangle = QRect(
-        WorkspaceIndicatorSlider::width,
+        TimelineIndicatorSlider::width,
         height() / 2 - lineHeight / 2,
-        width() - WorkspaceIndicatorSlider::width * 2,
+        width() - TimelineIndicatorSlider::width * 2,
         lineHeight
     );
     auto painter = QPainter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, QPainter::Antialiasing);
-    painter.setPen(QPen(Qt::lightGray, 1));
+    painter.setPen(QPen(QColor(0xd6d6d6), 1));
     painter.setBrush(QColor(0xe7eaea));
     painter.drawRoundedRect(rectangle, 1, 1);
 }
 
-void WorkspaceIndicator::drawSlider(WorkspaceIndicatorSlider *slider)
+void TimelineIndicator::drawSlider(TimelineIndicatorSlider *slider)
 {
     auto painter = QPainter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, QPainter::Antialiasing);
@@ -144,7 +149,7 @@ void WorkspaceIndicator::drawSlider(WorkspaceIndicatorSlider *slider)
     painter.drawImage(slider->getRenderRectangle(), slider->getImage());
 }
 
-void WorkspaceIndicator::drawSliders()
+void TimelineIndicator::drawSliders()
 {
     startSlider->setParentSize(size());
     playbackSlider->setParentSize(size());
@@ -160,12 +165,12 @@ void WorkspaceIndicator::drawSliders()
     }
 }
 
-void WorkspaceIndicator::paintEvent([[maybe_unused]] QPaintEvent *event)
+void TimelineIndicator::paintEvent([[maybe_unused]] QPaintEvent *event)
 {
     redraw();
 }
 
-void WorkspaceIndicator::redraw()
+void TimelineIndicator::redraw()
 {
     drawBackgroundIfNeeded();
     drawLine();
@@ -173,7 +178,7 @@ void WorkspaceIndicator::redraw()
     drawSliders();
 }
 
-void WorkspaceIndicator::dragSlider(WorkspaceIndicatorSlider *slider, int x)
+void TimelineIndicator::dragSlider(TimelineIndicatorSlider *slider, int x)
 {
     if (draggingSlider->getIsHidden()) {
         return;
@@ -195,7 +200,7 @@ void WorkspaceIndicator::dragSlider(WorkspaceIndicatorSlider *slider, int x)
     draggingSlider->dragToX(x);
 }
 
-void WorkspaceIndicator::movePlaybackIndicatorByOffset(int offset)
+void TimelineIndicator::movePlaybackIndicatorByOffset(int offset)
 {
     if (draggingSlider)
     {
@@ -211,17 +216,17 @@ void WorkspaceIndicator::movePlaybackIndicatorByOffset(int offset)
     update();
 }
 
-void WorkspaceIndicator::moveLeft()
+void TimelineIndicator::moveLeft()
 {
     movePlaybackIndicatorByOffset(-4);
 }
 
-void WorkspaceIndicator::moveRight()
+void TimelineIndicator::moveRight()
 {
     movePlaybackIndicatorByOffset(+4);
 }
 
-void WorkspaceIndicator::mousePressEvent(QMouseEvent *event)
+void TimelineIndicator::mousePressEvent(QMouseEvent *event)
 {
     auto x = event->position().x();
     auto y = event->position().y();
@@ -239,6 +244,9 @@ void WorkspaceIndicator::mousePressEvent(QMouseEvent *event)
             if (draggingSlider == startSlider) {
                 emit startSliderDraggingStarted();
             }
+            else if (draggingSlider == playbackSlider) {
+                emit playbackSliderDraggingStarted();
+            }
             else if (draggingSlider == endSlider) {
                 emit endSliderDraggingStarted();
             }
@@ -247,7 +255,7 @@ void WorkspaceIndicator::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void WorkspaceIndicator::mouseMoveEvent(QMouseEvent *event)
+void TimelineIndicator::mouseMoveEvent(QMouseEvent *event)
 {
     if (!draggingSlider)
     {
@@ -267,13 +275,16 @@ void WorkspaceIndicator::mouseMoveEvent(QMouseEvent *event)
     update();
 }
 
-void WorkspaceIndicator::mouseReleaseEvent([[maybe_unused]]QMouseEvent *event)
+void TimelineIndicator::mouseReleaseEvent([[maybe_unused]]QMouseEvent *event)
 {
     auto x = event->position().x();
     if (draggingSlider) {
         dragSlider(draggingSlider, x);
         if (draggingSlider == startSlider) {
             emit startSliderDraggingFinished();
+        }
+        else if (draggingSlider == playbackSlider) {
+            emit playbackSliderDraggingFinished();
         }
         else if (draggingSlider == endSlider) {
             emit endSliderDraggingFinished();
