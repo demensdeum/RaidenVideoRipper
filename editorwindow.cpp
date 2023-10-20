@@ -496,7 +496,17 @@ void EditorWindow::jumpToPlaybackPositionAndPlay()
     auto played = std::get<0>(playerWasPlaying);
     auto position = std::get<1>(playerWasPlaying);
     if (played) {
-        player->setPosition(position);
+        if (
+            position >= timelineIndicator->getStartValue()
+            &&
+            position <= timelineIndicator->getEndValue()
+            )
+        {
+            player->setPosition(position);
+        }
+        else {
+            player->setPosition(timelineIndicator->getStartValue());
+        }
         player->play();
         playerWasPlaying = std::make_tuple(false, 0);
     }
