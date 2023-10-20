@@ -63,7 +63,7 @@ private:
     void createLayout();
     void initializePlayer();
     void createUI();
-    void setupToolBar();
+//    void setupToolBar();
     void playToggleButtonClicked();
     void showStatusMessage(const QString &message);
     void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
@@ -94,14 +94,15 @@ private:
     VideoWidget *videoWidget;
 
     QAction *openAction;
-    QAction *playToggleAction;
-    QAction *stopAction;
+    //QAction *playToggleAction;
+    //QAction *stopAction;
 
     QString videoPath;
     QString ffmpegPath;
     State state;
 
     QPushButton *playbackButton;
+    QPushButton *stopButton;
     QLabel *durationLabel;
 
     QIcon playIcon;

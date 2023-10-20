@@ -56,7 +56,7 @@ EditorWindow::EditorWindow()
     createLayout();
     initializePlayer();
     setupActions();
-    setupToolBar();
+    //setupToolBar();
     updateWindowTitle();
     openArgumentsFileIfNeeded();
     updateDurationLabel();
@@ -128,7 +128,7 @@ void EditorWindow::createLayout()
     playbackButton->setIcon(playIcon);
     connect(playbackButton, &QPushButton::clicked, this, &EditorWindow::playToggleButtonClicked);
 
-    auto stopButton = new QPushButton();
+    stopButton = new QPushButton();
     stopButton->setFixedWidth(40);
     stopButton->setIcon(stopIcon);
     connect(stopButton, &QPushButton::clicked, this, &EditorWindow::stopButtonClicked);
@@ -166,22 +166,14 @@ void EditorWindow::createLayout()
     bottomPrimaryHorizontalPanelLayout->addWidget(volumeSlider);
     this->volumeChanged(savedVolume);
 
-    //QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
-    //int availableWidth = availableGeometry.width();
-    //int volumeSliderWidth = 80;
-    //volumeSlider->setFixedWidth(volumeSliderWidth);
-
     // Bottom Secondary Panel
 
     auto bottomSecondaryPanel = new QWidget();
     bottomSecondaryPanel->setFixedHeight(secondaryPanelHeight);
 
-    //    auto openButton = new QPushButton("Open");
-    //    connect(openButton, &QPushButton::clicked, this, &EditorWindow::open);
-
     auto startButton = new QPushButton("START");
     startButton->setFixedWidth(160);
-    startButton->setFixedHeight(24);
+    startButton->setFixedHeight(30);
     startButton->setStyleSheet("QPushButton {"
                                "color: white;"
                                "background-color: #007ad9;"
@@ -196,20 +188,22 @@ void EditorWindow::createLayout()
     auto emptySpace = new QWidget();
     emptySpace->setFixedWidth(1);
 
+    auto leftEmptySpace = new QWidget();
+    leftEmptySpace->setFixedWidth(1);
+
+    auto rightEmptySpace = new QWidget();
+    rightEmptySpace->setFixedWidth(1);
+
     auto bottomSecondaryHorizontalPanelLayout = new QHBoxLayout(bottomSecondaryPanel);
     bottomSecondaryHorizontalPanelLayout->setContentsMargins(0, 0, 0, 0);
-    //bottomSecondaryHorizontalPanelLayout->addWidget(openButton);
+    bottomSecondaryHorizontalPanelLayout->addWidget(leftEmptySpace);
     bottomSecondaryHorizontalPanelLayout->addWidget(playbackButton);
     bottomSecondaryHorizontalPanelLayout->addWidget(stopButton);
     bottomSecondaryHorizontalPanelLayout->addWidget(emptySpace);
     bottomSecondaryHorizontalPanelLayout->addWidget(volumeSlider);
     bottomSecondaryHorizontalPanelLayout->addWidget(durationLabel);
-    //bottomSecondaryHorizontalPanelLayout->addWidget(convertToVideoCheckbox);
-    //bottomSecondaryHorizontalPanelLayout->addWidget(convertToGifCheckbox);
     bottomSecondaryHorizontalPanelLayout->addWidget(startButton);
-    //bottomSecondaryHorizontalPanelLayout->addWidget(previewCheckbox);
-    //bottomSecondaryHorizontalPanelLayout->addWidget(volumeSlider);
-
+    bottomSecondaryHorizontalPanelLayout->addWidget(rightEmptySpace);
 
     videoWidget = new VideoWidget(this);
     videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
@@ -222,6 +216,7 @@ void EditorWindow::createLayout()
         );
 
     auto layout = new QVBoxLayout();
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(videoWidget);
 
     timelineIndicator = new TimelineIndicator(this, 100);
@@ -305,8 +300,8 @@ void EditorWindow::createLayout()
     setCentralWidget(widget);
 
     QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
-    auto width = availableGeometry.width() * 0.4;
-    auto height = width * 0.8;
+    auto width = availableGeometry.width() * 0.8;
+    auto height = width * 0.5625;
 
     resize(width, height);
 }
@@ -370,80 +365,80 @@ void EditorWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
     }
 }
 
-void EditorWindow::setupToolBar()
-{
-    toolBar = new QToolBar();
-    //addToolBar(toolBar);
+//void EditorWindow::setupToolBar()
+//{
+//    toolBar = new QToolBar();
+//    //addToolBar(toolBar);
 
-    toolBar->addAction(openAction);
+//    toolBar->addAction(openAction);
 
-    auto playMenu = menuBar()->addMenu("&Play");
+//    auto playMenu = menuBar()->addMenu("&Play");
 
-    playToggleAction = new QAction("Play", this);
-    playToggleAction->setIcon(playIcon);
-    connect(playToggleAction, &QAction::triggered, this, &EditorWindow::playToggleButtonClicked);
-    toolBar->addAction(playToggleAction);
-    playMenu->addAction(playToggleAction);
+//    playToggleAction = new QAction("Play", this);
+//    playToggleAction->setIcon(playIcon);
+//    connect(playToggleAction, &QAction::triggered, this, &EditorWindow::playToggleButtonClicked);
+//    toolBar->addAction(playToggleAction);
+//    playMenu->addAction(playToggleAction);
 
-    auto aboutMenu = menuBar()->addMenu("&About");
+//    auto aboutMenu = menuBar()->addMenu("&About");
 
-    auto aboutApplicationAction = new QAction("About Raiden Video Ripper", this);
-    connect(aboutApplicationAction, &QAction::triggered, qApp, [this] { showAboutApplication(); });
-    aboutMenu->addAction(aboutApplicationAction);
+//    auto aboutApplicationAction = new QAction("About Raiden Video Ripper", this);
+//    connect(aboutApplicationAction, &QAction::triggered, qApp, [this] { showAboutApplication(); });
+//    aboutMenu->addAction(aboutApplicationAction);
 
-    auto aboutQtAction = new QAction("About &Qt", this);
-    connect(aboutQtAction, &QAction::triggered, qApp, &QApplication::aboutQt);
-    aboutMenu->addAction(aboutQtAction);
+//    auto aboutQtAction = new QAction("About &Qt", this);
+//    connect(aboutQtAction, &QAction::triggered, qApp, &QApplication::aboutQt);
+//    aboutMenu->addAction(aboutQtAction);
 
-    stopAction = new QAction("Stop", this);
-    stopAction->setIcon(stopIcon);
-    connect(stopAction, &QAction::triggered, this, &EditorWindow::stopButtonClicked);
-    toolBar->addAction(stopAction);
-    playMenu->addAction(stopAction);
+//    stopAction = new QAction("Stop", this);
+//    stopAction->setIcon(stopIcon);
+//    connect(stopAction, &QAction::triggered, this, &EditorWindow::stopButtonClicked);
+//    toolBar->addAction(stopAction);
+//    playMenu->addAction(stopAction);
 
-    auto leftKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
-    QObject::connect(leftKeyShortcut, &QShortcut::activated, this, &EditorWindow::handleLeftKeyPress);
+//    auto leftKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Left), this);
+//    QObject::connect(leftKeyShortcut, &QShortcut::activated, this, &EditorWindow::handleLeftKeyPress);
 
-    auto rightKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
-    QObject::connect(rightKeyShortcut, &QShortcut::activated, this, &EditorWindow::handleRightKeyPress);
+//    auto rightKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Right), this);
+//    QObject::connect(rightKeyShortcut, &QShortcut::activated, this, &EditorWindow::handleRightKeyPress);
 
-    auto playToggleKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Space), this);
-    QObject::connect(playToggleKeyShortcut, &QShortcut::activated, this, &EditorWindow::togglePlayback);
+//    auto playToggleKeyShortcut = new QShortcut(QKeySequence(Qt::Key_Space), this);
+//    QObject::connect(playToggleKeyShortcut, &QShortcut::activated, this, &EditorWindow::togglePlayback);
 
-    volumeSlider = new QSlider(Qt::Horizontal, this);
-    volumeSlider->setMinimum(0);
-    volumeSlider->setMaximum(100);
-    //    volumeSlider->setTickInterval(10);
-    //    volumeSlider->setTickPosition(QSlider::TicksBelow);
-    volumeSlider->setToolTip("Volume");
-    auto savedVolume = settings.value(volumeSettingsKey, volumeSlider->maximum()).value<qint64>();
-    volumeSlider->setValue(savedVolume);
-    connect(volumeSlider, &QSlider::valueChanged, this, &EditorWindow::volumeChanged);
-    toolBar->addWidget(volumeSlider);
-    this->volumeChanged(savedVolume);
+//    volumeSlider = new QSlider(Qt::Horizontal, this);
+//    volumeSlider->setMinimum(0);
+//    volumeSlider->setMaximum(100);
+//    //    volumeSlider->setTickInterval(10);
+//    //    volumeSlider->setTickPosition(QSlider::TicksBelow);
+//    volumeSlider->setToolTip("Volume");
+//    auto savedVolume = settings.value(volumeSettingsKey, volumeSlider->maximum()).value<qint64>();
+//    volumeSlider->setValue(savedVolume);
+//    connect(volumeSlider, &QSlider::valueChanged, this, &EditorWindow::volumeChanged);
+//    toolBar->addWidget(volumeSlider);
+//    this->volumeChanged(savedVolume);
 
-    //    QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
-    //    int availableWidth = availableGeometry.width();
-    //    int volumeSliderWidth = availableWidth * 0.01;
-    //    volumeSlider->setFixedWidth(volumeSliderWidth);
+//    //    QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
+//    //    int availableWidth = availableGeometry.width();
+//    //    int volumeSliderWidth = availableWidth * 0.01;
+//    //    volumeSlider->setFixedWidth(volumeSliderWidth);
 
-    toolBar->addSeparator();
+//    toolBar->addSeparator();
 
-    previewCheckbox = new QCheckBox("Preview", this);
-    previewCheckbox->setChecked(settings.value(previewCheckboxStateKey, true).value<bool>());
-    connect(previewCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::previewCheckboxStateChange);
-    toolBar->addWidget(previewCheckbox);
+//    previewCheckbox = new QCheckBox("Preview", this);
+//    previewCheckbox->setChecked(settings.value(previewCheckboxStateKey, true).value<bool>());
+//    connect(previewCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::previewCheckboxStateChange);
+//    toolBar->addWidget(previewCheckbox);
 
-    convertToVideoCheckbox = new QCheckBox("mp4", this);
-    convertToVideoCheckbox->setChecked(settings.value(convertToVideoCheckboxStateKey, true).value<bool>());
-    connect(convertToVideoCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxVideoStateChanged);
-    toolBar->addWidget(convertToVideoCheckbox);
+//    convertToVideoCheckbox = new QCheckBox("mp4", this);
+//    convertToVideoCheckbox->setChecked(settings.value(convertToVideoCheckboxStateKey, true).value<bool>());
+//    connect(convertToVideoCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxVideoStateChanged);
+//    toolBar->addWidget(convertToVideoCheckbox);
 
-    convertToGifCheckbox = new QCheckBox("gif", this);
-    convertToGifCheckbox->setChecked(settings.value(convertToGifCheckboxStateKey, true).value<bool>());
-    connect(convertToGifCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxGifStateChanged);
-    toolBar->addWidget(convertToGifCheckbox);
-}
+//    convertToGifCheckbox = new QCheckBox("gif", this);
+//    convertToGifCheckbox->setChecked(settings.value(convertToGifCheckboxStateKey, true).value<bool>());
+//    connect(convertToGifCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxGifStateChanged);
+//    toolBar->addWidget(convertToGifCheckbox);
+//}
 
 void EditorWindow::handleLeftKeyPress()
 {
@@ -813,13 +808,11 @@ void EditorWindow::updateButtons(QMediaPlayer::PlaybackState state)
 {
     if (player->isPlaying()) {
         playbackButton->setIcon(pauseIcon);
-        playToggleAction->setIcon(pauseIcon);
     }
     else {
         playbackButton->setIcon(playIcon);
-        playToggleAction->setIcon(playIcon);
     }
-    stopAction->setEnabled(state != QMediaPlayer::StoppedState);
+    stopButton->setEnabled(state != QMediaPlayer::StoppedState);
 }
 
 void EditorWindow::showStatusMessage(const QString &message)
