@@ -85,9 +85,9 @@ private:
     QMediaPlayer *player;
     QAudioOutput *audioOutput;
     QToolBar *toolBar;
-    QCheckBox *convertToVideoCheckbox;
-    QCheckBox *convertToGifCheckbox;
-    QCheckBox *previewCheckbox;
+    QAction *previewCheckboxAction;
+    QAction *convertToVideoCheckboxAction;
+    QAction *convertToGifCheckboxAction;
 
     QSlider *volumeSlider;
 

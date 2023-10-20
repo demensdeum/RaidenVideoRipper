@@ -85,6 +85,33 @@ void EditorWindow::setupActions()
     auto fileMenu = menuBar()->addMenu("&File");
     fileMenu->addAction(openAction);
     fileMenu->addAction(exitAction);
+
+    auto optionsMenu = menuBar()->addMenu("&Options");
+
+    previewCheckboxAction = new QAction("Preview", this);
+    previewCheckboxAction->setCheckable(true);
+    previewCheckboxAction->setChecked(settings.value(previewCheckboxStateKey, true).value<bool>());
+    optionsMenu->addAction(previewCheckboxAction);
+
+    convertToVideoCheckboxAction = new QAction("Convert to Video", this);
+    convertToVideoCheckboxAction->setCheckable(true);
+    convertToVideoCheckboxAction->setChecked(settings.value(convertToVideoCheckboxStateKey, true).value<bool>());
+    optionsMenu->addAction(convertToVideoCheckboxAction);
+
+    convertToGifCheckboxAction = new QAction("Convert to Gif", this);
+    convertToGifCheckboxAction->setCheckable(true);
+    convertToGifCheckboxAction->setChecked(settings.value(convertToGifCheckboxStateKey, true).value<bool>());
+    optionsMenu->addAction(convertToGifCheckboxAction);
+
+    auto aboutMenu = menuBar()->addMenu("&About");
+
+    auto aboutApplicationAction = new QAction("About Raiden Video Ripper", this);
+    connect(aboutApplicationAction, &QAction::triggered, qApp, [this] { showAboutApplication(); });
+    aboutMenu->addAction(aboutApplicationAction);
+
+    auto aboutQtAction = new QAction("About &Qt", this);
+    connect(aboutQtAction, &QAction::triggered, qApp, &QApplication::aboutQt);
+    aboutMenu->addAction(aboutQtAction);
 }
 
 void EditorWindow::updateDurationLabel()
@@ -137,21 +164,6 @@ void EditorWindow::createLayout()
     bottomPrimaryHorizontalPanelLayout->setContentsMargins(0, 0, 0, 0);
     bottomPrimaryHorizontalPanelLayout->addWidget(playbackButton);
     bottomPrimaryHorizontalPanelLayout->addWidget(stopButton);
-
-    previewCheckbox = new QCheckBox("Preview", this);
-    previewCheckbox->setChecked(settings.value(previewCheckboxStateKey, true).value<bool>());
-    connect(previewCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::previewCheckboxStateChange);
-    bottomPrimaryHorizontalPanelLayout->addWidget(previewCheckbox);
-
-    convertToVideoCheckbox = new QCheckBox("mp4", this);
-    convertToVideoCheckbox->setChecked(settings.value(convertToVideoCheckboxStateKey, true).value<bool>());
-    connect(convertToVideoCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxVideoStateChanged);
-    bottomPrimaryHorizontalPanelLayout->addWidget(convertToVideoCheckbox);
-
-    convertToGifCheckbox = new QCheckBox("gif", this);
-    convertToGifCheckbox->setChecked(settings.value(convertToGifCheckboxStateKey, true).value<bool>());
-    connect(convertToGifCheckbox, &QCheckBox::stateChanged, this, &EditorWindow::checkboxGifStateChanged);
-    bottomPrimaryHorizontalPanelLayout->addWidget(convertToGifCheckbox);
 
     volumeSlider = new QSlider(Qt::Horizontal, this);
     volumeSlider->setMinimum(0);
@@ -300,7 +312,7 @@ void EditorWindow::createLayout()
     setCentralWidget(widget);
 
     QRect availableGeometry = QApplication::primaryScreen()->availableGeometry();
-    auto width = availableGeometry.width() * 0.8;
+    auto width = availableGeometry.width() * 0.7038043478260869;
     auto height = width * 0.5625;
 
     resize(width, height);
@@ -331,13 +343,13 @@ void EditorWindow::handleDropUrl(QUrl url)
 }
 
 void EditorWindow::startPositionSliderMoved(qint64 position) {
-    if (!previewCheckbox->isChecked()) return;
+    if (!previewCheckboxAction->isChecked()) return;
     player->setPosition(position);
     this->updateDurationLabel();
 }
 
 void EditorWindow::endPositionSliderMoved(qint64 position) {
-    if (!previewCheckbox->isChecked()) return;
+    if (!previewCheckboxAction->isChecked()) return;
     player->setPosition(position);
     this->updateDurationLabel();
 }
@@ -358,7 +370,7 @@ void EditorWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
 {
     updateButtons(state);
 
-    if (previewCheckbox->isChecked()) {
+    if (previewCheckboxAction->isChecked()) {
         if (state == QMediaPlayer::StoppedState && userForcedStop == false) {
             player->play();
         }
@@ -380,15 +392,7 @@ void EditorWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
 //    toolBar->addAction(playToggleAction);
 //    playMenu->addAction(playToggleAction);
 
-//    auto aboutMenu = menuBar()->addMenu("&About");
 
-//    auto aboutApplicationAction = new QAction("About Raiden Video Ripper", this);
-//    connect(aboutApplicationAction, &QAction::triggered, qApp, [this] { showAboutApplication(); });
-//    aboutMenu->addAction(aboutApplicationAction);
-
-//    auto aboutQtAction = new QAction("About &Qt", this);
-//    connect(aboutQtAction, &QAction::triggered, qApp, &QApplication::aboutQt);
-//    aboutMenu->addAction(aboutQtAction);
 
 //    stopAction = new QAction("Stop", this);
 //    stopAction->setIcon(stopIcon);
@@ -640,16 +644,16 @@ void EditorWindow::startButtonClicked()
 {
     switch (state) {
     case IDLE:
-        if (convertToVideoCheckbox->isChecked()) {
+        if (convertToVideoCheckboxAction->isChecked()) {
             state = VIDEO_PROCESSING;
         }
-        else if (convertToGifCheckbox->isChecked()) {
+        else if (convertToGifCheckboxAction->isChecked()) {
             state = GIF_PROCESSING;
         }
         break;
 
     case VIDEO_PROCESSING:
-        if (convertToGifCheckbox->isChecked()) {
+        if (convertToGifCheckboxAction->isChecked()) {
             state = GIF_PROCESSING;
         }
         break;
@@ -692,8 +696,8 @@ void EditorWindow::cut()
             showAlert("WUT!", "Open file first!");
         }
         else if (
-            !convertToVideoCheckbox->isChecked() &&
-            !convertToGifCheckbox->isChecked()
+            !convertToVideoCheckboxAction->isChecked() &&
+            !convertToGifCheckboxAction->isChecked()
             ) {
             showAlert("WUT!", "Select video/gif checkboxes first!");
         }
@@ -747,7 +751,7 @@ void EditorWindow::convertingDidFinish(bool result)
         showAlert("WOW!", stateToString[state] + " Ripped Successfully!");
         if (state == VIDEO_PROCESSING)
         {
-            if (convertToGifCheckbox->isChecked())
+            if (convertToGifCheckboxAction->isChecked())
             {
                 state = GIF_PROCESSING;
                 cut();
@@ -782,7 +786,7 @@ void EditorWindow::playbackChanged(qint64 position)
         timelineIndicator->blockSignals(false);
     };
 
-    if (player->isPlaying() && this->previewCheckbox->isChecked()) {
+    if (player->isPlaying() && this->previewCheckboxAction->isChecked()) {
         auto startPosition = timelineIndicator->getStartValue();
         auto endPosition = timelineIndicator->getEndValue();
         if (position > endPosition) {
