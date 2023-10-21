@@ -14,6 +14,7 @@
 #include <QSettings>
 #include <QThreadPool>
 #include <QLabel>
+#include <QMediaPlayer>
 #include <videowidget.h>
 #include <timelineindicator.h>
 
@@ -71,8 +72,8 @@ private:
     void checkboxGifStateChanged(int _state);
     void handleDropUrl(QUrl url);
     void updateDurationLabel();
-    void pauseAndSavePlaybackPosition();
-    void jumpToPlaybackPositionAndPlay();
+    void savePlaybackState();
+    void restorePlaybackState();
 
     static void showAlert(const QString &title, const QString &message);
 
@@ -107,8 +108,8 @@ private:
     QIcon playIcon;
     QIcon pauseIcon;
     QIcon stopIcon;
-
-    std::tuple<bool, int> playerWasPlaying;
+    
+    std::tuple<QMediaPlayer::PlaybackState, int> playbackState;
 
     std::map<int, QString> stateToString;
 

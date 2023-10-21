@@ -49,7 +49,7 @@ EditorWindow::EditorWindow()
             break;
         }
     }
-    playerWasPlaying = std::make_tuple(false, 0);
+    playbackState = std::make_tuple(QMediaPlayer::StoppedState, 0);
     userForcedStop = false;
     state = IDLE;
     audioOutput = nullptr;
@@ -319,18 +319,34 @@ void EditorWindow::createLayout()
 
 void EditorWindow::playbackSliderDraggingStarted()
 {
-    if (player->isPlaying()) {
-        playerWasPlaying = std::make_tuple(true, player->position());
+    auto state = player->playbackState();
+    // TODO: switch
+    if (
+        state == QMediaPlayer::PlayingState
+        ||
+        state == QMediaPlayer::PausedState
+        ) {
+        playbackState = std::make_tuple(player->playbackState(), player->position());
         player->pause();
     }
 }
 
 void EditorWindow::playbackSliderDraggingFinished()
 {
-    if (std::get<0>(playerWasPlaying)) {
-        playerWasPlaying = std::make_tuple(false, 0);
+    auto state = std::get<0>(playbackState);
+
+    switch (state) {
+    case QMediaPlayer::PlayingState:
         player->play();
+        break;
+    case QMediaPlayer::PausedState:
+        player->pause();
+        break;
+    default:
+        break;
     }
+
+    playbackState = std::make_tuple(QMediaPlayer::StoppedState, 0);
 }
 
 void EditorWindow::handleDropUrl(QUrl url)
@@ -483,53 +499,68 @@ void EditorWindow::showAboutApplication()
         );
 }
 
-void EditorWindow::pauseAndSavePlaybackPosition()
+void EditorWindow::savePlaybackState()
 {
-    if (player->isPlaying()) {
+    auto state = player->playbackState();
+    switch (state) {
+    case QMediaPlayer::PlayingState:
+    case QMediaPlayer::PausedState:
+        playbackState = std::make_tuple(player->playbackState(), player->position());
         player->pause();
-        playerWasPlaying = std::make_tuple(true, player->position());
+        break;
+    default:
+        break;
     }
 }
 
-void EditorWindow::jumpToPlaybackPositionAndPlay()
+void EditorWindow::restorePlaybackState()
 {
-    auto played = std::get<0>(playerWasPlaying);
-    auto position = std::get<1>(playerWasPlaying);
-    if (played) {
-        if (
-            position >= timelineIndicator->getStartValue()
-            &&
-            position <= timelineIndicator->getEndValue()
-            )
-        {
-            player->setPosition(position);
-        }
-        else {
-            player->setPosition(timelineIndicator->getStartValue());
-        }
-        player->play();
-        playerWasPlaying = std::make_tuple(false, 0);
+    auto state = std::get<0>(playbackState);
+    auto position = std::get<1>(playbackState);
+
+    if (
+        position >= timelineIndicator->getStartValue()
+        &&
+        position <= timelineIndicator->getEndValue()
+        )
+    {
+        player->setPosition(position);
     }
+    else {
+        player->setPosition(timelineIndicator->getStartValue());
+    }
+    switch (state) {
+    case QMediaPlayer::PlayingState:
+        player->play();
+        break;
+    case QMediaPlayer::PausedState:
+        player->pause();
+        break;
+    default:
+        break;
+    }
+
+    playbackState = std::make_tuple(QMediaPlayer::StoppedState, 0);
 }
 
 void EditorWindow::startSliderDraggingStarted()
 {
-    pauseAndSavePlaybackPosition();
+    savePlaybackState();
 }
 
 void EditorWindow::startSliderDraggingFinished()
 {
-    jumpToPlaybackPositionAndPlay();
+    restorePlaybackState();
 }
 
 void EditorWindow::endSliderDraggingStarted()
 {
-    pauseAndSavePlaybackPosition();
+    savePlaybackState();
 }
 
 void EditorWindow::endSliderDraggingFinished()
 {
-    jumpToPlaybackPositionAndPlay();
+    restorePlaybackState();
 }
 
 void EditorWindow::open()
@@ -558,6 +589,7 @@ void EditorWindow::handleOpenFile(QUrl url)
     settings.setValue(lastWorkingPathKey, videoPathDirectory);
     player->setSource(url);
     player->play();
+    volumeChanged(volumeSlider->value());
     timelineIndicator->setMaximumValue(player->duration());
     timelineIndicator->setStartValue(0);
     timelineIndicator->setPlaybackValue(0);
