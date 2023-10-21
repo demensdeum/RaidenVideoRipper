@@ -1,34 +1,34 @@
-#include "timelineindicator.h"
+#include "timelinewidget.h"
 #include <QLabel>
 #include <QPainter>
 #include <QColor>
 #include <QDebug>
 #include <QMouseEvent>
 
-TimelineIndicator::TimelineIndicator(QWidget* parent, int maximumValue) : QWidget(parent) {
+TimelineWidget::TimelineWidget(QWidget* parent, int maximumValue) : QWidget(parent) {
     auto startValue = 0;
     auto endValue = 10000;
     auto playbackValue = endValue / 2;
     maximumValue = endValue;
     this->maximumValue = maximumValue;
-    startSlider = new TimelineIndicatorSlider(
+    startSlider = new TimelineSliderWidget(
         startValue,
         maximumValue,
-        TimelineIndicatorSlider::Left,
+        TimelineSliderWidget::Left,
         QImage("://resources/images/startSliderImage.png"),
         false
         );
-    playbackSlider = new TimelineIndicatorSlider(
+    playbackSlider = new TimelineSliderWidget(
         playbackValue,
         maximumValue,
-        TimelineIndicatorSlider::Center,
+        TimelineSliderWidget::Center,
         QImage("://resources/images/playbackSliderImage.png"),
         false
         );
-    endSlider = new TimelineIndicatorSlider(
+    endSlider = new TimelineSliderWidget(
         endValue,
         maximumValue,
-        TimelineIndicatorSlider::Right,
+        TimelineSliderWidget::Right,
         QImage("://resources/images/endSliderImage.png"),
         false
         );
@@ -36,61 +36,61 @@ TimelineIndicator::TimelineIndicator(QWidget* parent, int maximumValue) : QWidge
     this->setMinimumHeight(minimumHeight);
 }
 
-TimelineIndicator::~TimelineIndicator()
+TimelineWidget::~TimelineWidget()
 {
     delete startSlider;
     delete playbackSlider;
     delete endSlider;
 }
 
-int TimelineIndicator::getStartValue()
+int TimelineWidget::getStartValue()
 {
     return startSlider->getValue();
 }
 
-int TimelineIndicator::getPlaybackValue()
+int TimelineWidget::getPlaybackValue()
 {
     return playbackSlider->getValue();
 }
 
-int TimelineIndicator::getEndValue()
+int TimelineWidget::getEndValue()
 {
     return endSlider->getValue();
 }
 
-void TimelineIndicator::setFreeplayMode(bool freeplayMode)
+void TimelineWidget::setFreeplayMode(bool freeplayMode)
 {
     this->freeplayMode = freeplayMode;
     startSlider->setIsHidden(freeplayMode);
     endSlider->setIsHidden(freeplayMode);
 }
 
-void TimelineIndicator::setStartValue(int startValue)
+void TimelineWidget::setStartValue(int startValue)
 {
     startSlider->setValue(startValue);
     update();
 }
 
-void TimelineIndicator::setPlaybackValue(int playbackValue)
+void TimelineWidget::setPlaybackValue(int playbackValue)
 {
     playbackSlider->setValue(playbackValue);
     update();
 }
 
-void TimelineIndicator::setEndValue(int endValue)
+void TimelineWidget::setEndValue(int endValue)
 {
     endSlider->setValue(endValue);
     update();
 }
 
-void TimelineIndicator::setMaximumValue(int maximumValue)
+void TimelineWidget::setMaximumValue(int maximumValue)
 {
     startSlider->setMaximumValue(maximumValue);
     playbackSlider->setMaximumValue(maximumValue);
     endSlider->setMaximumValue(maximumValue);
 }
 
-void TimelineIndicator::resizeEvent(QResizeEvent *event)
+void TimelineWidget::resizeEvent(QResizeEvent *event)
 {
     QSize parentSize = event->size();
     startSlider->setParentSize(parentSize);
@@ -98,7 +98,7 @@ void TimelineIndicator::resizeEvent(QResizeEvent *event)
     endSlider->setParentSize(parentSize);
 }
 
-void TimelineIndicator::drawBackgroundIfNeeded()
+void TimelineWidget::drawBackgroundIfNeeded()
 {
     if (debug) {
     auto rectangle = QRect(0, 0, width(), height());
@@ -109,7 +109,7 @@ void TimelineIndicator::drawBackgroundIfNeeded()
     }
 }
 
-void TimelineIndicator::drawRangeLine()
+void TimelineWidget::drawRangeLine()
 {
     auto rectangle = QRect(
         startSlider->getTargetX(),
@@ -124,12 +124,12 @@ void TimelineIndicator::drawRangeLine()
     painter.drawRoundedRect(rectangle, 1, 1);
 }
 
-void TimelineIndicator::drawLine()
+void TimelineWidget::drawLine()
 {
     auto rectangle = QRect(
-        TimelineIndicatorSlider::width,
+        TimelineSliderWidget::width,
         height() / 2 - lineHeight / 2,
-        width() - TimelineIndicatorSlider::width * 2,
+        width() - TimelineSliderWidget::width * 2,
         lineHeight
     );
     auto painter = QPainter(this);
@@ -139,7 +139,7 @@ void TimelineIndicator::drawLine()
     painter.drawRoundedRect(rectangle, 1, 1);
 }
 
-void TimelineIndicator::drawSlider(TimelineIndicatorSlider *slider)
+void TimelineWidget::drawSlider(TimelineSliderWidget *slider)
 {
     auto painter = QPainter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, QPainter::Antialiasing);
@@ -149,7 +149,7 @@ void TimelineIndicator::drawSlider(TimelineIndicatorSlider *slider)
     painter.drawImage(slider->getRenderRectangle(), slider->getImage());
 }
 
-void TimelineIndicator::drawSliders()
+void TimelineWidget::drawSliders()
 {
     startSlider->setParentSize(size());
     playbackSlider->setParentSize(size());
@@ -165,12 +165,12 @@ void TimelineIndicator::drawSliders()
     }
 }
 
-void TimelineIndicator::paintEvent([[maybe_unused]] QPaintEvent *event)
+void TimelineWidget::paintEvent([[maybe_unused]] QPaintEvent *event)
 {
     redraw();
 }
 
-void TimelineIndicator::redraw()
+void TimelineWidget::redraw()
 {
     drawBackgroundIfNeeded();
     drawLine();
@@ -178,7 +178,7 @@ void TimelineIndicator::redraw()
     drawSliders();
 }
 
-void TimelineIndicator::dragSlider(TimelineIndicatorSlider *slider, int x)
+void TimelineWidget::dragSlider(TimelineSliderWidget *slider, int x)
 {
     if (draggingSlider->getIsHidden()) {
         return;
@@ -200,7 +200,7 @@ void TimelineIndicator::dragSlider(TimelineIndicatorSlider *slider, int x)
     draggingSlider->dragToX(x);
 }
 
-void TimelineIndicator::movePlaybackIndicatorByOffset(int offset)
+void TimelineWidget::movePlaybackIndicatorByOffset(int offset)
 {
     if (draggingSlider)
     {
@@ -216,17 +216,17 @@ void TimelineIndicator::movePlaybackIndicatorByOffset(int offset)
     update();
 }
 
-void TimelineIndicator::moveLeft()
+void TimelineWidget::moveLeft()
 {
     movePlaybackIndicatorByOffset(-4);
 }
 
-void TimelineIndicator::moveRight()
+void TimelineWidget::moveRight()
 {
     movePlaybackIndicatorByOffset(+4);
 }
 
-void TimelineIndicator::mousePressEvent(QMouseEvent *event)
+void TimelineWidget::mousePressEvent(QMouseEvent *event)
 {
     auto x = event->position().x();
     auto y = event->position().y();
@@ -255,7 +255,7 @@ void TimelineIndicator::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void TimelineIndicator::mouseMoveEvent(QMouseEvent *event)
+void TimelineWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if (!draggingSlider)
     {
@@ -275,7 +275,7 @@ void TimelineIndicator::mouseMoveEvent(QMouseEvent *event)
     update();
 }
 
-void TimelineIndicator::mouseReleaseEvent([[maybe_unused]]QMouseEvent *event)
+void TimelineWidget::mouseReleaseEvent([[maybe_unused]]QMouseEvent *event)
 {
     auto x = event->position().x();
     if (draggingSlider) {

@@ -1,7 +1,7 @@
-#include "timelineindicatorslider.h"
+#include "timelinesliderwidget.h"
 #include <QDebug>
 
-TimelineIndicatorSlider::TimelineIndicatorSlider(
+TimelineSliderWidget::TimelineSliderWidget(
     int value,
     int maximumValue,
     Alignment alignment,
@@ -16,23 +16,23 @@ TimelineIndicatorSlider::TimelineIndicatorSlider(
     this->image = image;
 }
 
-float TimelineIndicatorSlider::ratio() {
+float TimelineSliderWidget::ratio() {
     auto ratio = float(value) / float(maximumValue);
     return ratio;
 }
 
-float TimelineIndicatorSlider::xToRatio(int x) {
+float TimelineSliderWidget::xToRatio(int x) {
     auto adaptedX = x;
     switch (alignment) {
-    case TimelineIndicatorSlider::Left:
+    case TimelineSliderWidget::Left:
         adaptedX -= width / 2;
         break;
-
-    case TimelineIndicatorSlider::Center:
+        
+    case TimelineSliderWidget::Center:
         adaptedX -= width;
         break;
-
-    case TimelineIndicatorSlider::Right:
+        
+    case TimelineSliderWidget::Right:
         adaptedX -= width * 1.5;
         break;
     }
@@ -40,39 +40,39 @@ float TimelineIndicatorSlider::xToRatio(int x) {
     return ratio;
 }
 
-QImage TimelineIndicatorSlider::getImage()
+QImage TimelineSliderWidget::getImage()
 {
     return image;
 }
 
-int TimelineIndicatorSlider::getValue()
+int TimelineSliderWidget::getValue()
 {
     return value;
 }
 
-void TimelineIndicatorSlider::setValue(int value)
+void TimelineSliderWidget::setValue(int value)
 {
     this->value = value;
     this->updateRenderRectangle();
 }
 
-void TimelineIndicatorSlider::setMaximumValue(int value)
+void TimelineSliderWidget::setMaximumValue(int value)
 {
     this->maximumValue = value;
     this->updateRenderRectangle();
 }
 
-void TimelineIndicatorSlider::setParentSize(QSize parentSize)
+void TimelineSliderWidget::setParentSize(QSize parentSize)
 {
     this->parentSize = parentSize;
     this->updateRenderRectangle();
 }
 
-QRect TimelineIndicatorSlider::getRenderRectangle() {
+QRect TimelineSliderWidget::getRenderRectangle() {
     return renderRectangle;
 }
 
-bool TimelineIndicatorSlider::hitTest(int x, int y)
+bool TimelineSliderWidget::hitTest(int x, int y)
 {
     if (x < renderRectangle.x())
     {
@@ -94,17 +94,17 @@ bool TimelineIndicatorSlider::hitTest(int x, int y)
     return true;
 }
 
-void TimelineIndicatorSlider::dragToX(int x){
+void TimelineSliderWidget::dragToX(int x){
     auto ratio = xToRatio(x);
     setValue(maximumValue * ratio);
 }
 
-void TimelineIndicatorSlider::setIsHidden(bool isHidden)
+void TimelineSliderWidget::setIsHidden(bool isHidden)
 {
     this->isHidden = isHidden;
 }
 
-int TimelineIndicatorSlider::getTargetX()
+int TimelineSliderWidget::getTargetX()
 {
     auto adaptedX = renderRectangle.x();
     switch (alignment) {
@@ -119,12 +119,12 @@ int TimelineIndicatorSlider::getTargetX()
     return adaptedX;
 }
 
-bool TimelineIndicatorSlider::getIsHidden()
+bool TimelineSliderWidget::getIsHidden()
 {
     return isHidden;
 }
 
-int TimelineIndicatorSlider::alignRenderX(int renderX)
+int TimelineSliderWidget::alignRenderX(int renderX)
 {
     switch (alignment) {
     case Left:
@@ -138,13 +138,13 @@ int TimelineIndicatorSlider::alignRenderX(int renderX)
     return renderX;
 }
 
-int TimelineIndicatorSlider::lineWidth()
+int TimelineSliderWidget::lineWidth()
 {
     auto lineWidth = parentSize.width() - width * 2;
     return lineWidth;
 }
 
-void TimelineIndicatorSlider::updateRenderRectangle()
+void TimelineSliderWidget::updateRenderRectangle()
 {
     auto ratio = float(value) / float(maximumValue);
     auto renderX = lineWidth() * ratio;

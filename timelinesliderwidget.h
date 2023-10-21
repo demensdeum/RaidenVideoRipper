@@ -4,7 +4,7 @@
 #include <QRect>
 #include <QImage>
 
-class TimelineIndicatorSlider
+class TimelineSliderWidget
 {
 public:
     enum Alignment {
@@ -13,7 +13,7 @@ public:
         Right
     };
     
-    TimelineIndicatorSlider(
+    TimelineSliderWidget(
         int value,
         int maximumValue,
         Alignment alignment,

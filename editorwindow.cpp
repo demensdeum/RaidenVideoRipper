@@ -231,67 +231,67 @@ void EditorWindow::createLayout()
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(videoWidget);
 
-    timelineIndicator = new TimelineIndicator(this, 100);
+    timelineIndicator = new TimelineWidget(this, 100);
 
     connect(
         timelineIndicator,
-        &TimelineIndicator::startSliderDraggingStarted,
+        &TimelineWidget::startSliderDraggingStarted,
         this,
         &EditorWindow::startSliderDraggingStarted
         );
 
     connect(
         timelineIndicator,
-        &TimelineIndicator::startSliderDraggingFinished,
+        &TimelineWidget::startSliderDraggingFinished,
         this,
         &EditorWindow::startSliderDraggingFinished
         );
 
     connect(
         timelineIndicator,
-        &TimelineIndicator::playbackSliderDraggingStarted,
+        &TimelineWidget::playbackSliderDraggingStarted,
         this,
         &EditorWindow::playbackSliderDraggingStarted
         );
 
     connect(
         timelineIndicator,
-        &TimelineIndicator::playbackSliderDraggingFinished,
+        &TimelineWidget::playbackSliderDraggingFinished,
         this,
         &EditorWindow::playbackSliderDraggingFinished
         );
 
     connect(
         timelineIndicator,
-        &TimelineIndicator::endSliderDraggingStarted,
+        &TimelineWidget::endSliderDraggingStarted,
         this,
         &EditorWindow::endSliderDraggingStarted
         );
 
     connect(
         timelineIndicator,
-        &TimelineIndicator::endSliderDraggingFinished,
+        &TimelineWidget::endSliderDraggingFinished,
         this,
         &EditorWindow::endSliderDraggingFinished
         );
 
     connect(
         timelineIndicator,
-        &TimelineIndicator::startValueChanged,
+        &TimelineWidget::startValueChanged,
         this,
         &EditorWindow::startPositionSliderMoved
         );
 
     connect(
         timelineIndicator,
-        &TimelineIndicator::playbackValueChanged,
+        &TimelineWidget::playbackValueChanged,
         this,
         &EditorWindow::playbackSliderMoved
         );
 
     connect(
         timelineIndicator,
-        &TimelineIndicator::endValueChanged,
+        &TimelineWidget::endValueChanged,
         this,
         &EditorWindow::endPositionSliderMoved
         );

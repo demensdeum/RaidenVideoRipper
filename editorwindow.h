@@ -16,7 +16,7 @@
 #include <QLabel>
 #include <QMediaPlayer>
 #include <videowidget.h>
-#include <timelineindicator.h>
+#include <timelinewidget.h>
 
 class EditorWindow : public QMainWindow
 {
@@ -79,7 +79,7 @@ private:
 
     bool userForcedStop;
     
-    TimelineIndicator *timelineIndicator;
+    TimelineWidget *timelineIndicator;
 
     QThreadPool threadPool;
     QSettings settings;

@@ -1,14 +1,14 @@
 #pragma once
 
 #include <QWidget>
-#include <timelineindicatorslider.h>
+#include <timelinesliderwidget.h>
 
-class TimelineIndicator : public QWidget {
+class TimelineWidget : public QWidget {
     Q_OBJECT
 
 public:
-    TimelineIndicator(QWidget* parent, int maximumValue);
-    ~TimelineIndicator();
+    TimelineWidget(QWidget* parent, int maximumValue);
+    ~TimelineWidget();
 
     int getStartValue();
     int getPlaybackValue();
@@ -43,17 +43,17 @@ protected:
     void mouseReleaseEvent([[maybe_unused]] QMouseEvent *event);
 
 private:
-    TimelineIndicatorSlider *startSlider;
-    TimelineIndicatorSlider *playbackSlider;
-    TimelineIndicatorSlider *endSlider;
+    TimelineSliderWidget *startSlider;
+    TimelineSliderWidget *playbackSlider;
+    TimelineSliderWidget *endSlider;
 
-    void dragSlider(TimelineIndicatorSlider *slider, int x);
+    void dragSlider(TimelineSliderWidget *slider, int x);
 
     void drawBackgroundIfNeeded();
     void drawLine();
     void drawRangeLine();
     void drawSliders();
-    void drawSlider(TimelineIndicatorSlider *slider);
+    void drawSlider(TimelineSliderWidget *slider);
     void redraw();
     void movePlaybackIndicatorByOffset(int offset);
 
@@ -62,6 +62,6 @@ private:
     const int minimumValue = 0;
     int maximumValue;
     bool freeplayMode;
-    TimelineIndicatorSlider* draggingSlider;
+    TimelineSliderWidget* draggingSlider;
     const bool debug = false;
 };

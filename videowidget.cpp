@@ -5,8 +5,8 @@
 
 VideoWidget::VideoWidget(QWidget *parent) : QVideoWidget(parent)
 {
-    QObject *c = findChild<QWidget*>();
-    c->installEventFilter(this);
+    QObject *child = findChild<QWidget*>();
+    child->installEventFilter(this);
 }
 
 // Qt 6 bug: https://bugreports.qt.io/browse/QTBUG-107668
