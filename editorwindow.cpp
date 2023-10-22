@@ -49,10 +49,10 @@ EditorWindow::EditorWindow()
             break;
         }
     }
-    playbackState = std::make_tuple(QMediaPlayer::StoppedState, 0);
+    editorVideoWidget = nullptr;
+    savedPlaybackState = std::make_tuple(QMediaPlayer::StoppedState, 0);
     userForcedStop = false;
     state = IDLE;
-    audioOutput = nullptr;
     createLayout();
     initializePlayer();
     setupActions();
@@ -217,19 +217,19 @@ void EditorWindow::createLayout()
     bottomSecondaryHorizontalPanelLayout->addWidget(startButton);
     bottomSecondaryHorizontalPanelLayout->addWidget(rightEmptySpace);
 
-    videoWidget = new VideoWidget(this);
-    videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
-    videoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    editorVideoWidget = new EditorVideoWidget(this);
+    //editorVideoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
+    editorVideoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(
-        videoWidget,
-        &VideoWidget::dragDidDropUrl,
+        editorVideoWidget,
+        &EditorVideoWidget::dragDidDropUrl,
         this,
         &EditorWindow::handleDropUrl
         );
 
     auto layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(videoWidget);
+    layout->addWidget(editorVideoWidget);
 
     timelineIndicator = new TimelineWidget(this, 100);
 
@@ -319,34 +319,34 @@ void EditorWindow::createLayout()
 
 void EditorWindow::playbackSliderDraggingStarted()
 {
-    auto state = player->playbackState();
+    auto state = editorVideoWidget->getPlaybackState();
     // TODO: switch
     if (
         state == QMediaPlayer::PlayingState
         ||
         state == QMediaPlayer::PausedState
         ) {
-        playbackState = std::make_tuple(player->playbackState(), player->position());
-        player->pause();
+        savedPlaybackState = std::make_tuple(editorVideoWidget->getPlaybackState(), editorVideoWidget->position());
+        editorVideoWidget->pause();
     }
 }
 
 void EditorWindow::playbackSliderDraggingFinished()
 {
-    auto state = std::get<0>(playbackState);
+    auto state = std::get<0>(savedPlaybackState);
 
     switch (state) {
     case QMediaPlayer::PlayingState:
-        player->play();
+        editorVideoWidget->play();
         break;
     case QMediaPlayer::PausedState:
-        player->pause();
+        editorVideoWidget->pause();
         break;
     default:
         break;
     }
 
-    playbackState = std::make_tuple(QMediaPlayer::StoppedState, 0);
+    savedPlaybackState = std::make_tuple(QMediaPlayer::StoppedState, 0);
 }
 
 void EditorWindow::handleDropUrl(QUrl url)
@@ -359,26 +359,22 @@ void EditorWindow::handleDropUrl(QUrl url)
 
 void EditorWindow::startPositionSliderMoved(qint64 position) {
     if (!previewCheckboxAction->isChecked()) return;
-    player->setPosition(position);
+    editorVideoWidget->setPosition(position);
     this->updateDurationLabel();
 }
 
 void EditorWindow::endPositionSliderMoved(qint64 position) {
     if (!previewCheckboxAction->isChecked()) return;
-    player->setPosition(position);
+    editorVideoWidget->setPosition(position);
     this->updateDurationLabel();
 }
 
 void EditorWindow::initializePlayer()
 {
-    audioOutput = new QAudioOutput();
-    player = new QMediaPlayer();
-    player->setAudioOutput(audioOutput);
-
-    connect(player, &QMediaPlayer::positionChanged, this, &EditorWindow::playbackChanged);
-    connect(player, &QMediaPlayer::playbackStateChanged, this, &EditorWindow::playbackStateChanged);
-    connect(player, &QMediaPlayer::errorOccurred, this, &EditorWindow::handlePlayerError);
-    player->setVideoOutput(videoWidget);
+    editorVideoWidget = new EditorVideoWidget(this);
+    connect(editorVideoWidget, &EditorVideoWidget::positionChanged, this, &EditorWindow::playbackChanged);
+    connect(editorVideoWidget, &EditorVideoWidget::playbackStateChanged, this, &EditorWindow::playbackStateChanged);
+    connect(editorVideoWidget, &EditorVideoWidget::errorOccured, this, &EditorWindow::handlePlayerError);
 }
 
 void EditorWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
@@ -387,7 +383,7 @@ void EditorWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
 
     if (previewCheckboxAction->isChecked()) {
         if (state == QMediaPlayer::StoppedState && userForcedStop == false) {
-            player->play();
+            editorVideoWidget->play();
         }
     }
 }
@@ -446,16 +442,16 @@ void EditorWindow::playToggleButtonClicked() {
 
 void EditorWindow::stopButtonClicked() {
     userForcedStop = true;
-    player->stop();
+    editorVideoWidget->stop();
 }
 
 void EditorWindow::togglePlayback() {
     userForcedStop = false;
-    if (player->playbackState() == QMediaPlayer::PlayingState) {
-        player->pause();
+    if (editorVideoWidget->getPlaybackState() == QMediaPlayer::PlayingState) {
+        editorVideoWidget->pause();
     }
     else {
-        player->play();
+        editorVideoWidget->play();
     }
 }
 
@@ -501,12 +497,15 @@ void EditorWindow::showAboutApplication()
 
 void EditorWindow::savePlaybackState()
 {
-    auto state = player->playbackState();
+    auto state = editorVideoWidget->getPlaybackState();
     switch (state) {
     case QMediaPlayer::PlayingState:
     case QMediaPlayer::PausedState:
-        playbackState = std::make_tuple(player->playbackState(), player->position());
-        player->pause();
+        savedPlaybackState = std::make_tuple(
+            editorVideoWidget->getPlaybackState(),
+            editorVideoWidget->position()
+            );
+        editorVideoWidget->pause();
         break;
     default:
         break;
@@ -515,8 +514,8 @@ void EditorWindow::savePlaybackState()
 
 void EditorWindow::restorePlaybackState()
 {
-    auto state = std::get<0>(playbackState);
-    auto position = std::get<1>(playbackState);
+    auto state = std::get<0>(savedPlaybackState);
+    auto position = std::get<1>(savedPlaybackState);
 
     if (
         position >= timelineIndicator->getStartValue()
@@ -524,23 +523,23 @@ void EditorWindow::restorePlaybackState()
         position <= timelineIndicator->getEndValue()
         )
     {
-        player->setPosition(position);
+        editorVideoWidget->setPosition(position);
     }
     else {
-        player->setPosition(timelineIndicator->getStartValue());
+        editorVideoWidget->setPosition(timelineIndicator->getStartValue());
     }
     switch (state) {
     case QMediaPlayer::PlayingState:
-        player->play();
+        editorVideoWidget->play();
         break;
     case QMediaPlayer::PausedState:
-        player->pause();
+        editorVideoWidget->pause();
         break;
     default:
         break;
     }
 
-    playbackState = std::make_tuple(QMediaPlayer::StoppedState, 0);
+    savedPlaybackState = std::make_tuple(QMediaPlayer::StoppedState, 0);
 }
 
 void EditorWindow::startSliderDraggingStarted()
@@ -587,13 +586,13 @@ void EditorWindow::handleOpenFile(QUrl url)
     videoPath = QDir::toNativeSeparators(url.toLocalFile());
     auto videoPathDirectory = QFileInfo(videoPath).absolutePath();
     settings.setValue(lastWorkingPathKey, videoPathDirectory);
-    player->setSource(url);
-    player->play();
+    editorVideoWidget->setSource(url);
+    editorVideoWidget->play();
     volumeChanged(volumeSlider->value());
-    timelineIndicator->setMaximumValue(player->duration());
+    timelineIndicator->setMaximumValue(editorVideoWidget->duration());
     timelineIndicator->setStartValue(0);
     timelineIndicator->setPlaybackValue(0);
-    timelineIndicator->setEndValue(player->duration());
+    timelineIndicator->setEndValue(editorVideoWidget->duration());
     updateWindowTitle();
 }
 
@@ -638,8 +637,8 @@ void EditorWindow::startButtonClicked()
 void EditorWindow::volumeChanged(qint64 position)
 {
     auto volume = static_cast<float>(position) / static_cast<float>(volumeSlider->maximum());
-    if (audioOutput) {
-        audioOutput->setVolume(volume);
+    if (editorVideoWidget) {
+        editorVideoWidget->setVolume(volume);
     }
     settings.setValue(volumeSettingsKey, position);
 }
@@ -741,7 +740,7 @@ void EditorWindow::convertingDidFinish(bool result)
 
 void EditorWindow::playbackSliderMoved(qint64 position)
 {
-    player->setPosition(position);
+    editorVideoWidget->setPosition(position);
     this->updateDurationLabel();
 }
 
@@ -753,31 +752,31 @@ void EditorWindow::playbackChanged(qint64 position)
         timelineIndicator->blockSignals(false);
     };
 
-    if (player->isPlaying() && this->previewCheckboxAction->isChecked()) {
+    if (editorVideoWidget->isPlaying() && this->previewCheckboxAction->isChecked()) {
         auto startPosition = timelineIndicator->getStartValue();
         auto endPosition = timelineIndicator->getEndValue();
         if (position > endPosition) {
-            player->setPosition(startPosition);
+            editorVideoWidget->setPosition(startPosition);
         }
         else if (position < startPosition) {
-            player->setPosition(startPosition);
+            editorVideoWidget->setPosition(startPosition);
         }
     }
-    sliderUpdate(player->position());
+    sliderUpdate(editorVideoWidget->position());
     updateDurationLabel();
 }
 
 void EditorWindow::ensureStopped()
 {
-    if (player->playbackState() != QMediaPlayer::StoppedState)
+    if (editorVideoWidget->getPlaybackState() != QMediaPlayer::StoppedState)
     {
-        player->stop();
+        editorVideoWidget->stop();
     }
 }
 
 void EditorWindow::updateButtons(QMediaPlayer::PlaybackState state)
 {
-    if (player->isPlaying()) {
+    if (editorVideoWidget->isPlaying()) {
         playbackButton->setIcon(pauseIcon);
     }
     else {

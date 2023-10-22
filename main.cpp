@@ -12,5 +12,6 @@ int main(int argc, char *argv[])
     application.setApplicationVersion(applicationVersion);
     EditorWindow window;
     window.show();
+
     return application.exec();
 }

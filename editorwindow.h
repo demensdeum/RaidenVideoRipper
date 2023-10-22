@@ -7,7 +7,6 @@
 #include <QCheckBox>
 #include <QSlider>
 #include <QPushButton>
-#include <QVideoWidget>
 #include <QProcess>
 #include <QString>
 #include <QVBoxLayout>
@@ -15,8 +14,10 @@
 #include <QThreadPool>
 #include <QLabel>
 #include <QMediaPlayer>
+#include "editorvideowidget.h"
 #include <videowidget.h>
 #include <timelinewidget.h>
+#include <progressindicatorwidget.h>
 
 class EditorWindow : public QMainWindow
 {
@@ -34,6 +35,7 @@ public:
 
 private:
     void open();
+    void setupProgressIndicator();
     void startButtonClicked();
     void volumeChanged(qint64 position);
     void cut();
@@ -79,13 +81,13 @@ private:
 
     bool userForcedStop;
     
+    QWidget *transparentWidget;
+
     TimelineWidget *timelineIndicator;
 
     QThreadPool threadPool;
     QSettings settings;
 
-    QMediaPlayer *player;
-    QAudioOutput *audioOutput;
     QToolBar *toolBar;
     QAction *previewCheckboxAction;
     QAction *convertToVideoCheckboxAction;
@@ -93,7 +95,7 @@ private:
 
     QSlider *volumeSlider;
 
-    VideoWidget *videoWidget;
+    EditorVideoWidget *editorVideoWidget;
 
     QAction *openAction;
 
@@ -109,7 +111,7 @@ private:
     QIcon pauseIcon;
     QIcon stopIcon;
     
-    std::tuple<QMediaPlayer::PlaybackState, int> playbackState;
+    std::tuple<QMediaPlayer::PlaybackState, int> savedPlaybackState;
 
     std::map<int, QString> stateToString;
 

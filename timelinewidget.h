@@ -35,17 +35,16 @@ signals:
     void endSliderDraggingStarted();
     void endSliderDraggingFinished();
 
-protected:
+private:
+    TimelineSliderWidget *startSlider;
+    TimelineSliderWidget *playbackSlider;
+    TimelineSliderWidget *endSlider;
+
     void resizeEvent(QResizeEvent *event);
     void paintEvent(QPaintEvent *event);
     void mousePressEvent([[maybe_unused]] QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent([[maybe_unused]] QMouseEvent *event);
-
-private:
-    TimelineSliderWidget *startSlider;
-    TimelineSliderWidget *playbackSlider;
-    TimelineSliderWidget *endSlider;
 
     void dragSlider(TimelineSliderWidget *slider, int x);
 

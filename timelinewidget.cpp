@@ -101,11 +101,11 @@ void TimelineWidget::resizeEvent(QResizeEvent *event)
 void TimelineWidget::drawBackgroundIfNeeded()
 {
     if (debug) {
-    auto rectangle = QRect(0, 0, width(), height());
-    auto painter = QPainter(this);
-    painter.setRenderHint(QPainter::SmoothPixmapTransform, QPainter::Antialiasing);
-    painter.setBrush(Qt::red);
-    painter.drawRect(rectangle);
+        auto rectangle = QRect(0, 0, width(), height());
+        auto painter = QPainter(this);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform, QPainter::Antialiasing);
+        painter.setBrush(Qt::red);
+        painter.drawRect(rectangle);
     }
 }
 
@@ -131,7 +131,7 @@ void TimelineWidget::drawLine()
         height() / 2 - lineHeight / 2,
         width() - TimelineSliderWidget::width * 2,
         lineHeight
-    );
+        );
     auto painter = QPainter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform, QPainter::Antialiasing);
     painter.setPen(QPen(QColor(0xd6d6d6), 1));
