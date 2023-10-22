@@ -4,6 +4,9 @@
 #include <QWidget>
 #include <QMediaPlayer>
 #include <QAudioOutput>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QGraphicsVideoItem>
 
 class EditorVideoWidget: public QWidget
 {
@@ -39,6 +42,7 @@ signals:
 private:
     QAudioOutput audioOutput;
     QMediaPlayer mediaPlayer;
-
-    float maximalAudioOutputValue = 1;
+    QGraphicsVideoItem item;
+    QGraphicsScene *scene;
+    QGraphicsView *graphicsView;
 };

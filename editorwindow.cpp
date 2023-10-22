@@ -53,8 +53,8 @@ EditorWindow::EditorWindow()
     savedPlaybackState = std::make_tuple(QMediaPlayer::StoppedState, 0);
     userForcedStop = false;
     state = IDLE;
-    createLayout();
     initializePlayer();
+    createLayout();
     setupActions();
     updateWindowTitle();
     openArgumentsFileIfNeeded();
@@ -217,18 +217,9 @@ void EditorWindow::createLayout()
     bottomSecondaryHorizontalPanelLayout->addWidget(startButton);
     bottomSecondaryHorizontalPanelLayout->addWidget(rightEmptySpace);
 
-    editorVideoWidget = new EditorVideoWidget(this);
-    //editorVideoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
-    editorVideoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-    connect(
-        editorVideoWidget,
-        &EditorVideoWidget::dragDidDropUrl,
-        this,
-        &EditorWindow::handleDropUrl
-        );
-
     auto layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
+    editorVideoWidget->setGeometry(0,0,320, 240);
     layout->addWidget(editorVideoWidget);
 
     timelineIndicator = new TimelineWidget(this, 100);
@@ -375,6 +366,14 @@ void EditorWindow::initializePlayer()
     connect(editorVideoWidget, &EditorVideoWidget::positionChanged, this, &EditorWindow::playbackChanged);
     connect(editorVideoWidget, &EditorVideoWidget::playbackStateChanged, this, &EditorWindow::playbackStateChanged);
     connect(editorVideoWidget, &EditorVideoWidget::errorOccured, this, &EditorWindow::handlePlayerError);
+    //editorVideoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
+    //editorVideoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    connect(
+        editorVideoWidget,
+        &EditorVideoWidget::dragDidDropUrl,
+        this,
+        &EditorWindow::handleDropUrl
+        );
 }
 
 void EditorWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
