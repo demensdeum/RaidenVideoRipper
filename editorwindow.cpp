@@ -59,6 +59,9 @@ EditorWindow::EditorWindow()
     updateWindowTitle();
     openArgumentsFileIfNeeded();
     updateDurationLabel();
+
+    auto url = QUrl("C:/msys64/home/Demensdeum/Videos/Настроечная таблица Philips PM5544.mp4");
+    handleOpenFile(url);
 }
 
 void EditorWindow::openArgumentsFileIfNeeded()
@@ -219,7 +222,6 @@ void EditorWindow::createLayout()
 
     auto layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
-    editorVideoWidget->setGeometry(0,0,320, 240);
     layout->addWidget(editorVideoWidget);
 
     timelineIndicator = new TimelineWidget(this, 100);
@@ -366,8 +368,7 @@ void EditorWindow::initializePlayer()
     connect(editorVideoWidget, &EditorVideoWidget::positionChanged, this, &EditorWindow::playbackChanged);
     connect(editorVideoWidget, &EditorVideoWidget::playbackStateChanged, this, &EditorWindow::playbackStateChanged);
     connect(editorVideoWidget, &EditorVideoWidget::errorOccured, this, &EditorWindow::handlePlayerError);
-    //editorVideoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
-    //editorVideoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    editorVideoWidget->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     connect(
         editorVideoWidget,
         &EditorVideoWidget::dragDidDropUrl,

@@ -31,6 +31,8 @@ public:
     void showProgressIndicator(QString text, int progress);
     void hideProgressIndicator();
 
+    void resizeEvent(QResizeEvent* event);
+
     QMediaPlayer::PlaybackState getPlaybackState();
 
 signals:
@@ -40,9 +42,11 @@ signals:
     void dragDidDropUrl(QUrl url);
 
 private:
+    QGraphicsVideoItem *item;
     QAudioOutput audioOutput;
     QMediaPlayer mediaPlayer;
-    QGraphicsVideoItem item;
     QGraphicsScene *scene;
     QGraphicsView *graphicsView;
+
+    const int bottomMargin = 100;
 };
