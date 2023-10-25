@@ -21,6 +21,7 @@
 #include <QString>
 #include <videoprocessor.h>
 #include "constants.h"
+#include "utils.h"
 
 EditorWindow::EditorWindow()
 {
@@ -40,10 +41,10 @@ EditorWindow::EditorWindow()
     for (int state = 0; state < State::EnumCount; state++) {
         switch (state) {
         case VIDEO_PROCESSING:
-            stateToString[state] = "VIDEO";
+            stateToString[state] = "video";
             break;
         case GIF_PROCESSING:
-            stateToString[state] = "GIF";
+            stateToString[state] = "gif";
             break;
         case EnumCount:
             break;
@@ -59,6 +60,7 @@ EditorWindow::EditorWindow()
     updateWindowTitle();
     openArgumentsFileIfNeeded();
     updateDurationLabel();
+    progressBarWindow = nullptr;
 }
 
 void EditorWindow::openArgumentsFileIfNeeded()
@@ -159,6 +161,36 @@ void EditorWindow::updateDurationLabel()
                         );
 
     durationLabel->setText(text);
+}
+
+void EditorWindow::cancelInProgess()
+{
+    qDebug() << "cancel in progress";
+    progressBarWindow.value()->close();
+    videoProcessor.value()->cancel();
+}
+
+void EditorWindow::cleanupBeforeExit()
+{
+    settings.setValue(mainWindowGeometryKey, saveGeometry());
+    settings.setValue(mainWindowStateKey, saveState());
+
+    switch (state) {
+    case IDLE:
+        break;
+    case VIDEO_PROCESSING:
+    case GIF_PROCESSING:
+        cancelInProgess();
+        break;
+    case EnumCount:
+        break;
+    }
+}
+
+void EditorWindow::closeEvent(QCloseEvent *event)
+{
+    cleanupBeforeExit();
+    QMainWindow::closeEvent(event);
 }
 
 void EditorWindow::createLayout()
@@ -603,6 +635,17 @@ void EditorWindow::startButtonClicked()
 {
     switch (state) {
     case IDLE:
+        if (videoPath.isEmpty()) {
+            showAlert("WUT!", "Open file first!");
+            return;
+        }
+        else if (
+            !convertToVideoCheckboxAction->isChecked() &&
+            !convertToGifCheckboxAction->isChecked()
+            ) {
+            showAlert("WUT!", "Select video/gif checkboxes first!");
+            return;
+        }
         if (convertToVideoCheckboxAction->isChecked()) {
             state = VIDEO_PROCESSING;
         }
@@ -636,6 +679,18 @@ void EditorWindow::volumeChanged(qint64 position)
     settings.setValue(volumeSettingsKey, position);
 }
 
+void EditorWindow::showProgressbarWindow()
+{
+    progressBarWindow = new ProgressBarWindow();
+    connect(
+        progressBarWindow.value(),
+        &ProgressBarWindow::cancelButtonPressed,
+        this,
+        &EditorWindow::cancelInProgess
+        );
+    progressBarWindow.value()->show();
+}
+
 void EditorWindow::cut()
 {
     int startPosition = timelineIndicator->getStartValue();
@@ -643,7 +698,7 @@ void EditorWindow::cut()
 
     if (endPosition < startPosition)
     {
-        showAlert("ERROR!", "You can't rip upside down! End position must be greater than start position!");
+        showAlert("ERROR!", "You can't cut upside down! End position must be greater than start position!");
         return;
     }
 
@@ -651,15 +706,7 @@ void EditorWindow::cut()
     switch (state)
     {
     case IDLE:
-        if (videoPath.isEmpty()) {
-            showAlert("WUT!", "Open file first!");
-        }
-        else if (
-            !convertToVideoCheckboxAction->isChecked() &&
-            !convertToGifCheckboxAction->isChecked()
-            ) {
-            showAlert("WUT!", "Select video/gif checkboxes first!");
-        }
+        showAlert("Ugh!", "Internal error, IDLE state!");
         return;
 
     case VIDEO_PROCESSING:
@@ -674,19 +721,22 @@ void EditorWindow::cut()
         break;
     }
 
-    QString text = "Rippin " + stateToString[state];
+    showProgressbarWindow();
+
+    auto stateString = RaidenVideoRipper::Utils::capitalized(stateToString[state]);
+    QString text = "Cutting " + stateString;
     showAlert("WOW!", text);
 
-    auto videoProcessor = new VideoProcessor(startPosition, endPosition, videoPath, outputVideoPath);
-    videoProcessor->setAutoDelete(true);
+    videoProcessor = new VideoProcessor(startPosition, endPosition, videoPath, outputVideoPath);
+    videoProcessor.value()->setAutoDelete(true);
 
     connect(
-        videoProcessor,
+        videoProcessor.value(),
         &VideoProcessor::videoProcessingDidFinish,
         this,
         &EditorWindow::convertingDidFinish
         );
-    threadPool.start(videoProcessor);
+    threadPool.start(videoProcessor.value());
 }
 
 void EditorWindow::showAlert(const QString &title, const QString &message)
@@ -700,6 +750,7 @@ void EditorWindow::showAlert(const QString &title, const QString &message)
 
 void EditorWindow::convertingDidFinish(bool result)
 {
+    progressBarWindow.value()->close();
     qDebug("Process Finished");
 
     auto isSuccess = result == 0;
@@ -707,7 +758,8 @@ void EditorWindow::convertingDidFinish(bool result)
     if (isSuccess)
     {
         qDebug("SUCCESS!!!");
-        showAlert("WOW!", stateToString[state] + " Ripped Successfully!");
+        auto stateString = RaidenVideoRipper::Utils::capitalized(stateToString[state]);
+        showAlert("WOW!", stateString + " Cutted Successfully!");
         if (state == VIDEO_PROCESSING)
         {
             if (convertToGifCheckboxAction->isChecked())

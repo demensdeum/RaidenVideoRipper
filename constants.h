@@ -9,3 +9,5 @@
 [[maybe_unused]] static const char *previewCheckboxStateKey = "previewCheckboxState";
 [[maybe_unused]] static const char *convertToVideoCheckboxStateKey = "videoCheckboxStateKey";
 [[maybe_unused]] static const char *convertToGifCheckboxStateKey = "gifCheckboxStateKey";
+[[maybe_unused]] static const char *mainWindowGeometryKey = "mainWindowGeometryKey";
+[[maybe_unused]] static const char *mainWindowStateKey = "mainWindowStateKey";

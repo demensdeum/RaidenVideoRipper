@@ -20,6 +20,9 @@ public:
 signals:
     void videoProcessingDidFinish(int result);
 
+public slots:
+    void cancel();
+
 private:
     int startPosition;
     int endPosition;

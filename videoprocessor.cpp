@@ -19,6 +19,11 @@ VideoProcessor::VideoProcessor(
     this->outputVideoPath = outputVideoPath;
 }
 
+void VideoProcessor::cancel()
+{
+    qDebug() << "cancel";
+}
+
 void VideoProcessor::run()
 {
     std::vector<std::string> arguments;

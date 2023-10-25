@@ -13,6 +13,7 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 SOURCES += \
     editorwindow.cpp \
     main.cpp \
+    progressbarwindow.cpp \
     timelinesliderwidget.cpp \
     timelinewidget.cpp \
     videoprocessor.cpp \
@@ -22,8 +23,10 @@ HEADERS += \
     constants.h \
     editorwindow.h \
     ffmpeg_headless.h \
+    progressbarwindow.h \
     timelinesliderwidget.h \
     timelinewidget.h \
+    utils.h \
     videoprocessor.h \
     videowidget.h
 

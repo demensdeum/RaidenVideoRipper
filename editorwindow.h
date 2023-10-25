@@ -15,8 +15,10 @@
 #include <QThreadPool>
 #include <QLabel>
 #include <QMediaPlayer>
+#include <progressbarwindow.h>
 #include <videowidget.h>
 #include <timelinewidget.h>
+#include <videoprocessor.h>
 
 class EditorWindow : public QMainWindow
 {
@@ -31,6 +33,7 @@ class EditorWindow : public QMainWindow
 
 public:
     EditorWindow();
+    void closeEvent(QCloseEvent *event);
 
 private:
     void open();
@@ -74,6 +77,9 @@ private:
     void updateDurationLabel();
     void savePlaybackState();
     void restorePlaybackState();
+    void showProgressbarWindow();
+    void cleanupBeforeExit();
+    void cancelInProgess();
 
     static void showAlert(const QString &title, const QString &message);
 
@@ -108,7 +114,10 @@ private:
     QIcon playIcon;
     QIcon pauseIcon;
     QIcon stopIcon;
-    
+
+    std::optional<ProgressBarWindow *> progressBarWindow;
+    std::optional<VideoProcessor *> videoProcessor;
+
     std::tuple<QMediaPlayer::PlaybackState, int> playbackState;
 
     std::map<int, QString> stateToString;
