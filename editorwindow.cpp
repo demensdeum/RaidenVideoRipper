@@ -102,11 +102,23 @@ void EditorWindow::setupActions()
     convertToVideoCheckboxAction = new QAction("Convert to Video", this);
     convertToVideoCheckboxAction->setCheckable(true);
     convertToVideoCheckboxAction->setChecked(settings.value(convertToVideoCheckboxStateKey, true).value<bool>());
+    connect(
+        convertToVideoCheckboxAction,
+        &QAction::triggered,
+        this,
+        &EditorWindow::checkboxVideoStateChanged
+        );
     optionsMenu->addAction(convertToVideoCheckboxAction);
 
     convertToGifCheckboxAction = new QAction("Convert to Gif", this);
     convertToGifCheckboxAction->setCheckable(true);
     convertToGifCheckboxAction->setChecked(settings.value(convertToGifCheckboxStateKey, true).value<bool>());
+    connect(
+        convertToVideoCheckboxAction,
+        &QAction::triggered,
+        this,
+        &EditorWindow::checkboxGifStateChanged
+        );
     optionsMenu->addAction(convertToGifCheckboxAction);
 
     auto aboutMenu = menuBar()->addMenu("&About");
@@ -402,34 +414,14 @@ void EditorWindow::handleRightKeyPress()
     timelineIndicator->moveRight();
 }
 
-void EditorWindow::checkboxVideoStateChanged(int _state)
+void EditorWindow::checkboxVideoStateChanged(bool isChecked)
 {
-    Qt::CheckState state = (Qt::CheckState)_state;
-    switch (state) {
-    case Qt::Unchecked:
-        settings.setValue(convertToVideoCheckboxStateKey, _state);
-        break;
-    case Qt::Checked:
-        settings.setValue(convertToVideoCheckboxStateKey, _state);
-        break;
-    default:
-        break;
-    }
+    settings.setValue(convertToVideoCheckboxStateKey, isChecked);
 }
 
-void EditorWindow::checkboxGifStateChanged(int _state)
+void EditorWindow::checkboxGifStateChanged(bool isChecked)
 {
-    Qt::CheckState state = (Qt::CheckState)_state;
-    switch (state) {
-    case Qt::Unchecked:
-        settings.setValue(convertToGifCheckboxStateKey, _state);
-        break;
-    case Qt::Checked:
-        settings.setValue(convertToGifCheckboxStateKey, _state);
-        break;
-    default:
-        break;
-    }
+    settings.setValue(convertToGifCheckboxStateKey, isChecked);
 }
 
 void EditorWindow::previewCheckboxStateChange(bool isChecked)

@@ -68,8 +68,8 @@ private:
     void playToggleButtonClicked();
     void showStatusMessage(const QString &message);
     void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
-    void checkboxVideoStateChanged(int _state);
-    void checkboxGifStateChanged(int _state);
+    void checkboxVideoStateChanged(bool isChecked);
+    void checkboxGifStateChanged(bool isChecked);
     void handleDropUrl(QUrl url);
     void updateDurationLabel();
     void savePlaybackState();
