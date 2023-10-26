@@ -1,7 +1,7 @@
 #include "videoprocessor.h"
 
 extern "C" {
-#include "ffmpeg_headless.h"
+#include <dullahan_ffmpeg.h>
 }
 
 #include <QDebug>
@@ -21,7 +21,7 @@ VideoProcessor::VideoProcessor(
 
 void VideoProcessor::cancel()
 {
-    qDebug() << "cancel";
+    dullahan_ffmpeg_cancel();
 }
 
 void VideoProcessor::run()
@@ -42,6 +42,6 @@ void VideoProcessor::run()
         argv.push_back(const_cast<char*>(arg.c_str()));
     }
 
-    auto result = headless_main(argv.size(), argv.data());
+    auto result = dullahan_ffmpeg_main(argv.size(), argv.data());
     emit videoProcessingDidFinish(result);
 }

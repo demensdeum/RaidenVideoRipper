@@ -19,6 +19,7 @@
 #include <videowidget.h>
 #include <timelinewidget.h>
 #include <videoprocessor.h>
+#include <videoprocessorprogresspoller.h>
 
 class EditorWindow : public QMainWindow
 {
@@ -77,10 +78,11 @@ private:
     void updateDurationLabel();
     void savePlaybackState();
     void restorePlaybackState();
-    void showProgressbarWindow();
+    void showProgressbarWindow(QString text);
     void cleanupBeforeExit();
     void cancelInProgess();
     void restoreWindowSize();
+    void didPollProgress(int progress);
 
     static void showAlert(const QString &title, const QString &message);
 
@@ -118,6 +120,7 @@ private:
 
     std::optional<ProgressBarWindow *> progressBarWindow;
     std::optional<VideoProcessor *> videoProcessor;
+    std::optional<VideoProcessorProgressPoller *> videoProcessorProgressPoller;
 
     std::tuple<QMediaPlayer::PlaybackState, int> playbackState;
 

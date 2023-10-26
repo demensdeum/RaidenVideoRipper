@@ -426,9 +426,24 @@ void EditorWindow::initializePlayer()
     player = new QMediaPlayer();
     player->setAudioOutput(audioOutput);
 
-    connect(player, &QMediaPlayer::positionChanged, this, &EditorWindow::playbackChanged);
-    connect(player, &QMediaPlayer::playbackStateChanged, this, &EditorWindow::playbackStateChanged);
-    connect(player, &QMediaPlayer::errorOccurred, this, &EditorWindow::handlePlayerError);
+    connect(
+        player,
+        &QMediaPlayer::positionChanged,
+        this,
+        &EditorWindow::playbackChanged
+    );
+    connect(
+        player,
+        &QMediaPlayer::playbackStateChanged,
+        this,
+        &EditorWindow::playbackStateChanged
+    );
+    connect(
+        player,
+        &QMediaPlayer::errorOccurred,
+        this,
+        &EditorWindow::handlePlayerError
+    );
     player->setVideoOutput(videoWidget);
 }
 
@@ -686,9 +701,9 @@ void EditorWindow::volumeChanged(qint64 position)
     settings.setValue(volumeSettingsKey, position);
 }
 
-void EditorWindow::showProgressbarWindow()
+void EditorWindow::showProgressbarWindow(QString text)
 {
-    progressBarWindow = new ProgressBarWindow();
+    progressBarWindow = new ProgressBarWindow(text);
     connect(
         progressBarWindow.value(),
         &ProgressBarWindow::cancelButtonPressed,
@@ -696,6 +711,17 @@ void EditorWindow::showProgressbarWindow()
         &EditorWindow::cancelInProgess
         );
     progressBarWindow.value()->show();
+
+    if (videoProcessorProgressPoller.has_value()) {
+        videoProcessorProgressPoller.value()->stop();
+    }
+    videoProcessorProgressPoller = new VideoProcessorProgressPoller(player->duration());
+    connect(
+        videoProcessorProgressPoller.value(),
+        &VideoProcessorProgressPoller::didPollProgress,
+        this,
+        &EditorWindow::didPollProgress
+    );
 }
 
 void EditorWindow::cut()
@@ -728,11 +754,9 @@ void EditorWindow::cut()
         break;
     }
 
-    showProgressbarWindow();
-
     auto stateString = RaidenVideoRipper::Utils::capitalized(stateToString[state]);
-    QString text = "Cutting " + stateString;
-    showAlert("WOW!", text);
+    QString text = "Cutting " + stateString + "...";
+    showProgressbarWindow(text);
 
     videoProcessor = new VideoProcessor(startPosition, endPosition, videoPath, outputVideoPath);
     videoProcessor.value()->setAutoDelete(true);
@@ -746,6 +770,12 @@ void EditorWindow::cut()
     threadPool.start(videoProcessor.value());
 }
 
+void EditorWindow::didPollProgress(int progress)
+{
+    progressBarWindow.value()->setProgress(progress);
+    qDebug() << "didPollProgess: " << progress;
+}
+
 void EditorWindow::showAlert(const QString &title, const QString &message)
 {
     QMessageBox messageBox;
@@ -757,7 +787,9 @@ void EditorWindow::showAlert(const QString &title, const QString &message)
 
 void EditorWindow::convertingDidFinish(bool result)
 {
+    videoProcessorProgressPoller.value()->stop();
     progressBarWindow.value()->close();
+
     qDebug("Process Finished");
 
     auto isSuccess = result == 0;

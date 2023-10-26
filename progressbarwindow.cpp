@@ -3,10 +3,10 @@
 #include <QVBoxLayout>
 #include <QSpacerItem>
 
-ProgressBarWindow::ProgressBarWindow(QWidget *parent)
-    : QWidget(parent)
+ProgressBarWindow::ProgressBarWindow(QString text)
+    : QWidget()
 {
-    setWindowTitle("Cutting...");
+    setWindowTitle(text);
     setFixedSize(400, 100);
     setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowFlag(Qt::WindowMinimizeButtonHint, false);

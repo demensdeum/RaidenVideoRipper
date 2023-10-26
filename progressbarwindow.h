@@ -8,7 +8,7 @@ class ProgressBarWindow : public QWidget
     Q_OBJECT
 
 public:
-    ProgressBarWindow(QWidget *parent = nullptr);
+    ProgressBarWindow(QString text = "Processing...");
 
     void setMaxValue(int maxValue);
     void setProgress(int value);

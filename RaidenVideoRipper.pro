@@ -17,6 +17,7 @@ SOURCES += \
     timelinesliderwidget.cpp \
     timelinewidget.cpp \
     videoprocessor.cpp \
+    videoprocessorprogresspoller.cpp \
     videowidget.cpp
 
 HEADERS += \
@@ -28,9 +29,10 @@ HEADERS += \
     timelinewidget.h \
     utils.h \
     videoprocessor.h \
+    videoprocessorprogresspoller.h \
     videowidget.h
 
-LIBS += $$PWD/headless_ffmpeg.dll.a
+LIBS += $$PWD/dullahan_ffmpeg.dll.a
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
