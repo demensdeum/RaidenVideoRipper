@@ -175,6 +175,7 @@ void EditorWindow::cancelInProgess()
     qDebug() << "cancel in progress";
     progressBarWindow.value()->close();
     videoProcessor.value()->cancel();
+    videoProcessorProgressPoller.value()->stop();
 }
 
 void EditorWindow::cleanupBeforeExit()
@@ -627,10 +628,28 @@ void EditorWindow::open()
 
 void EditorWindow::handleOpenFile(QUrl url)
 {
+    auto incomingFilepath = QDir::toNativeSeparators(url.toLocalFile());
+
+    if (incomingFilepath == videoPath) {
+        qDebug() << "User trying to open same file, are they nuts?";
+        return;
+    }
+    videoPath = incomingFilepath;
+
+    switch (state) {
+    case IDLE:
+        break;
+    case VIDEO_PROCESSING:
+    case GIF_PROCESSING:
+        cancelInProgess();
+    case EnumCount:
+        break;
+    }
+
     if (state != IDLE) {
         return;
     }
-    videoPath = QDir::toNativeSeparators(url.toLocalFile());
+
     auto videoPathDirectory = QFileInfo(videoPath).absolutePath();
     settings.setValue(lastWorkingPathKey, videoPathDirectory);
     player->setSource(url);

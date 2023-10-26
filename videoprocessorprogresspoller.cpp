@@ -15,7 +15,7 @@ VideoProcessorProgressPoller::VideoProcessorProgressPoller(int duration)
         this,
         &VideoProcessorProgressPoller::pollProgress
     );
-    timer->start(1000);
+    timer->start(tick);
 }
 
 void VideoProcessorProgressPoller::pollProgress()

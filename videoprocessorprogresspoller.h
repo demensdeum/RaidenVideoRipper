@@ -19,6 +19,7 @@ public:
 private:
     QTimer *timer;
     int duration;
+    const int tick = 200;
 
 signals:
     void didPollProgress(int progress);
