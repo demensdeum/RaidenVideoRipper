@@ -80,6 +80,7 @@ private:
     void showProgressbarWindow();
     void cleanupBeforeExit();
     void cancelInProgess();
+    void restoreWindowSize();
 
     static void showAlert(const QString &title, const QString &message);
 

@@ -61,6 +61,13 @@ EditorWindow::EditorWindow()
     openArgumentsFileIfNeeded();
     updateDurationLabel();
     progressBarWindow = nullptr;
+    restoreWindowSize();
+}
+
+void EditorWindow::restoreWindowSize()
+{
+    restoreGeometry(settings.value(mainWindowGeometryKey).toByteArray());
+    restoreState(settings.value(mainWindowStateKey).toByteArray());
 }
 
 void EditorWindow::openArgumentsFileIfNeeded()
