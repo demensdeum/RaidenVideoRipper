@@ -58,21 +58,21 @@ EditorWindow::EditorWindow()
         outputFormatMp4,
         "Video (mp4)",
         "mp4",
-        settings.value(outputFormatIsSelectedKey(outputFormatMp4), true).value<bool>()
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatMp4)), true).value<bool>()
         );
 
     auto gif = OutputFormat(
         outputFormatGif,
         "Gif",
         "gif",
-        settings.value(outputFormatIsSelectedKey(outputFormatGif), true).value<bool>()
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatGif)), true).value<bool>()
         );
 
     auto mp3 = OutputFormat(
         outputFormatMp3,
         "Audio (mp3)",
         "mp3",
-        settings.value(outputFormatIsSelectedKey(outputFormatMp3), true).value<bool>()
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatMp3)), true).value<bool>()
         );
 
     outputFormats.push_back(mp4);
@@ -89,9 +89,9 @@ EditorWindow::EditorWindow()
     restoreWindowSize();
 }
 
-QString EditorWindow::outputFormatIsSelectedKey(const char *identifier)
+QString EditorWindow::outputFormatIsSelectedKey(QString identifier)
 {
-    return QString(identifier) + isSelectedKeyExtension;
+    return identifier + isSelectedKeyExtension;
 }
 
 void EditorWindow::restoreWindowSize()
@@ -142,7 +142,7 @@ void EditorWindow::setupActions()
         QAction *outputFormatCheckboxAction = new QAction(outputFormat.title, this);
         outputFormatCheckboxAction->setCheckable(true);
         outputFormatCheckboxAction->setChecked(outputFormat.isSelected);
-        outputFormatCheckboxAction->setData(QVariant::fromValue(outputFormat.identifier));
+        outputFormatCheckboxAction->setData(QVariant::fromValue(&outputFormat));
         connect(
             outputFormatCheckboxAction,
             &QAction::triggered,
@@ -457,19 +457,19 @@ void EditorWindow::initializePlayer()
         &QMediaPlayer::positionChanged,
         this,
         &EditorWindow::playbackChanged
-    );
+        );
     connect(
         player,
         &QMediaPlayer::playbackStateChanged,
         this,
         &EditorWindow::playbackStateChanged
-    );
+        );
     connect(
         player,
         &QMediaPlayer::errorOccurred,
         this,
         &EditorWindow::handlePlayerError
-    );
+        );
     player->setVideoOutput(videoWidget);
 }
 
@@ -497,17 +497,10 @@ void EditorWindow::handleRightKeyPress()
 void EditorWindow::outputFormatCheckboxStateChanged([[maybe_unused]]bool isChecked)
 {
     auto sender = static_cast<QAction *>(QObject::sender());
-    auto outputFormat = sender->data();
-    qDebug() << outputFormat;
-//    if (isChecked) {
-//        outputFormat->isSelected = isChecked;
-//    }
-}
-
-void EditorWindow::checkboxGifStateChanged(bool isChecked)
-{
-    qDebug() << isChecked;
-    //settings.setValue(convertToGifCheckboxStateKey, isChecked);
+    OutputFormat *outputFormat = qvariant_cast<OutputFormat *>(sender->data());
+    outputFormat->isSelected = isChecked;
+    auto key = outputFormatIsSelectedKey(outputFormat->identifier);
+    settings.setValue(key, isChecked);
 }
 
 void EditorWindow::previewCheckboxStateChange(bool isChecked)
@@ -715,7 +708,7 @@ void EditorWindow::startButtonClicked()
             return;
         }
         else if (selectedOutputFormats.empty())
-         {
+        {
             showAlert("WUT!", "Select output formats checkboxes first!");
             return;
         }
@@ -772,7 +765,7 @@ void EditorWindow::showProgressbarWindow(QString text)
         &VideoProcessorProgressPoller::didPollProgress,
         this,
         &EditorWindow::didPollProgress
-    );
+        );
 }
 
 void EditorWindow::cut()
@@ -820,7 +813,7 @@ void EditorWindow::cut()
 
     auto stateString = RaidenVideoRipper::Utils::capitalized(
         currentOutputFormat.value().title
-    );
+        );
     QString text = "Cutting " + stateString + "...";
     showProgressbarWindow(text);
 

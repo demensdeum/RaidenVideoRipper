@@ -75,7 +75,6 @@ private:
     void showStatusMessage(const QString &message);
     void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
     void outputFormatCheckboxStateChanged(bool isChecked);
-    void checkboxGifStateChanged(bool isChecked);
     void handleDropUrl(QUrl url);
     void updateDurationLabel();
     void savePlaybackState();
@@ -85,7 +84,7 @@ private:
     void cancelInProgess();
     void restoreWindowSize();
     void didPollProgress(int progress);
-    QString outputFormatIsSelectedKey(const char *identifier);
+    QString outputFormatIsSelectedKey(QString identifier);
 
     std::vector<OutputFormat> getSelectedOutputFormats();
     std::queue<OutputFormat> currentOutputFormats;
