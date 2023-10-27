@@ -7,7 +7,9 @@
 [[maybe_unused]] static const char *volumeSettingsKey = "Volume";
 [[maybe_unused]] static const char *lastWorkingPathKey = "lastWorkingPath";
 [[maybe_unused]] static const char *previewCheckboxStateKey = "previewCheckboxState";
-[[maybe_unused]] static const char *convertToVideoCheckboxStateKey = "videoCheckboxStateKey";
-[[maybe_unused]] static const char *convertToGifCheckboxStateKey = "gifCheckboxStateKey";
-[[maybe_unused]] static const char *mainWindowGeometryKey = "mainWindowGeometryKey";
-[[maybe_unused]] static const char *mainWindowStateKey = "mainWindowStateKey";
+[[maybe_unused]] static const char *mainWindowGeometryKey = "mainWindowGeometry";
+[[maybe_unused]] static const char *mainWindowStateKey = "mainWindowState";
+[[maybe_unused]] static const char *outputFormatMp4 = "outputFormatMp4";
+[[maybe_unused]] static const char *outputFormatGif = "outputFormatGif";
+[[maybe_unused]] static const char *outputFormatMp3 = "outputFormatMp3";
+[[maybe_unused]] static const char *isSelectedKeyExtension = "isSelected";

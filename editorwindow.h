@@ -15,10 +15,12 @@
 #include <QThreadPool>
 #include <QLabel>
 #include <QMediaPlayer>
+#include <queue>
 #include <progressbarwindow.h>
 #include <videowidget.h>
 #include <timelinewidget.h>
 #include <videoprocessor.h>
+#include <outputformat.h>
 #include <videoprocessorprogresspoller.h>
 
 class EditorWindow : public QMainWindow
@@ -27,8 +29,7 @@ class EditorWindow : public QMainWindow
 
     enum State {
         IDLE = 0,
-        VIDEO_PROCESSING,
-        GIF_PROCESSING,
+        FILE_PROCESSING,
         CANCELLED,
         EnumCount
     };
@@ -73,7 +74,7 @@ private:
     void playToggleButtonClicked();
     void showStatusMessage(const QString &message);
     void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
-    void checkboxVideoStateChanged(bool isChecked);
+    void outputFormatCheckboxStateChanged(bool isChecked);
     void checkboxGifStateChanged(bool isChecked);
     void handleDropUrl(QUrl url);
     void updateDurationLabel();
@@ -84,6 +85,10 @@ private:
     void cancelInProgess();
     void restoreWindowSize();
     void didPollProgress(int progress);
+    QString outputFormatIsSelectedKey(const char *identifier);
+
+    std::vector<OutputFormat> getSelectedOutputFormats();
+    std::queue<OutputFormat> currentOutputFormats;
 
     static void showAlert(const QString &title, const QString &message);
 
@@ -98,8 +103,6 @@ private:
     QAudioOutput *audioOutput;
     QToolBar *toolBar;
     QAction *previewCheckboxAction;
-    QAction *convertToVideoCheckboxAction;
-    QAction *convertToGifCheckboxAction;
 
     QSlider *volumeSlider;
 
@@ -107,8 +110,8 @@ private:
 
     QAction *openAction;
 
-    QString videoPath;
-    QString ffmpegPath;
+    std::optional<OutputFormat> currentOutputFormat;
+    QString filePath;
     State state;
 
     QPushButton *playbackButton;
@@ -126,6 +129,7 @@ private:
     std::tuple<QMediaPlayer::PlaybackState, int> playbackState;
 
     std::map<int, QString> stateToString;
+    std::vector<OutputFormat> outputFormats;
 
     const int primaryPanelHeight = 40;
     const int secondaryPanelHeight = 40;

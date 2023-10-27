@@ -25,6 +25,8 @@
 
 EditorWindow::EditorWindow()
 {
+    qRegisterMetaType<OutputFormat>("OutputFormat");
+
     auto style = this->style();
     playIcon = QIcon::fromTheme(
         "media-playback-start.png",
@@ -40,11 +42,8 @@ EditorWindow::EditorWindow()
         );
     for (int state = 0; state < State::EnumCount; state++) {
         switch (state) {
-        case VIDEO_PROCESSING:
-            stateToString[state] = "video";
-            break;
-        case GIF_PROCESSING:
-            stateToString[state] = "gif";
+        case FILE_PROCESSING:
+            stateToString[state] = "file";
             break;
         case EnumCount:
             break;
@@ -54,6 +53,32 @@ EditorWindow::EditorWindow()
     userForcedStop = false;
     state = IDLE;
     audioOutput = nullptr;
+
+    auto mp4 = OutputFormat(
+        outputFormatMp4,
+        "Video (mp4)",
+        "mp4",
+        settings.value(outputFormatIsSelectedKey(outputFormatMp4), true).value<bool>()
+        );
+
+    auto gif = OutputFormat(
+        outputFormatGif,
+        "Gif",
+        "gif",
+        settings.value(outputFormatIsSelectedKey(outputFormatGif), true).value<bool>()
+        );
+
+    auto mp3 = OutputFormat(
+        outputFormatMp3,
+        "Audio (mp3)",
+        "mp3",
+        settings.value(outputFormatIsSelectedKey(outputFormatMp3), true).value<bool>()
+        );
+
+    outputFormats.push_back(mp4);
+    outputFormats.push_back(gif);
+    outputFormats.push_back(mp3);
+
     createLayout();
     initializePlayer();
     setupActions();
@@ -62,6 +87,11 @@ EditorWindow::EditorWindow()
     updateDurationLabel();
     progressBarWindow = nullptr;
     restoreWindowSize();
+}
+
+QString EditorWindow::outputFormatIsSelectedKey(const char *identifier)
+{
+    return QString(identifier) + isSelectedKeyExtension;
 }
 
 void EditorWindow::restoreWindowSize()
@@ -108,27 +138,19 @@ void EditorWindow::setupActions()
         );
     optionsMenu->addAction(previewCheckboxAction);
 
-    convertToVideoCheckboxAction = new QAction("Convert to Video", this);
-    convertToVideoCheckboxAction->setCheckable(true);
-    convertToVideoCheckboxAction->setChecked(settings.value(convertToVideoCheckboxStateKey, true).value<bool>());
-    connect(
-        convertToVideoCheckboxAction,
-        &QAction::triggered,
-        this,
-        &EditorWindow::checkboxVideoStateChanged
-        );
-    optionsMenu->addAction(convertToVideoCheckboxAction);
-
-    convertToGifCheckboxAction = new QAction("Convert to Gif", this);
-    convertToGifCheckboxAction->setCheckable(true);
-    convertToGifCheckboxAction->setChecked(settings.value(convertToGifCheckboxStateKey, true).value<bool>());
-    connect(
-        convertToVideoCheckboxAction,
-        &QAction::triggered,
-        this,
-        &EditorWindow::checkboxGifStateChanged
-        );
-    optionsMenu->addAction(convertToGifCheckboxAction);
+    for (auto&& outputFormat : outputFormats) {
+        QAction *outputFormatCheckboxAction = new QAction(outputFormat.title, this);
+        outputFormatCheckboxAction->setCheckable(true);
+        outputFormatCheckboxAction->setChecked(outputFormat.isSelected);
+        outputFormatCheckboxAction->setData(QVariant::fromValue(outputFormat.identifier));
+        connect(
+            outputFormatCheckboxAction,
+            &QAction::triggered,
+            this,
+            &EditorWindow::outputFormatCheckboxStateChanged
+            );
+        optionsMenu->addAction(outputFormatCheckboxAction);
+    }
 
     auto aboutMenu = menuBar()->addMenu("&About");
 
@@ -187,8 +209,7 @@ void EditorWindow::cleanupBeforeExit()
     switch (state) {
     case IDLE:
         break;
-    case VIDEO_PROCESSING:
-    case GIF_PROCESSING:
+    case FILE_PROCESSING:
         cancelInProgess();
         break;
     case CANCELLED:
@@ -473,14 +494,20 @@ void EditorWindow::handleRightKeyPress()
     timelineIndicator->moveRight();
 }
 
-void EditorWindow::checkboxVideoStateChanged(bool isChecked)
+void EditorWindow::outputFormatCheckboxStateChanged([[maybe_unused]]bool isChecked)
 {
-    settings.setValue(convertToVideoCheckboxStateKey, isChecked);
+    auto sender = static_cast<QAction *>(QObject::sender());
+    auto outputFormat = sender->data();
+    qDebug() << outputFormat;
+//    if (isChecked) {
+//        outputFormat->isSelected = isChecked;
+//    }
 }
 
 void EditorWindow::checkboxGifStateChanged(bool isChecked)
 {
-    settings.setValue(convertToGifCheckboxStateKey, isChecked);
+    qDebug() << isChecked;
+    //settings.setValue(convertToGifCheckboxStateKey, isChecked);
 }
 
 void EditorWindow::previewCheckboxStateChange(bool isChecked)
@@ -634,18 +661,18 @@ void EditorWindow::handleOpenFile(QUrl url)
 {
     auto incomingFilepath = QDir::toNativeSeparators(url.toLocalFile());
 
-    if (incomingFilepath == videoPath) {
+    if (incomingFilepath == filePath) {
         qDebug() << "User trying to open same file, are they nuts?";
         return;
     }
-    videoPath = incomingFilepath;
+    filePath = incomingFilepath;
 
     if (state != IDLE) {
         return;
     }
 
-    auto videoPathDirectory = QFileInfo(videoPath).absolutePath();
-    settings.setValue(lastWorkingPathKey, videoPathDirectory);
+    auto filePathDirectory = QFileInfo(filePath).absolutePath();
+    settings.setValue(lastWorkingPathKey, filePathDirectory);
     player->setSource(url);
     player->play();
     volumeChanged(volumeSlider->value());
@@ -660,42 +687,42 @@ void EditorWindow::updateWindowTitle()
 {
     auto applicationTitle = QString(applicationName) + " " + QString(applicationVersion);
     auto title = applicationTitle;
-    if (!videoPath.isEmpty()) {
-        title = QFileInfo(videoPath).fileName() + " - " + applicationTitle;
+    if (!filePath.isEmpty()) {
+        title = QFileInfo(filePath).fileName() + " - " + applicationTitle;
     }
     this->setWindowTitle(title);
 }
 
+std::vector<OutputFormat> EditorWindow::getSelectedOutputFormats()
+{
+    std::vector<OutputFormat> selectedFormats;
+
+    std::copy_if(outputFormats.begin(), outputFormats.end(), std::back_inserter(selectedFormats),
+                 [](const OutputFormat& format) {
+                     return format.isSelected;
+                 });
+
+    return selectedFormats;
+}
+
 void EditorWindow::startButtonClicked()
 {
+    auto selectedOutputFormats = getSelectedOutputFormats();
     switch (state) {
     case IDLE:
-        if (videoPath.isEmpty()) {
+        if (filePath.isEmpty()) {
             showAlert("WUT!", "Open file first!");
             return;
         }
-        else if (
-            !convertToVideoCheckboxAction->isChecked() &&
-            !convertToGifCheckboxAction->isChecked()
-            ) {
-            showAlert("WUT!", "Select video/gif checkboxes first!");
+        else if (selectedOutputFormats.empty())
+         {
+            showAlert("WUT!", "Select output formats checkboxes first!");
             return;
         }
-        if (convertToVideoCheckboxAction->isChecked()) {
-            state = VIDEO_PROCESSING;
-        }
-        else if (convertToGifCheckboxAction->isChecked()) {
-            state = GIF_PROCESSING;
-        }
         break;
 
-    case VIDEO_PROCESSING:
-        if (convertToGifCheckboxAction->isChecked()) {
-            state = GIF_PROCESSING;
-        }
-        break;
-
-    case GIF_PROCESSING:
+    case FILE_PROCESSING:
+        qDebug() << "Start pressed in file processing state, user nuts?";
         break;
 
     case CANCELLED:
@@ -705,6 +732,13 @@ void EditorWindow::startButtonClicked()
     case EnumCount:
         break;
     }
+
+
+    for (auto&& outputFormat : selectedOutputFormats) {
+        currentOutputFormats.push(outputFormat);
+    }
+
+    state = FILE_PROCESSING;
 
     cut();
 }
@@ -745,6 +779,16 @@ void EditorWindow::cut()
 {
     setEnabled(false);
 
+    if (!currentOutputFormats.empty()) {
+        currentOutputFormat = std::optional<OutputFormat>(currentOutputFormats.front());
+        qDebug() << "DERP DERP DERP1111" << currentOutputFormat->title;
+        currentOutputFormats.pop();
+    }
+    else {
+        qDebug() << "Cut called with empty currentOutputFormats, wtf?";
+        return;
+    }
+
     int startPosition = timelineIndicator->getStartValue();
     int endPosition = timelineIndicator->getEndValue();
 
@@ -762,12 +806,8 @@ void EditorWindow::cut()
         showAlert("Ugh!", "Internal error, IDLE state!");
         return;
 
-    case VIDEO_PROCESSING:
-        outputVideoPath = videoPath + "_output.mp4";
-        break;
-
-    case GIF_PROCESSING:
-        outputVideoPath = videoPath + "_output.gif";
+    case FILE_PROCESSING:
+        outputVideoPath = filePath + "_output." + currentOutputFormat.value().extension;
         break;
 
     case CANCELLED:
@@ -778,11 +818,18 @@ void EditorWindow::cut()
         break;
     }
 
-    auto stateString = RaidenVideoRipper::Utils::capitalized(stateToString[state]);
+    auto stateString = RaidenVideoRipper::Utils::capitalized(
+        currentOutputFormat.value().title
+    );
     QString text = "Cutting " + stateString + "...";
     showProgressbarWindow(text);
 
-    videoProcessor = new VideoProcessor(startPosition, endPosition, videoPath, outputVideoPath);
+    videoProcessor = new VideoProcessor(
+        startPosition,
+        endPosition,
+        filePath,
+        outputVideoPath
+        );
     videoProcessor.value()->setAutoDelete(true);
 
     connect(
@@ -820,44 +867,26 @@ void EditorWindow::convertingDidFinish(bool result)
 
     auto isSuccess = result == 0;
 
-    if (isSuccess && state != CANCELLED)
-    {
-        qDebug("SUCCESS!!!");
-        auto stateString = RaidenVideoRipper::Utils::capitalized(stateToString[state]);
-        showAlert("WOW!", stateString + " Cutted Successfully!");
-        if (state == VIDEO_PROCESSING)
-        {
-            if (convertToGifCheckboxAction->isChecked())
-            {
-                state = GIF_PROCESSING;
+    switch (state) {
+    case IDLE:
+        break;
+    case FILE_PROCESSING:
+        if (isSuccess) {
+            if (!currentOutputFormats.empty()) {
                 cut();
             }
             else {
+                showAlert("Wow!", "Success!");
                 state = IDLE;
             }
         }
-        else if (state == GIF_PROCESSING)
-        {
+        else {
             state = IDLE;
+            showAlert("Uhh!", "Error while cutting!");
         }
-    }
-    else
-    {
-        switch (state) {
-        case IDLE:
-            qDebug() << "Cutting error in idle state, wtf?";
-            break;
-        case VIDEO_PROCESSING:
-        case GIF_PROCESSING:
-            showAlert("Ugh!!", "Cut Failed! :-(");
-            qDebug("Not normal FFmpeg-Headless exit: %d", result);
-            break;
-        case CANCELLED:
-        case EnumCount:
-            break;
-        }
-
-        state = IDLE;
+    case CANCELLED:
+    case EnumCount:
+        break;
     }
 }
 

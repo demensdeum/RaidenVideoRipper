@@ -24,6 +24,7 @@ HEADERS += \
     constants.h \
     editorwindow.h \
     ffmpeg_headless.h \
+    outputformat.h \
     progressbarwindow.h \
     timelinesliderwidget.h \
     timelinewidget.h \
