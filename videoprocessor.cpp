@@ -26,16 +26,17 @@ void VideoProcessor::cancel()
 
 void VideoProcessor::run()
 {
-    std::vector<std::string> arguments;
-    arguments.emplace_back("ffmpeg");
-    arguments.emplace_back("-y");
-    arguments.emplace_back("-i");
-    arguments.emplace_back(videoPath.toStdString());
-    arguments.emplace_back("-ss");
-    arguments.emplace_back(std::to_string(startPosition) + "ms");
-    arguments.emplace_back("-to");
-    arguments.emplace_back(std::to_string(endPosition) + "ms");
-    arguments.emplace_back(outputVideoPath.toStdString());
+    auto arguments = std::vector<std::string> {
+        "ffmpeg",
+        "-y",
+        "-i",
+        videoPath.toStdString(),
+        "-ss",
+        std::to_string(startPosition) + "ms",
+        "-to",
+        std::to_string(endPosition) + "ms",
+        outputVideoPath.toStdString()
+    };
 
     std::vector<char*> argv;
     for (const auto& arg : arguments) {

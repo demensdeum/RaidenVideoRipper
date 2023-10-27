@@ -494,7 +494,7 @@ void EditorWindow::handleRightKeyPress()
     timelineIndicator->moveRight();
 }
 
-void EditorWindow::outputFormatCheckboxStateChanged([[maybe_unused]]bool isChecked)
+void EditorWindow::outputFormatCheckboxStateChanged(bool isChecked)
 {
     auto sender = static_cast<QAction *>(QObject::sender());
     OutputFormat *outputFormat = qvariant_cast<OutputFormat *>(sender->data());
@@ -875,7 +875,10 @@ void EditorWindow::convertingDidFinish(bool result)
         }
         else {
             state = IDLE;
-            showAlert("Uhh!", "Error while cutting!");
+            showAlert(
+               "Uhh!",
+                "Error while cutting! Result code: " + QString::number(result)
+            );
         }
     case CANCELLED:
     case EnumCount:
