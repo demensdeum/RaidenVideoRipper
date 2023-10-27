@@ -29,6 +29,7 @@ class EditorWindow : public QMainWindow
         IDLE = 0,
         VIDEO_PROCESSING,
         GIF_PROCESSING,
+        CANCELLED,
         EnumCount
     };
 

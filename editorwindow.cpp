@@ -173,6 +173,7 @@ void EditorWindow::updateDurationLabel()
 void EditorWindow::cancelInProgess()
 {
     qDebug() << "cancel in progress";
+    state = CANCELLED;
     progressBarWindow.value()->close();
     videoProcessor.value()->cancel();
     videoProcessorProgressPoller.value()->stop();
@@ -189,6 +190,9 @@ void EditorWindow::cleanupBeforeExit()
     case VIDEO_PROCESSING:
     case GIF_PROCESSING:
         cancelInProgess();
+        break;
+    case CANCELLED:
+        qDebug() << "Cleanup in cancelled state, wtf?";
         break;
     case EnumCount:
         break;
@@ -372,14 +376,14 @@ void EditorWindow::createLayout()
 void EditorWindow::playbackSliderDraggingStarted()
 {
     auto state = player->playbackState();
-    // TODO: switch
-    if (
-        state == QMediaPlayer::PlayingState
-        ||
-        state == QMediaPlayer::PausedState
-        ) {
+
+    switch (state) {
+    case QMediaPlayer::PlayingState:
+    case QMediaPlayer::PausedState:
         playbackState = std::make_tuple(player->playbackState(), player->position());
         player->pause();
+    case QMediaPlayer::StoppedState:
+        break;
     }
 }
 
@@ -636,16 +640,6 @@ void EditorWindow::handleOpenFile(QUrl url)
     }
     videoPath = incomingFilepath;
 
-    switch (state) {
-    case IDLE:
-        break;
-    case VIDEO_PROCESSING:
-    case GIF_PROCESSING:
-        cancelInProgess();
-    case EnumCount:
-        break;
-    }
-
     if (state != IDLE) {
         return;
     }
@@ -704,6 +698,10 @@ void EditorWindow::startButtonClicked()
     case GIF_PROCESSING:
         break;
 
+    case CANCELLED:
+        qDebug() << "Start pressed in cancelled state, wtf?";
+        break;
+
     case EnumCount:
         break;
     }
@@ -745,12 +743,15 @@ void EditorWindow::showProgressbarWindow(QString text)
 
 void EditorWindow::cut()
 {
+    setEnabled(false);
+
     int startPosition = timelineIndicator->getStartValue();
     int endPosition = timelineIndicator->getEndValue();
 
     if (endPosition < startPosition)
     {
         showAlert("ERROR!", "You can't cut upside down! End position must be greater than start position!");
+        state = IDLE;
         return;
     }
 
@@ -767,6 +768,10 @@ void EditorWindow::cut()
 
     case GIF_PROCESSING:
         outputVideoPath = videoPath + "_output.gif";
+        break;
+
+    case CANCELLED:
+        qDebug() << "Cut started in cancelled mode, wtf?";
         break;
 
     case EnumCount:
@@ -806,6 +811,8 @@ void EditorWindow::showAlert(const QString &title, const QString &message)
 
 void EditorWindow::convertingDidFinish(bool result)
 {
+    setEnabled(true);
+
     videoProcessorProgressPoller.value()->stop();
     progressBarWindow.value()->close();
 
@@ -813,7 +820,7 @@ void EditorWindow::convertingDidFinish(bool result)
 
     auto isSuccess = result == 0;
 
-    if (isSuccess)
+    if (isSuccess && state != CANCELLED)
     {
         qDebug("SUCCESS!!!");
         auto stateString = RaidenVideoRipper::Utils::capitalized(stateToString[state]);
@@ -836,8 +843,21 @@ void EditorWindow::convertingDidFinish(bool result)
     }
     else
     {
-        showAlert("Ugh!!", "Cut Failed! :-(");
-        qDebug("Not normal FFmpeg-Headless exit: %d", result);
+        switch (state) {
+        case IDLE:
+            qDebug() << "Cutting error in idle state, wtf?";
+            break;
+        case VIDEO_PROCESSING:
+        case GIF_PROCESSING:
+            showAlert("Ugh!!", "Cut Failed! :-(");
+            qDebug("Not normal FFmpeg-Headless exit: %d", result);
+            break;
+        case CANCELLED:
+        case EnumCount:
+            break;
+        }
+
+        state = IDLE;
     }
 }
 
