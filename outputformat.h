@@ -31,13 +31,13 @@ struct OutputFormat
     {
     }
 
-    OutputFormat& operator=(const OutputFormat& other)
+    OutputFormat& operator=(OutputFormat&& other) noexcept
     {
         if (this != &other)
         {
-            identifier = other.identifier;
-            title = other.title;
-            extension = other.extension;
+            identifier = std::move(other.identifier);
+            title = std::move(other.title);
+            extension = std::move(other.extension);
             isSelected = other.isSelected;
         }
         return *this;
