@@ -849,6 +849,17 @@ void EditorWindow::showAlert(const QString &title, const QString &message)
     messageBox.exec();
 }
 
+void EditorWindow::processNextOutputFormatOrFinish()
+{
+    if (!currentOutputFormats.empty()) {
+        cut();
+    }
+    else {
+        showAlert("Wow!", "Success!");
+        state = IDLE;
+    }
+}
+
 void EditorWindow::convertingDidFinish(bool result)
 {
     setEnabled(true);
@@ -865,13 +876,7 @@ void EditorWindow::convertingDidFinish(bool result)
         break;
     case FILE_PROCESSING:
         if (isSuccess) {
-            if (!currentOutputFormats.empty()) {
-                cut();
-            }
-            else {
-                showAlert("Wow!", "Success!");
-                state = IDLE;
-            }
+            processNextOutputFormatOrFinish();
         }
         else {
             state = IDLE;
@@ -880,7 +885,13 @@ void EditorWindow::convertingDidFinish(bool result)
                 "Error while cutting! Result code: " + QString::number(result)
             );
         }
+        break;
+
     case CANCELLED:
+        state = FILE_PROCESSING;
+        processNextOutputFormatOrFinish();
+        break;
+
     case EnumCount:
         break;
     }

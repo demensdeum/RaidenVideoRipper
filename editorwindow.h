@@ -84,6 +84,7 @@ private:
     void cancelInProgess();
     void restoreWindowSize();
     void didPollProgress(int progress);
+    void processNextOutputFormatOrFinish();
     QString outputFormatIsSelectedKey(QString identifier);
 
     std::vector<OutputFormat> getSelectedOutputFormats();
