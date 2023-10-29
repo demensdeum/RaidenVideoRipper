@@ -29,7 +29,7 @@ https://wiki.qt.io/Qt_Coding_Style
 https://semver.org
 
 ### Donation
-You can support developer by donation:
+You can support developer by donation:   
 https://www.donationalerts.com/r/demensdeum
 
 ### Language:
