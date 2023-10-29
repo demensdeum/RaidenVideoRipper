@@ -63,14 +63,14 @@ EditorWindow::EditorWindow()
         outputFormatWebm,
         "WebM",
         "webm",
-        settings.value(outputFormatIsSelectedKey(QString(outputFormatWebm)), true).value<bool>()
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatWebm)), false).value<bool>()
         );
 
     auto mp3 = OutputFormat(
         outputFormatMp3,
         "Audio (mp3)",
         "mp3",
-        settings.value(outputFormatIsSelectedKey(QString(outputFormatMp3)), true).value<bool>()
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatMp3)), false).value<bool>()
         );
 
     outputFormats.push_back(mp4);

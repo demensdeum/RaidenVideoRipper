@@ -26,3 +26,6 @@ https://wiki.qt.io/Qt_Coding_Style
 
 ### Versioning   
 https://semver.org
+
+### Language:
+[![ru](https://img.shields.io/badge/lang-ru-red.svg)](https://github.com/demensdeum/RaidenVideoRipper/blob/main/README.ru.md)
