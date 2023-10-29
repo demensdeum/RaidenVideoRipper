@@ -1,5 +1,6 @@
 # Raiden Video Ripper
 ![Screenshot](Screenshot.png)   
+
 Кадр из [COSTA RICA IN 4K 60fps HDR (ULTRA HD)](https://www.youtube.com/watch?v=LXb3EKWsInQ)
 
 **Raiden Video Ripper** - это проект с открытым исходным кодом, предназначенный для редактирования видео и конвертации форматов. Он создан с использованием Qt 6 (Qt Creator) и позволяет обрезать и конвертировать видео в форматы MP4, GIF и WebM. Вы также можете извлекать аудио из видео и конвертировать его в формат MP3.
