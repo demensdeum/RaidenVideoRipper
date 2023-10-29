@@ -31,4 +31,5 @@ https://semver.org
 ### Деньги
 
 Вы можете поддержать разработчика деньгой по ссылке ниже:   
+
 https://www.donationalerts.com/r/demensdeum
