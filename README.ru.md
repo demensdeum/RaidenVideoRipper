@@ -18,14 +18,14 @@ Raiden Video Ripper упрощает редактирование и конве�
 Возможно, что приложение может работать как на Linux, так и на MacOS, но оно никогда не было протестировано на этих операционных системах.
 
 ### Ссылки
-- Qt 6: https://www.qt.io/product/qt6
-- FFmpeg для Windows: https://ffmpeg.org/download.html#build-windows
+Qt 6: https://www.qt.io/product/qt6
+FFmpeg для Windows: https://ffmpeg.org/download.html#build-windows
 
 ### Стиль кодирования
-- https://wiki.qt.io/Qt_Coding_Style
+https://wiki.qt.io/Qt_Coding_Style
 
 ### Версионирование
-- https://semver.org
+https://semver.org
 
 ### Деньги
 
