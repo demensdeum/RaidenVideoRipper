@@ -8,7 +8,6 @@ ProgressBarWindow::ProgressBarWindow(QString text)
 {
     setWindowTitle(text);
     setFixedSize(400, 100);
-    setWindowFlag(Qt::WindowStaysOnTopHint, true);
     setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowFlag(Qt::WindowMinimizeButtonHint, false);
 

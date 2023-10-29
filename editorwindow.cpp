@@ -40,15 +40,6 @@ EditorWindow::EditorWindow()
         "media-playback-stop.png",
         style->standardIcon(QStyle::SP_MediaStop)
         );
-    for (int state = 0; state < State::EnumCount; state++) {
-        switch (state) {
-        case FILE_PROCESSING:
-            stateToString[state] = "file";
-            break;
-        case EnumCount:
-            break;
-        }
-    }
     playbackState = std::make_tuple(QMediaPlayer::StoppedState, 0);
     userForcedStop = false;
     state = IDLE;
@@ -68,6 +59,13 @@ EditorWindow::EditorWindow()
         settings.value(outputFormatIsSelectedKey(QString(outputFormatGif)), true).value<bool>()
         );
 
+    auto webm = OutputFormat(
+        outputFormatWebm,
+        "WebM",
+        "webm",
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatWebm)), true).value<bool>()
+        );
+
     auto mp3 = OutputFormat(
         outputFormatMp3,
         "Audio (mp3)",
@@ -77,6 +75,7 @@ EditorWindow::EditorWindow()
 
     outputFormats.push_back(mp4);
     outputFormats.push_back(gif);
+    outputFormats.push_back(webm);
     outputFormats.push_back(mp3);
 
     createLayout();
@@ -698,6 +697,12 @@ std::vector<OutputFormat> EditorWindow::getSelectedOutputFormats()
     return selectedFormats;
 }
 
+void EditorWindow::raiseProgressWindowToUser()
+{
+    progressBarWindow.value()->raise();
+    progressBarWindow.value()->activateWindow();
+}
+
 void EditorWindow::startButtonClicked()
 {
     auto selectedOutputFormats = getSelectedOutputFormats();
@@ -715,17 +720,17 @@ void EditorWindow::startButtonClicked()
         break;
 
     case FILE_PROCESSING:
+        raiseProgressWindowToUser();
         qDebug() << "Start pressed in file processing state, user nuts?";
-        break;
+        return;
 
     case CANCELLED:
         qDebug() << "Start pressed in cancelled state, wtf?";
-        break;
+        return;
 
     case EnumCount:
         break;
     }
-
 
     for (auto&& outputFormat : selectedOutputFormats) {
         currentOutputFormats.push(outputFormat);
@@ -770,8 +775,6 @@ void EditorWindow::showProgressbarWindow(QString text)
 
 void EditorWindow::cut()
 {
-    setEnabled(false);
-
     if (!currentOutputFormats.empty()) {
         currentOutputFormat = std::optional<OutputFormat>(currentOutputFormats.front());
         qDebug() << "DERP DERP DERP1111" << currentOutputFormat->title;
@@ -862,8 +865,6 @@ void EditorWindow::processNextOutputFormatOrFinish()
 
 void EditorWindow::convertingDidFinish(bool result)
 {
-    setEnabled(true);
-
     videoProcessorProgressPoller.value()->stop();
     progressBarWindow.value()->close();
 

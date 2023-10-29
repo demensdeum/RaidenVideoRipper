@@ -85,6 +85,7 @@ private:
     void restoreWindowSize();
     void didPollProgress(int progress);
     void processNextOutputFormatOrFinish();
+    void raiseProgressWindowToUser();
     QString outputFormatIsSelectedKey(QString identifier);
 
     std::vector<OutputFormat> getSelectedOutputFormats();
@@ -127,8 +128,6 @@ private:
     std::optional<VideoProcessorProgressPoller *> videoProcessorProgressPoller;
 
     std::tuple<QMediaPlayer::PlaybackState, int> playbackState;
-
-    std::map<int, QString> stateToString;
     std::vector<OutputFormat> outputFormats;
 
     const int primaryPanelHeight = 40;
