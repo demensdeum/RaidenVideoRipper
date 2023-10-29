@@ -5,7 +5,7 @@
 [[maybe_unused]] static const char *companyName = "DemensDeum";
 [[maybe_unused]] static const char *companyDomain = "demensdeum.com";
 [[maybe_unused]] static const char *volumeSettingsKey = "Volume";
-[[maybe_unused]] static const char *lastWorkingPathKey = "lastWorkingPath";
+[[maybe_unused]] static const char *previousWorkingPathKey = "previousWorkingPathKey";
 [[maybe_unused]] static const char *previewCheckboxStateKey = "previewCheckboxState";
 [[maybe_unused]] static const char *mainWindowGeometryKey = "mainWindowGeometry";
 [[maybe_unused]] static const char *mainWindowStateKey = "mainWindowState";
@@ -14,3 +14,4 @@
 [[maybe_unused]] static const char *outputFormatWebm = "outputFormatWebm";
 [[maybe_unused]] static const char *outputFormatMp3 = "outputFormatMp3";
 [[maybe_unused]] static const char *isSelectedKeyExtension = "isSelected";
+[[maybe_unused]] static const char *outputFileSuffix = "_RaidenVideoRipper_";

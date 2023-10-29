@@ -81,7 +81,7 @@ private:
     void restorePlaybackState();
     void showProgressbarWindow(QString text);
     void cleanupBeforeExit();
-    void cancelInProgess();
+    void cancelInProgress();
     void restoreWindowSize();
     void didPollProgress(int progress);
     void processNextOutputFormatOrFinish();

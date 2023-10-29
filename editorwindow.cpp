@@ -191,7 +191,7 @@ void EditorWindow::updateDurationLabel()
     durationLabel->setText(text);
 }
 
-void EditorWindow::cancelInProgess()
+void EditorWindow::cancelInProgress()
 {
     qDebug() << "cancel in progress";
     state = CANCELLED;
@@ -207,15 +207,17 @@ void EditorWindow::cleanupBeforeExit()
 
     switch (state) {
     case IDLE:
-        break;
+        qDebug() << "Cleanup in idle state, wtf?";
+        return;
     case FILE_PROCESSING:
-        cancelInProgess();
+        cancelInProgress();
         break;
     case CANCELLED:
-        qDebug() << "Cleanup in cancelled state, wtf?";
-        break;
+        qDebug() << "Cleanup in cancelled state, wut?";
+        return;
     case EnumCount:
-        break;
+        qDebug() << "Cleanup in Enum Count state, u nuts????";
+        return;
     }
 }
 
@@ -402,8 +404,9 @@ void EditorWindow::playbackSliderDraggingStarted()
     case QMediaPlayer::PausedState:
         playbackState = std::make_tuple(player->playbackState(), player->position());
         player->pause();
+        return;
     case QMediaPlayer::StoppedState:
-        break;
+        return;
     }
 }
 
@@ -427,9 +430,6 @@ void EditorWindow::playbackSliderDraggingFinished()
 
 void EditorWindow::handleDropUrl(QUrl url)
 {
-    if (state != IDLE) {
-        return;
-    }
     handleOpenFile(url);
 }
 
@@ -577,9 +577,9 @@ void EditorWindow::savePlaybackState()
     case QMediaPlayer::PausedState:
         playbackState = std::make_tuple(player->playbackState(), player->position());
         player->pause();
-        break;
+        return;
     default:
-        break;
+        return;
     }
 }
 
@@ -638,7 +638,7 @@ void EditorWindow::open()
     QFileDialog fileDialog(this);
 
     QString moviesLocation = QStandardPaths::writableLocation(QStandardPaths::MoviesLocation);
-    auto path = settings.value(lastWorkingPathKey, moviesLocation).value<QString>();
+    auto path = settings.value(previousWorkingPathKey, moviesLocation).value<QString>();
 
     fileDialog.setDirectory(path);
 
@@ -651,6 +651,19 @@ void EditorWindow::open()
 
 void EditorWindow::handleOpenFile(QUrl url)
 {
+    switch (state) {
+    case IDLE:
+        break;
+    case FILE_PROCESSING:
+        raiseProgressWindowToUser();
+        qDebug() << "Open file while in processing state, user nuts?";
+        return;
+    case CANCELLED:
+    case EnumCount:
+        qDebug() << "Wtf? Trying to use wrong state for file open!!!";
+        return;
+    }
+
     auto incomingFilepath = QDir::toNativeSeparators(url.toLocalFile());
 
     if (incomingFilepath == filePath) {
@@ -659,12 +672,8 @@ void EditorWindow::handleOpenFile(QUrl url)
     }
     filePath = incomingFilepath;
 
-    if (state != IDLE) {
-        return;
-    }
-
     auto filePathDirectory = QFileInfo(filePath).absolutePath();
-    settings.setValue(lastWorkingPathKey, filePathDirectory);
+    settings.setValue(previousWorkingPathKey, filePathDirectory);
     player->setSource(url);
     player->play();
     volumeChanged(volumeSlider->value());
@@ -757,7 +766,7 @@ void EditorWindow::showProgressbarWindow(QString text)
         progressBarWindow.value(),
         &ProgressBarWindow::cancelButtonPressed,
         this,
-        &EditorWindow::cancelInProgess
+        &EditorWindow::cancelInProgress
         );
     progressBarWindow.value()->show();
 
@@ -803,15 +812,16 @@ void EditorWindow::cut()
         return;
 
     case FILE_PROCESSING:
-        outputVideoPath = filePath + "_output." + currentOutputFormat.value().extension;
+        outputVideoPath = filePath + outputFileSuffix + "." + currentOutputFormat.value().extension;
         break;
 
     case CANCELLED:
         qDebug() << "Cut started in cancelled mode, wtf?";
-        break;
+        return;
 
     case EnumCount:
-        break;
+        qDebug() << "State is EnumCount, the hell?";
+        return;
     }
 
     auto stateString = RaidenVideoRipper::Utils::capitalized(
@@ -840,7 +850,6 @@ void EditorWindow::cut()
 void EditorWindow::didPollProgress(int progress)
 {
     progressBarWindow.value()->setProgress(progress);
-    qDebug() << "didPollProgess: " << progress;
 }
 
 void EditorWindow::showAlert(const QString &title, const QString &message)

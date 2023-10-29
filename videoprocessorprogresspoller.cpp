@@ -20,8 +20,6 @@ VideoProcessorProgressPoller::VideoProcessorProgressPoller(int duration)
 
 void VideoProcessorProgressPoller::pollProgress()
 {
-    qDebug() << "PTS: " << dullahan_ffmpeg_conversion_pts();
-
     auto pts = dullahan_ffmpeg_conversion_pts() / 1000;
     auto ratio = float(pts) / float(duration);
     auto progress = int(float(ratio) * 100);
