@@ -1,9 +1,9 @@
 @echo off
 if "%~1"=="--full-build" (
     echo "Full build enabled..."
-    set configure_flags="--configure --clean"
-    goto :end
+    set configure_flags=--configure --clean
 )
+@echo on
 
 echo "Building Dullahan-FFmpeg..."
 del C:\msys64\tmp\Dullahan-FFmpeg-Build-Complete
