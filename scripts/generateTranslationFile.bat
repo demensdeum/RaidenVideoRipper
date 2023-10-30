@@ -1,4 +1,3 @@
-lupdatePath=C:\Qt\6.6.0\mingw_64\bin\lupdate.exe
+set lupdatePath C:\Qt\6.6.0\mingw_64\bin\lupdate.exe
 
-$lupdatePath .\RaidenVideoRipper.pro
- -noobsolete -ts resources\translation\raidenvideoripper_ru.ts
+%lupdatePath% .\RaidenVideoRipper.pro -noobsolete -ts resources\translation\raidenvideoripper_ru.ts

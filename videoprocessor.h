@@ -11,21 +11,23 @@ public:
     VideoProcessor(
         const int startPosition,
         const int endPosition,
-        const QString videoPath,
-        const QString outputVideoPath
+        const QString& videoPath,
+        const QString& outputVideoPath
         );
 
     void run() override;
-
-    int startPosition;
-    int endPosition;
-    QString videoPath;
-    QString outputVideoPath;
 
 signals:
     void videoProcessingDidFinish(int result);
 
 public slots:
     void cancel();
+
+private:
+    // class beign called with setAutoDelete(true), so that's better to keep those private
+    const int startPosition;
+    const int endPosition;
+    const QString videoPath;
+    const QString outputVideoPath;
 
 };

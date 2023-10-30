@@ -9,8 +9,8 @@ extern "C" {
 VideoProcessor::VideoProcessor(
     const int startPosition,
     const int endPosition,
-    const QString videoPath,
-    const QString outputVideoPath
+    const QString& videoPath,
+    const QString& outputVideoPath
 )
 : startPosition(startPosition),
 endPosition(endPosition),

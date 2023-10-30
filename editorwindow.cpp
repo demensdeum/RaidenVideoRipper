@@ -90,17 +90,9 @@ EditorWindow::EditorWindow()
     restoreWindowSize();
 }
 
-QString EditorWindow::stringPresentationOfCompletedFilepaths()
-{
-    return QString("<NO>");
-}
-
 void EditorWindow::showDonateWindowIfNeeded()
 {
     successfulRunsCount += 1;
-    auto outputFiles = tr("Output files: %1")
-                           .arg(stringPresentationOfCompletedFilepaths());
-    completedFilepaths = {};
     auto outputText = tr("Success!");
     if (successfulRunsCount >= donateSuccessfulRunsCount) {
         outputText = tr("<b>Success!</b><br>If you like this application, please consider a donation:<br><a href=\"https://www.donationalerts.com/r/demensdeum\">https://www.donationalerts.com/r/demensdeum</a>");
@@ -223,6 +215,7 @@ void EditorWindow::cancelInProgress()
     progressBarWindow.value()->close();
     videoProcessor.value()->cancel();
     videoProcessorProgressPoller.value()->stop();
+    RaidenVideoRipper::Utils::clearQueue(currentOutputFormats);
 }
 
 void EditorWindow::cleanupBeforeExit()
@@ -805,8 +798,13 @@ void EditorWindow::showProgressbarWindow(QString text)
 void EditorWindow::cut()
 {
     if (!currentOutputFormats.empty()) {
-        currentOutputFormat = std::optional<OutputFormat>(currentOutputFormats.front());
-        qDebug() << "DERP DERP DERP1111" << currentOutputFormat->title;
+        auto front = currentOutputFormats.front();
+        currentOutputFormat = new OutputFormat(
+            front.identifier,
+            front.title,
+            front.extension,
+            front.isSelected
+        );
         currentOutputFormats.pop();
     }
     else {
@@ -831,7 +829,7 @@ void EditorWindow::cut()
         return;
 
     case FILE_PROCESSING:
-        outputVideoPath = filePath + outputFileSuffix + "." + currentOutputFormat.value().extension;
+        outputVideoPath = filePath + outputFileSuffix + "." + currentOutputFormat.value()->extension;
         break;
 
     case CANCELLED:
@@ -844,7 +842,7 @@ void EditorWindow::cut()
     }
 
     auto stateString = RaidenVideoRipper::Utils::capitalized(
-        currentOutputFormat.value().title
+        currentOutputFormat.value()->title
         );
     QString text = tr("Cutting ") + stateString + "...";
     showProgressbarWindow(text);
@@ -886,8 +884,19 @@ void EditorWindow::processNextOutputFormatOrFinish()
         cut();
     }
     else {
-        showDonateWindowIfNeeded();
-        state = IDLE;
+        switch (state) {
+        case IDLE:
+            return;
+        case FILE_PROCESSING:
+            state = IDLE;
+            showDonateWindowIfNeeded();
+            return;
+        case CANCELLED:
+            state = IDLE;
+            return;
+        case EnumCount:
+            return;
+        }
     }
 }
 
@@ -904,7 +913,6 @@ void EditorWindow::convertingDidFinish(bool result)
     case IDLE:
         break;
     case FILE_PROCESSING:
-        completedFilepaths.push(videoProcessor.value()->outputVideoPath);
         if (isSuccess) {
             processNextOutputFormatOrFinish();
         }
@@ -912,18 +920,15 @@ void EditorWindow::convertingDidFinish(bool result)
             state = IDLE;
             showAlert(
                 tr("Uhh!"),
-                tr("Error while cutting! Result code: %1\nOutput files:\n%2")
+                tr("Error while cutting! Result code: %1")
                     .arg(
-                        QString::number(result),
-                        stringPresentationOfCompletedFilepaths()
+                        QString::number(result)
                         )
                 );
-            completedFilepaths = {};
         }
         break;
 
     case CANCELLED:
-        state = FILE_PROCESSING;
         processNextOutputFormatOrFinish();
         break;
 
