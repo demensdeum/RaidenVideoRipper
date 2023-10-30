@@ -3,7 +3,7 @@
 
 Frame from [COSTA RICA IN 4K 60fps HDR (ULTRA HD)](https://www.youtube.com/watch?v=LXb3EKWsInQ)
 
-**Raiden Video Ripper** is an open-source project designed for video editing and format conversion. It's built using Qt 6 (Qt Creator) and allows you to trim and convert videos to MP4 or GIF formats.  
+**Raiden Video Ripper** is an open-source project designed for video editing and format conversion. It's built using Qt 6 (Qt Creator) and allows you to trim and convert videos to MP4, GIF и WebM formats. Also there is MP3 support for audio export. 
 
 ### Install
 Open RaidenViewRipper.pro file and build project in Qt 6 - Qt Creator. Please note that to use this tool, you'll need to have the FFMPEG_BINARY environment variable properly set.    
