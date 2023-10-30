@@ -23,7 +23,7 @@ SOURCES += \
 HEADERS += \
     constants.h \
     editorwindow.h \
-    ffmpeg_headless.h \
+    dullahan_ffmpeg.h \
     outputformat.h \
     progressbarwindow.h \
     timelinesliderwidget.h \

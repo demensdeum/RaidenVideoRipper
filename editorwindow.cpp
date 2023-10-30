@@ -90,9 +90,17 @@ EditorWindow::EditorWindow()
     restoreWindowSize();
 }
 
+QString EditorWindow::stringPresentationOfCompletedFilepaths()
+{
+    return QString("<NO>");
+}
+
 void EditorWindow::showDonateWindowIfNeeded()
 {
     successfulRunsCount += 1;
+    auto outputFiles = tr("Output files: %1")
+                           .arg(stringPresentationOfCompletedFilepaths());
+    completedFilepaths = {};
     auto outputText = tr("Success!");
     if (successfulRunsCount >= donateSuccessfulRunsCount) {
         outputText = tr("<b>Success!</b><br>If you like this application, please consider a donation:<br><a href=\"https://www.donationalerts.com/r/demensdeum\">https://www.donationalerts.com/r/demensdeum</a>");
@@ -101,7 +109,7 @@ void EditorWindow::showDonateWindowIfNeeded()
     showAlert(
         tr("Wow!"),
         outputText
-    );
+        );
     settings.setValue(successfulRunsCountKey, successfulRunsCount);
 }
 
@@ -896,6 +904,7 @@ void EditorWindow::convertingDidFinish(bool result)
     case IDLE:
         break;
     case FILE_PROCESSING:
+        completedFilepaths.push(videoProcessor.value()->outputVideoPath);
         if (isSuccess) {
             processNextOutputFormatOrFinish();
         }
@@ -903,8 +912,13 @@ void EditorWindow::convertingDidFinish(bool result)
             state = IDLE;
             showAlert(
                 tr("Uhh!"),
-                tr("Error while cutting! Result code: ") + QString::number(result)
-            );
+                tr("Error while cutting! Result code: %1\nOutput files:\n%2")
+                    .arg(
+                        QString::number(result),
+                        stringPresentationOfCompletedFilepaths()
+                        )
+                );
+            completedFilepaths = {};
         }
         break;
 

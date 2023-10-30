@@ -9,13 +9,18 @@ class VideoProcessor : public QObject, public QRunnable
     Q_OBJECT
 public:
     VideoProcessor(
-        int startPosition,
-        int endPosition,
-        QString videoPath,
-        QString outputVideoPath
-    );
+        const int startPosition,
+        const int endPosition,
+        const QString videoPath,
+        const QString outputVideoPath
+        );
 
     void run() override;
+
+    int startPosition;
+    int endPosition;
+    QString videoPath;
+    QString outputVideoPath;
 
 signals:
     void videoProcessingDidFinish(int result);
@@ -23,9 +28,4 @@ signals:
 public slots:
     void cancel();
 
-private:
-    int startPosition;
-    int endPosition;
-    QString videoPath;
-    QString outputVideoPath;
 };

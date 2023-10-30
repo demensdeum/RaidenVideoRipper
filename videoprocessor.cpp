@@ -7,16 +7,16 @@ extern "C" {
 #include <QDebug>
 
 VideoProcessor::VideoProcessor(
-    int startPosition,
-    int endPosition,
-    QString videoPath,
-    QString outputVideoPath
+    const int startPosition,
+    const int endPosition,
+    const QString videoPath,
+    const QString outputVideoPath
 )
+: startPosition(startPosition),
+endPosition(endPosition),
+videoPath(videoPath),
+outputVideoPath(outputVideoPath)
 {
-    this->startPosition = startPosition;
-    this->endPosition = endPosition;
-    this->videoPath = videoPath;
-    this->outputVideoPath = outputVideoPath;
 }
 
 void VideoProcessor::cancel()

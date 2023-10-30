@@ -90,6 +90,7 @@ private:
     void switchLanguage(QString locale);
     void showDonateWindowIfNeeded();
     QString outputFormatIsSelectedKey(QString identifier);
+    QString stringPresentationOfCompletedFilepaths();
 
     std::vector<OutputFormat> getSelectedOutputFormats();
     std::queue<OutputFormat> currentOutputFormats;
@@ -136,5 +137,6 @@ private:
     const int primaryPanelHeight = 40;
     const int secondaryPanelHeight = 40;
 
+    std::queue<QString> completedFilepaths;
     int successfulRunsCount = 0;
 };
