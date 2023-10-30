@@ -1,4 +1,5 @@
 echo "Building Dullahan-FFmpeg..."
+del C:\msys64\tmp\Dullahan-FFmpeg-Build-Complete
 cd C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg
 C:\msys64\mingw64.exe C:\msys64\usr\bin\bash.exe build.sh --release --install-libs --configure --clean --run-examples
 
