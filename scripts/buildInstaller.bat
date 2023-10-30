@@ -1,7 +1,14 @@
+@echo off
+if "%~1"=="--full-build" (
+    echo "Full build enabled..."
+    set configure_flags="--configure --clean"
+    goto :end
+)
+
 echo "Building Dullahan-FFmpeg..."
 del C:\msys64\tmp\Dullahan-FFmpeg-Build-Complete
 cd C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg
-C:\msys64\mingw64.exe C:\msys64\usr\bin\bash.exe build.sh --release --install-libs --configure --clean --run-examples
+C:\msys64\mingw64.exe C:\msys64\usr\bin\bash.exe build.sh --release --install-libs --run-examples %configure_flags%
 
 :loop
 @echo off
@@ -43,3 +50,4 @@ cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.GPLv2 .
 cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.GPLv3 .
 cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.LGPLv2.1 .
 cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\LICENSE .
+"C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\installer\config.iss"
