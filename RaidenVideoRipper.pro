@@ -42,6 +42,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RC_ICONS = resources\icons\applicationIcon.ico
 
+TRANSLATIONS += resources\translation\raidenvideoripper_ru.ts
+
 RESOURCES += \
     resources.qrc
 

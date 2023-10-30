@@ -15,3 +15,9 @@
 [[maybe_unused]] static const char *outputFormatMp3 = "outputFormatMp3";
 [[maybe_unused]] static const char *isSelectedKeyExtension = "isSelected";
 [[maybe_unused]] static const char *outputFileSuffix = "_RaidenVideoRipper_";
+[[maybe_unused]] static const char *startButtonStyleSheet = "QPushButton {"
+                                                            "color: white;"
+                                                            "background-color: #007ad9;"
+                                                            "border: none;"
+                                                            "font-weight: bold;"
+                                                            "}";

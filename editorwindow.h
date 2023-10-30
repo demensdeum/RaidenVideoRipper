@@ -15,6 +15,7 @@
 #include <QThreadPool>
 #include <QLabel>
 #include <QMediaPlayer>
+#include <QTranslator>
 #include <queue>
 #include <progressbarwindow.h>
 #include <videowidget.h>
@@ -86,6 +87,7 @@ private:
     void didPollProgress(int progress);
     void processNextOutputFormatOrFinish();
     void raiseProgressWindowToUser();
+    void switchLanguage(QString locale);
     QString outputFormatIsSelectedKey(QString identifier);
 
     std::vector<OutputFormat> getSelectedOutputFormats();

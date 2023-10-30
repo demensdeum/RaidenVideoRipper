@@ -19,6 +19,7 @@
 #include <QPushButton>
 #include <QDial>
 #include <QString>
+#include <QLibraryInfo>
 #include <videoprocessor.h>
 #include "constants.h"
 #include "utils.h"
@@ -26,7 +27,6 @@
 EditorWindow::EditorWindow()
 {
     qRegisterMetaType<OutputFormat>("OutputFormat");
-
     auto style = this->style();
     playIcon = QIcon::fromTheme(
         "media-playback-start.png",
@@ -47,7 +47,7 @@ EditorWindow::EditorWindow()
 
     auto mp4 = OutputFormat(
         outputFormatMp4,
-        "Video (mp4)",
+        tr("Video (mp4)"),
         "mp4",
         settings.value(outputFormatIsSelectedKey(QString(outputFormatMp4)), true).value<bool>()
         );
@@ -68,7 +68,7 @@ EditorWindow::EditorWindow()
 
     auto mp3 = OutputFormat(
         outputFormatMp3,
-        "Audio (mp3)",
+        tr("Audio (mp3)"),
         "mp3",
         settings.value(outputFormatIsSelectedKey(QString(outputFormatMp3)), false).value<bool>()
         );
@@ -112,21 +112,21 @@ void EditorWindow::openArgumentsFileIfNeeded()
 
 void EditorWindow::setupActions()
 {
-    openAction = new QAction("Open...", this);
+    openAction = new QAction(tr("Open..."), this);
     openAction->setShortcut(QKeySequence::Open);
     connect(openAction, &QAction::triggered, this, &EditorWindow::open);
 
-    auto exitAction = new QAction("Exit", this);
+    auto exitAction = new QAction(tr("Exit"), this);
     connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
 
-    auto fileMenu = menuBar()->addMenu("&File");
+    auto fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(openAction);
     fileMenu->addAction(exitAction);
 
-    auto optionsMenu = menuBar()->addMenu("&Options");
+    auto optionsMenu = menuBar()->addMenu(tr("&Options"));
 
     auto isPreviewChecked = settings.value(previewCheckboxStateKey, true).value<bool>();
-    previewCheckboxAction = new QAction("Preview", this);
+    previewCheckboxAction = new QAction(tr("Preview"), this);
     previewCheckboxAction->setCheckable(true);
     previewCheckboxAction->setChecked(isPreviewChecked);
     connect(
@@ -151,13 +151,13 @@ void EditorWindow::setupActions()
         optionsMenu->addAction(outputFormatCheckboxAction);
     }
 
-    auto aboutMenu = menuBar()->addMenu("&About");
+    auto aboutMenu = menuBar()->addMenu(tr("&About"));
 
-    auto aboutApplicationAction = new QAction("About Raiden Video Ripper", this);
+    auto aboutApplicationAction = new QAction(tr("About Raiden Video Ripper"), this);
     connect(aboutApplicationAction, &QAction::triggered, qApp, [this] { showAboutApplication(); });
     aboutMenu->addAction(aboutApplicationAction);
 
-    auto aboutQtAction = new QAction("About &Qt", this);
+    auto aboutQtAction = new QAction(tr("About &Qt"), this);
     connect(aboutQtAction, &QAction::triggered, qApp, &QApplication::aboutQt);
     aboutMenu->addAction(aboutQtAction);
 }
@@ -261,15 +261,10 @@ void EditorWindow::createLayout()
     auto bottomSecondaryPanel = new QWidget();
     bottomSecondaryPanel->setFixedHeight(secondaryPanelHeight);
 
-    auto startButton = new QPushButton("START");
+    auto startButton = new QPushButton(tr("START"));
     startButton->setFixedWidth(160);
     startButton->setFixedHeight(30);
-    startButton->setStyleSheet("QPushButton {"
-                               "color: white;"
-                               "background-color: #007ad9;"
-                               "border: none;"
-                               "font-weight: bold;"
-                               "}");
+    startButton->setStyleSheet(startButtonStyleSheet);
     connect(startButton, &QPushButton::clicked, this, &EditorWindow::startButtonClicked);
 
     durationLabel = new QLabel("00:00:00.00 - 00:00:00.00 - 00:00:00.00");
@@ -532,7 +527,7 @@ void EditorWindow::togglePlayback() {
 void EditorWindow::showAboutApplication()
 {
     const auto copyright =
-        tr("Copyright &copy; 2023 <a href=\"https://www.demensdeum.com/\">Ilia Prokhorov (%1)</a>")
+        tr("Copyright &copy; 2023 <a href=\"https://www.demensdeum.com/\">Ilia Prokhorov</a>")
             .arg(applicationName);
     const auto license =
         QStringLiteral("<a href=\"https://opensource.org/license/mit/\">MIT License</a>");
@@ -718,12 +713,12 @@ void EditorWindow::startButtonClicked()
     switch (state) {
     case IDLE:
         if (filePath.isEmpty()) {
-            showAlert("WUT!", "Open file first!");
+            showAlert(tr("WUT!"), tr("Open file first!"));
             return;
         }
         else if (selectedOutputFormats.empty())
         {
-            showAlert("WUT!", "Select output formats checkboxes first!");
+            showAlert(tr("WUT!"), tr("Select output formats checkboxes first!"));
             return;
         }
         break;
@@ -799,7 +794,6 @@ void EditorWindow::cut()
 
     if (endPosition < startPosition)
     {
-        showAlert("ERROR!", "You can't cut upside down! End position must be greater than start position!");
         state = IDLE;
         return;
     }
@@ -808,7 +802,7 @@ void EditorWindow::cut()
     switch (state)
     {
     case IDLE:
-        showAlert("Ugh!", "Internal error, IDLE state!");
+        qDebug() << "Internal error, IDLE state!";
         return;
 
     case FILE_PROCESSING:
@@ -827,7 +821,7 @@ void EditorWindow::cut()
     auto stateString = RaidenVideoRipper::Utils::capitalized(
         currentOutputFormat.value().title
         );
-    QString text = "Cutting " + stateString + "...";
+    QString text = tr("Cutting ") + stateString + "...";
     showProgressbarWindow(text);
 
     videoProcessor = new VideoProcessor(
@@ -867,7 +861,7 @@ void EditorWindow::processNextOutputFormatOrFinish()
         cut();
     }
     else {
-        showAlert("Wow!", "Success!");
+        showAlert(tr("Wow!"), tr("Success!"));
         state = IDLE;
     }
 }
@@ -891,8 +885,8 @@ void EditorWindow::convertingDidFinish(bool result)
         else {
             state = IDLE;
             showAlert(
-               "Uhh!",
-                "Error while cutting! Result code: " + QString::number(result)
+                tr("Uhh!"),
+                tr("Error while cutting! Result code: ") + QString::number(result)
             );
         }
         break;

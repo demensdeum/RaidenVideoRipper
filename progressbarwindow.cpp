@@ -16,7 +16,7 @@ ProgressBarWindow::ProgressBarWindow(QString text)
     progressBar.setValue(0);
     mainLayout->addWidget(&progressBar);
 
-    QPushButton* cancelButton = new QPushButton("&Cancel");
+    QPushButton* cancelButton = new QPushButton(tr("&Cancel"));
     mainLayout->addWidget(cancelButton);
 
     connect(

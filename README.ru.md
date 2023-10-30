@@ -22,7 +22,7 @@ Raiden Video Ripper упрощает редактирование и конве�
 Qt 6: https://www.qt.io/product/qt6
 FFmpeg для Windows: https://ffmpeg.org/download.html#build-windows
 
-### Стиль кодирования
+### Оформление кода
 https://wiki.qt.io/Qt_Coding_Style
 
 ### Версионирование
