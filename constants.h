@@ -21,3 +21,5 @@
                                                             "border: none;"
                                                             "font-weight: bold;"
                                                             "}";
+[[maybe_unused]] static const int donateSuccessfulRunsCount = 6;
+[[maybe_unused]] static const char *successfulRunsCountKey = "successfulRunsCount";

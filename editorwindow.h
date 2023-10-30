@@ -88,6 +88,7 @@ private:
     void processNextOutputFormatOrFinish();
     void raiseProgressWindowToUser();
     void switchLanguage(QString locale);
+    void showDonateWindowIfNeeded();
     QString outputFormatIsSelectedKey(QString identifier);
 
     std::vector<OutputFormat> getSelectedOutputFormats();
@@ -134,4 +135,6 @@ private:
 
     const int primaryPanelHeight = 40;
     const int secondaryPanelHeight = 40;
+
+    int successfulRunsCount = 0;
 };

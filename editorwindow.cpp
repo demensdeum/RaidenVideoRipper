@@ -73,6 +73,8 @@ EditorWindow::EditorWindow()
         settings.value(outputFormatIsSelectedKey(QString(outputFormatMp3)), false).value<bool>()
         );
 
+    successfulRunsCount = settings.value(successfulRunsCountKey).value<int>();
+
     outputFormats.push_back(mp4);
     outputFormats.push_back(gif);
     outputFormats.push_back(webm);
@@ -86,6 +88,21 @@ EditorWindow::EditorWindow()
     updateDurationLabel();
     progressBarWindow = nullptr;
     restoreWindowSize();
+}
+
+void EditorWindow::showDonateWindowIfNeeded()
+{
+    successfulRunsCount += 1;
+    auto outputText = tr("Success!");
+    if (successfulRunsCount >= donateSuccessfulRunsCount) {
+        outputText = tr("<b>Success!</b><br>If you like this application, please consider a donation:<br><a href=\"https://www.donationalerts.com/r/demensdeum\">https://www.donationalerts.com/r/demensdeum</a>");
+        successfulRunsCount = 0;
+    }
+    showAlert(
+        tr("Wow!"),
+        outputText
+    );
+    settings.setValue(successfulRunsCountKey, successfulRunsCount);
 }
 
 QString EditorWindow::outputFormatIsSelectedKey(QString identifier)
@@ -861,7 +878,7 @@ void EditorWindow::processNextOutputFormatOrFinish()
         cut();
     }
     else {
-        showAlert(tr("Wow!"), tr("Success!"));
+        showDonateWindowIfNeeded();
         state = IDLE;
     }
 }
