@@ -9,7 +9,7 @@
 Пожалуйста, посетите страницу "Релизы", чтобы быть в курсе последних выпусков и обновлений: https://github.com/demensdeum/RaidenVideoRipper/releases
 
 ### Ссылки
-Qt 6: https://www.qt.io/product/qt6
+Qt 6: https://www.qt.io/product/qt6    
 FFmpeg для Windows: https://ffmpeg.org/download.html#build-windows
 
 ### Оформление кода
