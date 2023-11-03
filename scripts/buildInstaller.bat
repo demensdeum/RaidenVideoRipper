@@ -1,3 +1,15 @@
+set MINGWPATH=C:\msys64\usr\bin
+set MINGWSUBPATH=C:\msys64\mingw64\bin
+set QTMINGWPATH=C:\Qt\6.6.0\mingw_64\bin
+set PATH=%MINGWPATH%;%QTMINGWPATH%;%MINGWSUBPATH%;%PATH%
+set MINGWPATH=
+set QTMINGWPATH=
+set MINGWSUBPATH=
+
+set RAIDENVIDEORIPPERVERISON=1.0.0.0
+
+set configure_flags=
+
 @echo off
 if "%~1"=="--full-build" (
     echo "Full build enabled..."
@@ -23,7 +35,7 @@ if not exist "C:\msys64\tmp\Dullahan-FFmpeg-Build-Complete" (
 echo "Building Raiden Video Ripper..."
 cd C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper
 set buildDirectory=C:\RaidenVideoRipperReleaseVersion
-rm $buildDirectory$
+rmdir /s /q %buildDirectory%
 mkdir %buildDirectory%
 cd %buildDirectory%
 C:\Qt\6.6.0\mingw_64\bin\qmake C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\RaidenVideoRipper.pro
@@ -39,6 +51,18 @@ cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\libpostproc/postproc-57.dll
 cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\libswresample/swresample-4.dll .
 cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\libswscale/swscale-7.dll .
 cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\dullahan_ffmpeg.dll .
+cp C:\msys64\ucrt64\bin\libiconv-2.dll .
+cp C:\msys64\mingw64\bin\liblzma-5.dll .
+cp C:\msys64\mingw64\bin\libvorbis-0.dll .
+cp C:\msys64\mingw64\bin\libvorbisenc-2.dll .
+cp C:\msys64\mingw64\bin\SDL2.dll .
+cp C:\msys64\mingw64\bin\libx256.dll .
+cp C:\msys64\mingw64\bin\libx264-164.dll .
+cp C:\msys64\mingw64\bin\libvpx-1.dll .
+cp C:\msys64\mingw64\bin\libbz2-1.dll .
+cp C:\msys64\mingw64\bin\zlib1.dll .
+cp C:\msys64\mingw64\bin\libogg-0.dll .
+cp C:\msys64\mingw64\bin\libx265.dll .
 start RaidenVideoRipper.exe
 cd ..
 sleep 2
@@ -51,3 +75,9 @@ cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.GPLv3 .
 cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.LGPLv2.1 .
 cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\LICENSE .
 "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\installer\config.iss"
+cd ..
+mkdir zip
+cd zip
+cp -r ../release .
+rename release RaidenVideoRipper
+tar acvf RaidenVideoRipper-%RAIDENVIDEORIPPERVERISON%.zip RaidenVideoRipper
