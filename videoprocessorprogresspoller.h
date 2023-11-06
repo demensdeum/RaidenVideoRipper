@@ -18,7 +18,7 @@ public:
 
 private:
     QTimer *timer;
-    int duration;
+    qint64 duration;
     const int tick = 200;
 
 signals:

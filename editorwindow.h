@@ -89,6 +89,7 @@ private:
     void raiseProgressWindowToUser();
     void switchLanguage(QString locale);
     void showDonateWindowIfNeeded();
+    void durationLoaded(qint64 duration);
     QString outputFormatIsSelectedKey(QString identifier);
 
     std::vector<OutputFormat> getSelectedOutputFormats();
@@ -137,4 +138,5 @@ private:
     const int secondaryPanelHeight = 40;
 
     int successfulRunsCount = 0;
+    std::optional<qint64> fileDuration;
 };

@@ -225,7 +225,6 @@ void EditorWindow::cleanupBeforeExit()
 
     switch (state) {
     case IDLE:
-        qDebug() << "Cleanup in idle state, wtf?";
         return;
     case FILE_PROCESSING:
         cancelInProgress();
@@ -482,7 +481,25 @@ void EditorWindow::initializePlayer()
         this,
         &EditorWindow::handlePlayerError
         );
+    connect(
+        player,
+        &QMediaPlayer::durationChanged,
+        this,
+        &EditorWindow::durationLoaded
+        );
     player->setVideoOutput(videoWidget);
+}
+
+void EditorWindow::durationLoaded(qint64 duration)
+{
+    fileDuration = duration;
+    player->play();
+    volumeChanged(volumeSlider->value());
+    timelineIndicator->setMaximumValue(duration);
+    timelineIndicator->setStartValue(0);
+    timelineIndicator->setPlaybackValue(0);
+    timelineIndicator->setEndValue(duration);
+    updateWindowTitle();
 }
 
 void EditorWindow::playbackStateChanged(QMediaPlayer::PlaybackState state)
@@ -687,14 +704,8 @@ void EditorWindow::handleOpenFile(QUrl url)
 
     auto filePathDirectory = QFileInfo(filePath).absolutePath();
     settings.setValue(previousWorkingPathKey, filePathDirectory);
+    fileDuration.reset();
     player->setSource(url);
-    player->play();
-    volumeChanged(volumeSlider->value());
-    timelineIndicator->setMaximumValue(player->duration());
-    timelineIndicator->setStartValue(0);
-    timelineIndicator->setPlaybackValue(0);
-    timelineIndicator->setEndValue(player->duration());
-    updateWindowTitle();
 }
 
 void EditorWindow::updateWindowTitle()
@@ -774,6 +785,10 @@ void EditorWindow::volumeChanged(qint64 position)
 
 void EditorWindow::showProgressbarWindow(QString text)
 {
+    if (!fileDuration.has_value()) {
+        qDebug() << "showProgressbar - no duration!";
+        return;
+    }
     progressBarWindow = new ProgressBarWindow(text);
     connect(
         progressBarWindow.value(),
@@ -786,7 +801,7 @@ void EditorWindow::showProgressbarWindow(QString text)
     if (videoProcessorProgressPoller.has_value()) {
         videoProcessorProgressPoller.value()->stop();
     }
-    videoProcessorProgressPoller = new VideoProcessorProgressPoller(player->duration());
+    videoProcessorProgressPoller = new VideoProcessorProgressPoller(fileDuration.value());
     connect(
         videoProcessorProgressPoller.value(),
         &VideoProcessorProgressPoller::didPollProgress,
@@ -797,6 +812,11 @@ void EditorWindow::showProgressbarWindow(QString text)
 
 void EditorWindow::cut()
 {
+    if (!fileDuration.has_value()) {
+        qDebug() << "No file duration";
+        return;
+    }
+
     if (!currentOutputFormats.empty()) {
         auto front = currentOutputFormats.front();
         currentOutputFormat = new OutputFormat(
