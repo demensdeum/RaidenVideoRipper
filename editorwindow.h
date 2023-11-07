@@ -73,7 +73,7 @@ private:
     void createUI();
     void previewCheckboxStateChange(bool checked);
     void playToggleButtonClicked();
-    void showStatusMessage(const QString &message);
+    void showErrorMessage(const QString &message);
     void handlePlayerError(QMediaPlayer::Error error, const QString &errorString);
     void outputFormatCheckboxStateChanged(bool isChecked);
     void handleDropUrl(QUrl url);
@@ -139,4 +139,6 @@ private:
 
     int successfulRunsCount = 0;
     std::optional<qint64> fileDuration;
+
+    std::tuple<QString, QString> previousFileAndErrorState;
 };

@@ -2,12 +2,17 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QSpacerItem>
+#include <QApplication>
+#include <QScreen>
 
 ProgressBarWindow::ProgressBarWindow(QString text)
     : QWidget()
 {
     setWindowTitle(text);
-    setFixedSize(400, 100);
+    auto availableGeometry = QApplication::primaryScreen()->availableGeometry();
+    auto width = availableGeometry.width() * 0.2604166666666667;
+    auto height = width * 0.25;
+    setFixedSize(width, height);
     setWindowFlag(Qt::WindowCloseButtonHint, false);
     setWindowFlag(Qt::WindowMinimizeButtonHint, false);
 

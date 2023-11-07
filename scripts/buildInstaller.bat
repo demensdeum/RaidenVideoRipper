@@ -1,83 +1,164 @@
-set MINGWPATH=C:\msys64\usr\bin
-set MINGWSUBPATH=C:\msys64\mingw64\bin
-set QTMINGWPATH=C:\Qt\6.6.0\mingw_64\bin
-set PATH=%MINGWPATH%;%QTMINGWPATH%;%MINGWSUBPATH%;%PATH%
-set MINGWPATH=
+setlocal enabledelayedexpansion
+
+set QTLIBSPATH=
 set QTMINGWPATH=
+set DULLAHANFFMPEGMINGWBIN=
+set MINGWPATH=
 set MINGWSUBPATH=
+set QMAKESPEC=
+set MINGWMAKEBINARY=
+set DULLAHANFFMPEGDIRECTORY=
+set SLEEPBINARY=C:\msys64\usr\bin\sleep.exe
+set CPBINARY=C:\msys64\usr\bin\cp.exe
+set QTWINDEPLOYBINARY=
 
 set RAIDENVIDEORIPPERVERISON=1.0.0.0
 
 set configure_flags=
+set target_arch=""
+set dullahan_ffmpeg_build=true
 
-@echo off
-if "%~1"=="--full-build" (
-    echo "Full build enabled..."
-    set configure_flags=--configure --clean
+echo off
+
+for %%x in (%*) do (
+    echo %%~x
+    if %%~x==--configure (
+        echo "Full build enabled..."
+        set configure_flags=%configure_flags%--configure 
+    ) else if %%x==--clean (
+        echo "Clean..."
+        set configure_flags=%configure_flags%--clean
+    ) else if %%~x==--x86 (
+        set QTLIBSPATH=C:\Users\Demensdeum\Documents\Sources\3rdParty\qt\build\qtbase\lib
+        set QTMINGWPATH=C:\Users\Demensdeum\Documents\Sources\3rdParty\qt\build\qtbase\bin
+        set target_arch=--x86
+        set MINGWSUBPATH=C:\Users\Demensdeum\Documents\Sources\3rdParty\winlibs-ming32\bin
+        set DULLAHANFFMPEGMINGWBIN=C:\msys64\mingw32.exe
+        set MINGWPATH=C:\Users\Demensdeum\Documents\Sources\3rdParty\winlibs-ming32\bin
+        set MINGWMAKEBINARY=C:\Users\Demensdeum\Documents\Sources\3rdParty\winlibs-ming32\bin\mingw32-make.exe
+        set QMAKESPEC=win32-g++
+        set DULLAHANFFMPEGDIRECTORY=C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg
+        set DEPENDENCYLIBSPATH=C:\msys64\mingw32\bin
+        set QTWINDEPLOYBINARY=C:\Users\Demensdeum\Documents\Sources\3rdParty\qt\build\qtbase\bin\windeployqt.exe
+    ) else if %%~x==--x86_64 (
+        set QTMINGWPATH=C:\Qt\6.6.0\mingw_64\bin
+        set target_arch=--x86_64
+        set MINGWSUBPATH=C:\msys64\mingw64\bin
+        set DULLAHANFFMPEGMINGWBIN=C:\msys64\mingw64.exe
+        set MINGWPATH=C:\msys64\usr\bin
+        set QMAKESPEC=
+        echo "TODO: Set correct qmakespec for x86_64!!!"
+        set QTLIBSPATH=
+        echo "TODO: Set correct QTLIBSPATH for x86_64!!!"
+        set MINGWMAKEBINARY=
+        echo "TODO: Set correct MINGWMAKEBIN for x86_64!!!"
+        set DULLAHANFFMPEGDIRECTORY=C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg
+        echo "TODO set correct DEPENDENCYLIBSPATH=C:\msys64\mingw32\bin for x86_64!!!"
+        set QTWINDEPLOYBINARY=C:\Qt\6.6.0\mingw_64\bin\windeployqt.exe
+        exit 1
+    ) else if %%~x==--skip-dullahan-ffmpeg (
+        echo Skipping Dullahan-FFmpeg build
+        set dullahan_ffmpeg_build=false
+    ) else (
+        echo Unknown argument %%~x
+        exit 1
+    )
 )
-@echo on
 
+echo Target arch: %target_arch%
+
+if %target_arch%=="" (
+    echo "No arch selected! Use (--x86 or --x86_64 flags)"
+    exit 2
+)
+
+set PATH=%MINGWPATH%;%QTMINGWPATH%;%MINGWSUBPATH%;%QTLIBSPATH%;%PATH%
+
+echo on
+
+if %dullahan_ffmpeg_build%==true (
 echo "Building Dullahan-FFmpeg..."
 del C:\msys64\tmp\Dullahan-FFmpeg-Build-Complete
 cd C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg
-C:\msys64\mingw64.exe C:\msys64\usr\bin\bash.exe build.sh --release --install-libs --run-examples %configure_flags%
+%DULLAHANFFMPEGMINGWBIN% C:\msys64\usr\bin\bash.exe build.sh --release --install-libs --run-examples %configure_flags% %target_arch%
 
 :loop
-@echo off
+echo off
 if not exist "C:\msys64\tmp\Dullahan-FFmpeg-Build-Complete" (
-    @echo on
+    echo on
     echo "Waiting for FFmpeg-Dullahan build script to complete..."
-    @echo off
-    sleep 10
+    echo off
+    %SLEEPBINARY% 10
     goto :loop
 )
+)
+
+echo on
 
 echo "Building Raiden Video Ripper..."
 cd C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper
 set buildDirectory=C:\RaidenVideoRipperReleaseVersion
-rmdir /s /q %buildDirectory%
+rmdir /S /Q %buildDirectory%
 mkdir %buildDirectory%
 cd %buildDirectory%
-C:\Qt\6.6.0\mingw_64\bin\qmake C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\RaidenVideoRipper.pro
-make
+
+echo %PATH%
+
+%QTMINGWPATH%\qmake C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\RaidenVideoRipper.pro -spec %QMAKESPEC%
+
+%MINGWMAKEBINARY% -j16
+
+@echo off
+if %ERRORLEVEL% neq 0 (
+    @echo on
+    echo RVR build failed, return code: %ERRORLEVEL%.
+    @echo off
+    exit %ERRORLEVEL%
+)
+
 cd release
-C:\Qt\6.6.0\mingw_64\bin\windeployqt.exe RaidenVideoRipper.exe
-cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\libavfilter/avfilter-9.dll .
-cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\libavcodec/avcodec-60.dll .
-cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\libavdevice/avdevice-60.dll .
-cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\libavformat/avformat-60.dll .
-cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\libavutil/avutil-58.dll .
-cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\libpostproc/postproc-57.dll .
-cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\libswresample/swresample-4.dll .
-cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\libswscale/swscale-7.dll .
-cp C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg\dullahan_ffmpeg.dll .
-cp C:\msys64\ucrt64\bin\libiconv-2.dll .
-cp C:\msys64\mingw64\bin\liblzma-5.dll .
-cp C:\msys64\mingw64\bin\libvorbis-0.dll .
-cp C:\msys64\mingw64\bin\libvorbisenc-2.dll .
-cp C:\msys64\mingw64\bin\SDL2.dll .
-cp C:\msys64\mingw64\bin\libx256.dll .
-cp C:\msys64\mingw64\bin\libx264-164.dll .
-cp C:\msys64\mingw64\bin\libvpx-1.dll .
-cp C:\msys64\mingw64\bin\libbz2-1.dll .
-cp C:\msys64\mingw64\bin\zlib1.dll .
-cp C:\msys64\mingw64\bin\libogg-0.dll .
-cp C:\msys64\mingw64\bin\libx265.dll .
+
+%QTWINDEPLOYBINARY% RaidenVideoRipper.exe
+
+%CPBINARY% %DULLAHANFFMPEGDIRECTORY%\libavfilter\avfilter-9.dll .
+%CPBINARY% %DULLAHANFFMPEGDIRECTORY%\libavcodec\avcodec-60.dll .
+%CPBINARY% %DULLAHANFFMPEGDIRECTORY%\libavdevice\avdevice-60.dll .
+%CPBINARY% %DULLAHANFFMPEGDIRECTORY%\libavformat\avformat-60.dll .
+%CPBINARY% %DULLAHANFFMPEGDIRECTORY%\libavutil\avutil-58.dll .
+%CPBINARY% %DULLAHANFFMPEGDIRECTORY%\libpostproc\postproc-57.dll .
+%CPBINARY% %DULLAHANFFMPEGDIRECTORY%\libswresample\swresample-4.dll .
+%CPBINARY% %DULLAHANFFMPEGDIRECTORY%\libswscale\swscale-7.dll .
+%CPBINARY% %DULLAHANFFMPEGDIRECTORY%\dullahan_ffmpeg.dll .
+
+%CPBINARY% %DEPENDENCYLIBSPATH%\libiconv-2.dll .
+%CPBINARY% %DEPENDENCYLIBSPATH%\liblzma-5.dll .
+%CPBINARY% %DEPENDENCYLIBSPATH%\libvorbis-0.dll .
+%CPBINARY% %DEPENDENCYLIBSPATH%\libvorbisenc-2.dll .
+%CPBINARY% %DEPENDENCYLIBSPATH%\libx264-164.dll .
+%CPBINARY% %DEPENDENCYLIBSPATH%\libvpx-1.dll .
+%CPBINARY% %DEPENDENCYLIBSPATH%\libbz2-1.dll .
+%CPBINARY% %DEPENDENCYLIBSPATH%\zlib1.dll .
+%CPBINARY% %DEPENDENCYLIBSPATH%\libogg-0.dll .
+%CPBINARY% %DEPENDENCYLIBSPATH%\SDL2.dll .
+%CPBINARY% %QTMINGWPATH%\libmcfgthread-1.dll .
+
 start RaidenVideoRipper.exe
+
 cd ..
-sleep 2
+%SLEEPBINARY% 2
 del release /F /Q
 taskkill /f /t /im RaidenVideoRipper.exe
 cd release
-cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.LGPLv3 .
-cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.GPLv2 .
-cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.GPLv3 .
-cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.LGPLv2.1 .
-cp C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\LICENSE .
+%CPBINARY% C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.LGPLv3 .
+%CPBINARY% C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.GPLv2 .
+%CPBINARY% C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.GPLv3 .
+%CPBINARY% C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\COPYING.LGPLv2.1 .
+%CPBINARY% C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\LICENSE .
 "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\installer\config.iss"
 cd ..
 mkdir zip
 cd zip
-cp -r ../release .
+%CPBINARY% -r ../release .
 rename release RaidenVideoRipper
 tar acvf RaidenVideoRipper-%RAIDENVIDEORIPPERVERISON%.zip RaidenVideoRipper
+endlocal

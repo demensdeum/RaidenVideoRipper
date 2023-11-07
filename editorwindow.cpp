@@ -1004,13 +1004,24 @@ void EditorWindow::updateButtons(QMediaPlayer::PlaybackState state)
     stopButton->setEnabled(state != QMediaPlayer::StoppedState);
 }
 
-void EditorWindow::showStatusMessage(const QString &message)
+void EditorWindow::showErrorMessage([[maybe_unused]]const QString &message)
 {
-    statusBar()->showMessage(message, 5000);
+    auto previousErrorFilePath = std::get<0>(previousFileAndErrorState);
+    auto previousErrorText = std::get<1>(previousFileAndErrorState);
+    if (
+        previousErrorFilePath == filePath
+        &&
+        previousErrorText == message
+        )
+    {
+        return;
+    }
+    previousFileAndErrorState = std::make_tuple(filePath, message);
+    showAlert(tr("Uhh!"), message);
 }
 
 void EditorWindow::handlePlayerError(QMediaPlayer::Error error, const QString &errorString)
 {
     Q_UNUSED(error);
-    showStatusMessage(errorString);
+    showErrorMessage(errorString);
 }
