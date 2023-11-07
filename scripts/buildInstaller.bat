@@ -12,10 +12,10 @@ set SLEEPBINARY=C:\msys64\usr\bin\sleep.exe
 set CPBINARY=C:\msys64\usr\bin\cp.exe
 set QTWINDEPLOYBINARY=
 
-set RAIDENVIDEORIPPERVERISON=1.0.0.0
+set RAIDENVIDEORIPPERVERISON=1.0.1.0
 
 set configure_flags=
-set target_arch=""
+set target_arch=NULL
 set dullahan_ffmpeg_build=true
 
 echo off
@@ -41,21 +41,17 @@ for %%x in (%*) do (
         set DEPENDENCYLIBSPATH=C:\msys64\mingw32\bin
         set QTWINDEPLOYBINARY=C:\Users\Demensdeum\Documents\Sources\3rdParty\qt\build\qtbase\bin\windeployqt.exe
     ) else if %%~x==--x86_64 (
+        set QTLIBSPATH=C:/Qt/6.6.0/mingw_64/lib/        
         set QTMINGWPATH=C:\Qt\6.6.0\mingw_64\bin
         set target_arch=--x86_64
         set MINGWSUBPATH=C:\msys64\mingw64\bin
         set DULLAHANFFMPEGMINGWBIN=C:\msys64\mingw64.exe
         set MINGWPATH=C:\msys64\usr\bin
-        set QMAKESPEC=
-        echo "TODO: Set correct qmakespec for x86_64!!!"
-        set QTLIBSPATH=
-        echo "TODO: Set correct QTLIBSPATH for x86_64!!!"
-        set MINGWMAKEBINARY=
-        echo "TODO: Set correct MINGWMAKEBIN for x86_64!!!"
+        set MINGWMAKEBINARY=C:\Qt\Tools\mingw1120_64\bin\mingw32-make.exe        
+        set QMAKESPEC=win32-g++
         set DULLAHANFFMPEGDIRECTORY=C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg
-        echo "TODO set correct DEPENDENCYLIBSPATH=C:\msys64\mingw32\bin for x86_64!!!"
+        set DEPENDENCYLIBSPATH=C:\msys64\mingw64\bin
         set QTWINDEPLOYBINARY=C:\Qt\6.6.0\mingw_64\bin\windeployqt.exe
-        exit 1
     ) else if %%~x==--skip-dullahan-ffmpeg (
         echo Skipping Dullahan-FFmpeg build
         set dullahan_ffmpeg_build=false
@@ -67,7 +63,7 @@ for %%x in (%*) do (
 
 echo Target arch: %target_arch%
 
-if %target_arch%=="" (
+if %target_arch%==NULL (
     echo "No arch selected! Use (--x86 or --x86_64 flags)"
     exit 2
 )
@@ -80,7 +76,8 @@ if %dullahan_ffmpeg_build%==true (
 echo "Building Dullahan-FFmpeg..."
 del C:\msys64\tmp\Dullahan-FFmpeg-Build-Complete
 cd C:\msys64\home\Demensdeum\Sources\Dullahan-FFmpeg
-%DULLAHANFFMPEGMINGWBIN% C:\msys64\usr\bin\bash.exe build.sh --release --install-libs --run-examples %configure_flags% %target_arch%
+
+%DULLAHANFFMPEGMINGWBIN% C:\msys64\usr\bin\bash.exe -c "./build.sh --release --install-libs --run-examples %configure_flags% %target_arch% ; exec bash"
 
 :loop
 echo off
@@ -161,4 +158,9 @@ cd zip
 %CPBINARY% -r ../release .
 rename release RaidenVideoRipper
 tar acvf RaidenVideoRipper-%RAIDENVIDEORIPPERVERISON%.zip RaidenVideoRipper
+
+cd ..
+explorer installer
+explorer zip
+
 endlocal
