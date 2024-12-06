@@ -22,8 +22,7 @@ https://semver.org
 
 ### Donation
 You can support developer by donation:   
-
-https://www.donationalerts.com/r/demensdeum
+https://ko-fi.com/demensdeum
 
 ### Language:
 [![ru](https://img.shields.io/badge/lang-ru-red.svg)](https://github.com/demensdeum/RaidenVideoRipper/blob/main/README.ru.md)
