@@ -43,7 +43,6 @@ public:
 private:
     void updateRenderRectangle();
 
-    const int minimumValue = 0;
     int maximumValue;
     int value;
 

@@ -1,4 +1,4 @@
-#include "ProgressBarWindow.h"
+#include "progressbarwindow.h"
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QSpacerItem>
