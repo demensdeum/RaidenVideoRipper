@@ -16,6 +16,7 @@ SOURCES += \
     progressbarwindow.cpp \
     timelinesliderwidget.cpp \
     timelinewidget.cpp \
+    utils.cpp \
     videoprocessor.cpp \
     videoprocessorprogresspoller.cpp \
     videowidget.cpp

@@ -4,6 +4,10 @@
 #include <QStringList>
 #include <QDebug>
 #include <queue>
+#include <QGuiApplication>
+#include <QIcon>
+#include <QStyleHints>
+#include <QStyle>
 
 namespace RaidenVideoRipper {
 namespace Utils {
@@ -16,16 +20,13 @@ void clearQueue(std::queue<T>& queue)
     }
 }
 
-QString capitalized(const QString& text)
-{
-    auto parts = text.split("");
-    auto size = parts.size();
-    if (size < 1) {
-        return text;
-    }
-    parts[1] = parts[1].toUpper();
-    return parts.join("");
-}
+bool isApplicationInDarkMode();
+QIcon tintIconColors(const QIcon& originalIcon, const QColor& tintColor);
+QImage tintImageColors(const QImage& originalImage, const QColor& tintColor);
+QIcon themeStyledIcon(const QString& themeName, const QIcon& fallback);
+QImage themeStyledImage(const char *originalImageName);
+QString capitalized(const QString& text);
+
 }
 }
 

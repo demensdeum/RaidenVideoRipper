@@ -28,15 +28,15 @@ EditorWindow::EditorWindow()
 {
     qRegisterMetaType<OutputFormat>("OutputFormat");
     auto style = this->style();
-    playIcon = QIcon::fromTheme(
+    playIcon = RaidenVideoRipper::Utils::themeStyledIcon(
         "media-playback-start.png",
         style->standardIcon(QStyle::SP_MediaPlay)
         );
-    pauseIcon = QIcon::fromTheme(
+    pauseIcon = RaidenVideoRipper::Utils::themeStyledIcon(
         "media-playback-pause.png",
         style->standardIcon(QStyle::SP_MediaPause)
         );
-    stopIcon = QIcon::fromTheme(
+    stopIcon = RaidenVideoRipper::Utils::themeStyledIcon(
         "media-playback-stop.png",
         style->standardIcon(QStyle::SP_MediaStop)
         );

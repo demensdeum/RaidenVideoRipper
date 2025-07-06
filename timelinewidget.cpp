@@ -4,6 +4,7 @@
 #include <QColor>
 #include <QDebug>
 #include <QMouseEvent>
+#include "utils.h"
 
 TimelineWidget::TimelineWidget(QWidget* parent, int maximumValue) : QWidget(parent) {
     auto startValue = 0;
@@ -15,21 +16,21 @@ TimelineWidget::TimelineWidget(QWidget* parent, int maximumValue) : QWidget(pare
         startValue,
         maximumValue,
         TimelineSliderWidget::Left,
-        QImage("://resources/images/startSliderImage.png"),
+        RaidenVideoRipper::Utils::themeStyledImage("://resources/images/startSliderImage.png"),
         false
         );
     playbackSlider = new TimelineSliderWidget(
         playbackValue,
         maximumValue,
         TimelineSliderWidget::Center,
-        QImage("://resources/images/playbackSliderImage.png"),
+        RaidenVideoRipper::Utils::themeStyledImage("://resources/images/playbackSliderImage.png"),
         false
         );
     endSlider = new TimelineSliderWidget(
         endValue,
         maximumValue,
         TimelineSliderWidget::Right,
-        QImage("://resources/images/endSliderImage.png"),
+        RaidenVideoRipper::Utils::themeStyledImage("://resources/images/endSliderImage.png"),
         false
         );
     this->draggingSlider = nullptr;
