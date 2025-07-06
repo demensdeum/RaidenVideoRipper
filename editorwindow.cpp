@@ -562,7 +562,7 @@ void EditorWindow::togglePlayback() {
 void EditorWindow::showAboutApplication()
 {
     const auto copyright =
-        tr("Copyright &copy; 2023 <a href=\"https://www.demensdeum.com/\">Ilia Prokhorov</a>")
+        tr("Copyright &copy; 2025 <a href=\"https://www.demensdeum.com/\">I/E Ilia Prokhorov</a>")
             .arg(applicationName);
     const auto license =
         QStringLiteral("<a href=\"https://opensource.org/license/mit/\">MIT License</a>");
