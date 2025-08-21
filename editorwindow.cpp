@@ -57,15 +57,23 @@ EditorWindow::EditorWindow()
 
     auto gif = OutputFormat(
         outputFormatGif,
-        "Gif",
+        tr("Animation (Gif)"),
         "gif",
         std::vector<QString>(),
-        settings.value(outputFormatIsSelectedKey(QString(outputFormatGif)), true).value<bool>()
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatGif)), false).value<bool>()
+        );
+
+    auto webp = OutputFormat(
+        outputFormatGif,
+        tr("Animation (webp)"),
+        "webp",
+        std::vector<QString>(),
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatWebp)), false).value<bool>()
         );
 
     auto webm = OutputFormat(
         outputFormatWebm,
-        "WebM",
+        tr("Video (WebM)"),
         "webm",
         std::vector<QString>(),
         settings.value(outputFormatIsSelectedKey(QString(outputFormatWebm)), false).value<bool>()
@@ -73,7 +81,7 @@ EditorWindow::EditorWindow()
 
     auto ogv = OutputFormat(
         outputFormatOgv,
-        "ogv",
+        tr("Video (ogv)"),
         "ogv",
         std::vector<QString>(),
         settings.value(outputFormatIsSelectedKey(QString(outputFormatWebm)), false).value<bool>()
@@ -120,6 +128,7 @@ EditorWindow::EditorWindow()
 
     outputFormats.push_back(mp4);
     outputFormats.push_back(gif);
+    outputFormats.push_back(webp);
     outputFormats.push_back(webm);
     outputFormats.push_back(ogv);
 

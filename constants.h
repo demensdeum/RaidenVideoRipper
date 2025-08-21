@@ -11,6 +11,7 @@
 [[maybe_unused]] static const char *mainWindowStateKey = "mainWindowState";
 [[maybe_unused]] static const char *outputFormatMp4 = "outputFormatMp4";
 [[maybe_unused]] static const char *outputFormatGif = "outputFormatGif";
+[[maybe_unused]] static const char *outputFormatWebp = "outputFormatWebp";
 [[maybe_unused]] static const char *outputFormatWebm = "outputFormatWebm";
 [[maybe_unused]] static const char *outputFormatOgv = "outputFormatOgv";
 [[maybe_unused]] static const char *outputFormatMp3 = "outputFormatMp3";
