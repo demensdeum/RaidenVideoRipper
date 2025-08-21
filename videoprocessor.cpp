@@ -1,5 +1,7 @@
 #include "videoprocessor.h"
 
+#include <string>
+
 extern "C" {
 #include <dullahan_ffmpeg.h>
 }
@@ -10,11 +12,13 @@ VideoProcessor::VideoProcessor(
     const int startPosition,
     const int endPosition,
     const QString& videoPath,
+    const std::vector<QString> customArguments,
     const QString& outputVideoPath
 )
 : startPosition(startPosition),
 endPosition(endPosition),
 videoPath(videoPath),
+customArguments(customArguments),
 outputVideoPath(outputVideoPath)
 {
 }
@@ -34,9 +38,14 @@ void VideoProcessor::run()
         "-ss",
         std::to_string(startPosition) + "ms",
         "-to",
-        std::to_string(endPosition) + "ms",
-        outputVideoPath.toStdString()
+        std::to_string(endPosition) + "ms"
     };
+
+    for (const auto& customArg : customArguments) {
+        arguments.push_back(customArg.toStdString());
+    }
+
+    arguments.push_back(outputVideoPath.toStdString());
 
     std::vector<char*> argv;
     for (const auto& arg : arguments) {

@@ -45,10 +45,13 @@ EditorWindow::EditorWindow()
     state = IDLE;
     audioOutput = nullptr;
 
+    // video
+
     auto mp4 = OutputFormat(
         outputFormatMp4,
         tr("Video (mp4)"),
         "mp4",
+        std::vector<QString>(),
         settings.value(outputFormatIsSelectedKey(QString(outputFormatMp4)), true).value<bool>()
         );
 
@@ -56,6 +59,7 @@ EditorWindow::EditorWindow()
         outputFormatGif,
         "Gif",
         "gif",
+        std::vector<QString>(),
         settings.value(outputFormatIsSelectedKey(QString(outputFormatGif)), true).value<bool>()
         );
 
@@ -63,22 +67,67 @@ EditorWindow::EditorWindow()
         outputFormatWebm,
         "WebM",
         "webm",
+        std::vector<QString>(),
         settings.value(outputFormatIsSelectedKey(QString(outputFormatWebm)), false).value<bool>()
         );
+
+    auto ogv = OutputFormat(
+        outputFormatOgv,
+        "ogv",
+        "ogv",
+        std::vector<QString>(),
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatWebm)), false).value<bool>()
+        );
+
+    // audio
+
+    auto mp3CustomArguments = std::vector<QString>();
 
     auto mp3 = OutputFormat(
         outputFormatMp3,
         tr("Audio (mp3)"),
         "mp3",
+        mp3CustomArguments,
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatMp3)), false).value<bool>()
+        );
+
+    auto wavCustomArguments = std::vector<QString>();
+
+    auto wav = OutputFormat(
+        outputFormatWav,
+        tr("Audio (wav)"),
+        "wav",
+        wavCustomArguments,
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatMp3)), false).value<bool>()
+        );
+
+    auto oggCustomArguments = std::vector<QString>();
+    oggCustomArguments.push_back("-vn");
+    oggCustomArguments.push_back("-c:a");
+    oggCustomArguments.push_back("libvorbis");
+
+    auto ogg = OutputFormat(
+        outputFormatOgg,
+        tr("Audio (ogg)"),
+        "ogg",
+        oggCustomArguments,
         settings.value(outputFormatIsSelectedKey(QString(outputFormatMp3)), false).value<bool>()
         );
 
     successfulRunsCount = settings.value(successfulRunsCountKey).value<int>();
 
+    // video
+
     outputFormats.push_back(mp4);
     outputFormats.push_back(gif);
     outputFormats.push_back(webm);
+    outputFormats.push_back(ogv);
+
+    // audio
+
     outputFormats.push_back(mp3);
+    outputFormats.push_back(wav);
+    outputFormats.push_back(ogg);
 
     createLayout();
     initializePlayer();
@@ -92,12 +141,15 @@ EditorWindow::EditorWindow()
 
 void EditorWindow::showDonateWindowIfNeeded()
 {
+
     successfulRunsCount += 1;
     auto outputText = tr("Success!");
+#if RAIDENVIDEORIPPERDONATIONWINDOW
     if (successfulRunsCount >= donateSuccessfulRunsCount) {
         outputText = tr("<b>Success!</b><br>If you like this application, please consider a donation:<br><a href=\"https://www.donationalerts.com/r/demensdeum\">https://www.donationalerts.com/r/demensdeum</a>");
         successfulRunsCount = 0;
     }
+#endif
     showAlert(
         tr("Wow!"),
         outputText
@@ -823,6 +875,7 @@ void EditorWindow::cut()
             front.identifier,
             front.title,
             front.extension,
+            front.customArguments,
             front.isSelected
         );
         currentOutputFormats.pop();
@@ -867,12 +920,15 @@ void EditorWindow::cut()
     QString text = tr("Cutting ") + stateString + "...";
     showProgressbarWindow(text);
 
+    auto customArguments = currentOutputFormat.value()->customArguments;
+
     videoProcessor = new VideoProcessor(
         startPosition,
         endPosition,
         filePath,
+        customArguments,
         outputVideoPath
-        );
+    );
     videoProcessor.value()->setAutoDelete(true);
 
     connect(

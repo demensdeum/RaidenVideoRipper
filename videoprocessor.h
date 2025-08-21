@@ -12,6 +12,7 @@ public:
         const int startPosition,
         const int endPosition,
         const QString& videoPath,
+        const std::vector<QString> customArguments,
         const QString& outputVideoPath
         );
 
@@ -28,6 +29,6 @@ private:
     const int startPosition;
     const int endPosition;
     const QString videoPath;
+    const std::vector<QString> customArguments;
     const QString outputVideoPath;
-
 };

@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Raiden Video Ripper"
-#define MyAppVersion "1.0.1.0"
+#define MyAppVersion "1.0.3.0"
 #define MyAppPublisher "DemensDeum"
 #define MyAppURL "https://www.demendseum.com"
 #define MyAppExeName "RaidenVideoRipper.exe"
@@ -24,13 +24,13 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 ChangesAssociations=yes
 DisableProgramGroupPage=yes
-LicenseFile=C:\RaidenVideoRipperReleaseVersion\release\LICENSE
+LicenseFile=D:\RaidenVideoRipperReleaseVersion\release\LICENSE
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=C:\RaidenVideoRipperReleaseVersion\installer
+OutputDir=D:\RaidenVideoRipperReleaseVersion\installer
 OutputBaseFilename=RaidenVideoRipperInstaller
-SetupIconFile=C:\Users\Demensdeum\Documents\Sources\RaidenVideoRipper\resources\icons\applicationIcon.ico
+SetupIconFile=C:\Users\Demensdeum\Documents\Sources\Demensdeum\RaidenVideoRipper\resources\icons\applicationIcon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -43,8 +43,8 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\RaidenVideoRipperReleaseVersion\release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\RaidenVideoRipperReleaseVersion\release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\RaidenVideoRipperReleaseVersion\release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\RaidenVideoRipperReleaseVersion\release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
