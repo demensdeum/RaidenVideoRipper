@@ -14,6 +14,7 @@ SOURCES += \
     editorwindow.cpp \
     main.cpp \
     progressbarwindow.cpp \
+    successwindow.cpp \
     timelinesliderwidget.cpp \
     timelinewidget.cpp \
     utils.cpp \
@@ -27,6 +28,7 @@ HEADERS += \
     dullahan_ffmpeg.h \
     outputformat.h \
     progressbarwindow.h \
+    successwindow.h \
     timelinesliderwidget.h \
     timelinewidget.h \
     utils.h \

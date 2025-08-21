@@ -21,6 +21,7 @@
 #include <QString>
 #include <QLibraryInfo>
 #include <videoprocessor.h>
+#include <successwindow.h>
 #include "constants.h"
 #include "utils.h"
 
@@ -84,7 +85,7 @@ EditorWindow::EditorWindow()
         tr("Video (ogv)"),
         "ogv",
         std::vector<QString>(),
-        settings.value(outputFormatIsSelectedKey(QString(outputFormatWebm)), false).value<bool>()
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatOgv)), false).value<bool>()
         );
 
     // audio
@@ -106,7 +107,7 @@ EditorWindow::EditorWindow()
         tr("Audio (wav)"),
         "wav",
         wavCustomArguments,
-        settings.value(outputFormatIsSelectedKey(QString(outputFormatMp3)), false).value<bool>()
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatWav)), false).value<bool>()
         );
 
     auto oggCustomArguments = std::vector<QString>();
@@ -119,7 +120,7 @@ EditorWindow::EditorWindow()
         tr("Audio (ogg)"),
         "ogg",
         oggCustomArguments,
-        settings.value(outputFormatIsSelectedKey(QString(outputFormatMp3)), false).value<bool>()
+        settings.value(outputFormatIsSelectedKey(QString(outputFormatOgg)), false).value<bool>()
         );
 
     successfulRunsCount = settings.value(successfulRunsCountKey).value<int>();
@@ -150,20 +151,12 @@ EditorWindow::EditorWindow()
 
 void EditorWindow::showDonateWindowIfNeeded()
 {
-
     successfulRunsCount += 1;
-    auto outputText = tr("Success!");
-#if RAIDENVIDEORIPPERDONATIONWINDOW
-    if (successfulRunsCount >= donateSuccessfulRunsCount) {
-        outputText = tr("<b>Success!</b><br>If you like this application, please consider a donation:<br><a href=\"https://www.donationalerts.com/r/demensdeum\">https://www.donationalerts.com/r/demensdeum</a>");
-        successfulRunsCount = 0;
-    }
-#endif
-    showAlert(
-        tr("Wow!"),
-        outputText
-        );
+
     settings.setValue(successfulRunsCountKey, successfulRunsCount);
+
+    SuccessWindow *successDialog = new SuccessWindow(this);
+    successDialog->exec();
 }
 
 QString EditorWindow::outputFormatIsSelectedKey(QString identifier)
