@@ -10,8 +10,11 @@ class SuccessWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit SuccessWindow(QWidget *parent = nullptr);
+    explicit SuccessWindow(const QString &filePath, QWidget *parent = nullptr);
 
 public slots:
     void onAnchorClicked(const QUrl &link);
+
+private:
+    const QString &filePath;
 };

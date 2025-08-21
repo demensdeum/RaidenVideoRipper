@@ -65,7 +65,7 @@ EditorWindow::EditorWindow()
         );
 
     auto webp = OutputFormat(
-        outputFormatGif,
+        outputFormatWebp,
         tr("Animation (webp)"),
         "webp",
         std::vector<QString>(),
@@ -155,8 +155,8 @@ void EditorWindow::showDonateWindowIfNeeded()
 
     settings.setValue(successfulRunsCountKey, successfulRunsCount);
 
-    SuccessWindow *successDialog = new SuccessWindow(this);
-    successDialog->exec();
+    auto successWindow = new SuccessWindow(filePath, this);
+    successWindow->exec();
 }
 
 QString EditorWindow::outputFormatIsSelectedKey(QString identifier)

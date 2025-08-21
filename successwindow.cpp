@@ -1,16 +1,29 @@
 #include <successwindow.h>
 #include <QDebug>
+#include <QDir>
 #include <QDesktopServices>
-#include <QPushButton> // Include QPushButton header
-#include <QHBoxLayout> // Include QHBoxLayout header
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QProcess>
 
-SuccessWindow::SuccessWindow(QWidget *parent) : QDialog(parent)
+SuccessWindow::SuccessWindow(const QString &filePath, QWidget *parent) : QDialog(parent), filePath(filePath)
 {
     setWindowTitle(tr("Success"));
 
     QTextBrowser *textBrowser = new QTextBrowser(this);
     textBrowser->setOpenExternalLinks(false);
-    textBrowser->setHtml(tr("All files were successfully cut. <a href='file:///C:/'>Click here to open the location.</a>"));
+
+    QString emoji = "✅";
+    QString htmlMessage = QString("<p style='font-size: 72px; text-align: center;'>%1</p>"
+                                  "<p style='text-align: center;'>%2</p>"
+                                  "<p style='text-align: center;'><a href='https://demensdeum.com'>%3</a></p>")
+                                .arg(
+                                    emoji,
+                                    tr("All files were successfully cut."),
+                                    tr("Click here to open the location.")
+                                );
+    textBrowser->setHtml(htmlMessage);
+    textBrowser->setAlignment(Qt::AlignCenter);
 
     connect(textBrowser, &QTextBrowser::anchorClicked, this, &SuccessWindow::onAnchorClicked);
 
@@ -28,8 +41,10 @@ SuccessWindow::SuccessWindow(QWidget *parent) : QDialog(parent)
     setLayout(mainLayout);
 }
 
-void SuccessWindow::onAnchorClicked(const QUrl &link)
+void SuccessWindow::onAnchorClicked(const QUrl &)
 {
-    QDesktopServices::openUrl(link);
+    QStringList args;
+    args << "/select," << QDir::toNativeSeparators(filePath);
+    QProcess::startDetached("explorer.exe", args);
     close();
 }

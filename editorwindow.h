@@ -23,6 +23,7 @@
 #include <videoprocessor.h>
 #include <outputformat.h>
 #include <videoprocessorprogresspoller.h>
+#include <successwindow.h>
 
 class EditorWindow : public QMainWindow
 {
