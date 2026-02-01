@@ -8,6 +8,9 @@ Frame from [COSTA RICA IN 4K 60fps HDR (ULTRA HD)](https://www.youtube.com/watch
 ![Logo](logo.png)
 
 ### Install
+For Windows - use Microsoft Store
+https://apps.microsoft.com/detail/9nvzjs98smgc?hl=ru-RU&gl=GE
+
 Please visit the Releases page to stay up-to-date with the latest releases and updates:   
 https://github.com/demensdeum/RaidenVideoRipper/releases
 
