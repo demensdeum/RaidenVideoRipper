@@ -8,7 +8,7 @@
 ![Logo](logo.png)
 
 ## Установка
-Для Windows установите через Microsoft Store
+Для Windows установите через Microsoft Store  
 https://apps.microsoft.com/detail/9nvzjs98smgc?hl=ru-RU&gl=GE
 
 Пожалуйста, посетите страницу "Релизы", чтобы быть в курсе последних выпусков и обновлений:   
